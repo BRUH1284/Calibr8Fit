@@ -9,21 +9,21 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function AppText({type = 'headline-medum', color = 'onSurface', style, children, ...props}: Props) {
-    const theme = useTheme();
+export default function AppText({ type = 'headline-medum', color = 'onSurface', style, children, ...props }: Props) {
+  const theme = useTheme();
 
-    return (
-        <Text
-            {...props}
-            style={[
-                Typography[type],
-                {
-                    color: theme[color],
-                },
-                style
-            ]}
-        >
-            {children}
-        </Text>
-    );
+  return (
+    <Text
+      {...props}
+      style={[
+        Typography[type],
+        {
+          color: theme[color],
+        },
+        style
+      ]}
+    >
+      {children}
+    </Text>
+  );
 }

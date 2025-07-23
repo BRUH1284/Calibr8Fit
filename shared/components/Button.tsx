@@ -4,46 +4,56 @@ import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 
 type Props = {
-    label?: string;
-    labelType?: keyof typeof Typography;
-    labelStyle?: StyleProp<TextStyle>;
-    style?: StyleProp<ViewStyle>;
-    variant?: 'filled' | 'text';
-    onPress?: () => void;
+  label?: string;
+  labelType?: keyof typeof Typography;
+  labelStyle?: StyleProp<TextStyle>;
+  style?: StyleProp<ViewStyle>;
+  variant?: 'filled' | 'tonal' | 'text';
+  onPress?: () => void;
 };
 
-export default function Button({ 
-        variant = 'filled',
-        label = "Button", 
-        labelType = 'title-medium', 
-        labelStyle, 
-        style,
-        onPress = () => {} 
-    }: Props) {
-    const theme = useTheme();
+export default function Button({
+  variant = 'filled',
+  label = "Button",
+  labelType = 'title-medium',
+  labelStyle,
+  style,
+  onPress = () => { }
+}: Props) {
+  const theme = useTheme();
 
-    const backgroundColor = variant === 'filled' ? theme.primary : "transparent";
+  const backgroundColor = {
+    filled: theme.primary,
+    tonal: theme.secondaryContainer,
+    text: 'transparent',
+  }[variant] || theme.primary;
 
-    return (
-        <TouchableOpacity
-            style={[{
-                backgroundColor: variant === 'filled' ? theme.primary : "transparent",
-                padding: variant === 'filled' ? 16 : 6,
-                borderRadius: 100,
-                },
-                style
-            ]}
-            onPress={onPress}
-        >
-            <AppText 
-                type={labelType} 
-                style={[
-                    { 
-                        color: variant === 'filled' ? theme.onPrimary : theme.primary, 
-                        textAlign: 'center' 
-                    }, 
-                    labelStyle
-            ]}>{label}</AppText>
-        </TouchableOpacity>
-    );
+  const textColor = {
+    filled: theme.onPrimary,
+    tonal: theme.primary,
+    text: theme.primary,
+  }[variant] || theme.onPrimary;
+
+  return (
+    <TouchableOpacity
+      style={[{
+        backgroundColor: backgroundColor,
+        padding: variant !== 'text' ? 16 : 6,
+        borderRadius: 100,
+      },
+        style
+      ]}
+      onPress={onPress}
+    >
+      <AppText
+        type={labelType}
+        style={[
+          {
+            color: textColor,
+            textAlign: 'center'
+          },
+          labelStyle
+        ]}>{label}</AppText>
+    </TouchableOpacity>
+  );
 }

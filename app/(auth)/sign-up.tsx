@@ -10,81 +10,81 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
-    const theme = useTheme();
-    const { register } = useAuth();
+  const theme = useTheme();
+  const { register } = useAuth();
 
-    const [username, setUsername] = useState('');
-    const [usernameError, setUsernameError] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-    const handleUsernameChange = (newUsername: string) => {
-        setUsername(newUsername);
-        setUsernameError('');
-    };
+  const handleUsernameChange = (newUsername: string) => {
+    setUsername(newUsername);
+    setUsernameError('');
+  };
 
-    const handlePasswordChange = (newPassword: string) => {
-        setPassword(newPassword);
-        setPasswordError('');
-    };
+  const handlePasswordChange = (newPassword: string) => {
+    setPassword(newPassword);
+    setPasswordError('');
+  };
 
-    const handleRegister = async () => {
-        try {
-            await register(username, password);
+  const handleRegister = async () => {
+    try {
+      await register(username, password);
 
-            router.push('/user-info');
-        } catch (error: any) {
-            const cause = error?.cause;
+      router.push('/user-info');
+    } catch (error: any) {
+      const cause = error?.cause;
 
-            if (Array.isArray(cause)) {
-                setUsernameError(cause.find((e: { description: string }) => 
-                        e.description.toLowerCase().includes('username'))?.description || '');
-                setPasswordError(cause.find((e: { description: string }) => 
-                        e.description.toLowerCase().includes('password'))?.description || '');
-            } else {
-                setUsernameError(cause?.UserName || '');
-                setPasswordError(cause?.Password || '');
-            }
-        }
-            
-    };
+      if (Array.isArray(cause)) {
+        setUsernameError(cause.find((e: { description: string }) =>
+          e.description.toLowerCase().includes('username'))?.description || '');
+        setPasswordError(cause.find((e: { description: string }) =>
+          e.description.toLowerCase().includes('password'))?.description || '');
+      } else {
+        setUsernameError(cause?.UserName || '');
+        setPasswordError(cause?.Password || '');
+      }
+    }
 
-    return(
-        <SafeAreaView style={{
-            flex:1, 
-            gap: 32,
-            padding: 32,
-            justifyContent: 'flex-end',
-            backgroundColor: theme.background
-        }}>
-            <Image style={{height: 288, alignSelf: 'stretch', backgroundColor: 'red'}}
-                    source={require('@/assets/images/react-logo.png')}
-            />
-            <AppText type = 'headline-medum' style={{textAlign: 'center'}}>Sign up to Calibr8Fit</AppText>
-            <View style={{gap: 6, height: 256}}>
-                <TextField
-                    label='Username'
-                    onChangeText={handleUsernameChange}
-                    value={username}
-                    error={usernameError !== ''}
-                    supportingText={usernameError} 
-                />
-                <TextField
-                    label='Password'
-                    onChangeText={handlePasswordChange}
-                    value={password}
-                    error={passwordError !== ''}
-                    supportingText={passwordError} 
-                />
-            </View>
-            <Button 
-                onPress={handleRegister}
-                label='Continue' 
-                labelType='title-medium'
-                style={{
-                    alignSelf: 'stretch', 
-                    marginHorizontal: 32, 
-            }}/>
-        </SafeAreaView>
-    );
+  };
+
+  return (
+    <SafeAreaView style={{
+      flex: 1,
+      gap: 32,
+      padding: 32,
+      justifyContent: 'flex-end',
+      backgroundColor: theme.background
+    }}>
+      <Image style={{ height: 288, alignSelf: 'stretch', backgroundColor: 'red' }}
+        source={require('@/assets/images/react-logo.png')}
+      />
+      <AppText type='headline-medum' style={{ textAlign: 'center' }}>Sign up to Calibr8Fit</AppText>
+      <View style={{ gap: 6, height: 256 }}>
+        <TextField
+          label='Username'
+          onChangeText={handleUsernameChange}
+          value={username}
+          error={usernameError !== ''}
+          supportingText={usernameError}
+        />
+        <TextField
+          label='Password'
+          onChangeText={handlePasswordChange}
+          value={password}
+          error={passwordError !== ''}
+          supportingText={passwordError}
+        />
+      </View>
+      <Button
+        onPress={handleRegister}
+        label='Continue'
+        labelType='title-medium'
+        style={{
+          alignSelf: 'stretch',
+          marginHorizontal: 32,
+        }} />
+    </SafeAreaView>
+  );
 }
