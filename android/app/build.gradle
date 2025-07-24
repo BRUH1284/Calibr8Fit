@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.Calir8Fit'
+    namespace 'com.anonymous.Calibr8Fit'
     defaultConfig {
-        applicationId 'com.anonymous.Calir8Fit'
+        applicationId 'com.anonymous.Calibr8Fit'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

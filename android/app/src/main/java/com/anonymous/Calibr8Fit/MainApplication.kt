@@ -1,4 +1,4 @@
-package com.anonymous.Calir8Fit
+package com.anonymous.Calibr8Fit
 
 import android.app.Application
 import android.content.res.Configuration

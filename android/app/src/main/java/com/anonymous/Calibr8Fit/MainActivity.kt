@@ -1,4 +1,4 @@
-package com.anonymous.Calir8Fit
+package com.anonymous.Calibr8Fit
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

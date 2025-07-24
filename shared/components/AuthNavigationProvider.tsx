@@ -23,7 +23,7 @@ export default function AuthNavigationProvider() {
         router.replace("/(tabs)");
       } else {
         console.log("Root layout - Navigating to auth");
-        router.replace("/(auth)/user-info");
+        router.replace("/(auth)");
       }
     }
   }, [authenticated, isChecking]);

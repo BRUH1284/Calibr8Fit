@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>Calir8Fit</string>
+    <string>Calibr8Fit</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -27,14 +27,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>calir8fit</string>
-          <string>com.anonymous.Calir8Fit</string>
+          <string>calibr8fit</string>
+          <string>com.anonymous.Calibr8Fit</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>exp+calir8fit</string>
+          <string>exp+calibr8fit</string>
         </array>
       </dict>
     </array>

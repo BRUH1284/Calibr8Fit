@@ -2,14 +2,17 @@ import { Typography } from "@/styles/typography";
 import { StyleProp, TextStyle, TouchableOpacity, ViewStyle } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
+import DynamicIcon, { IconItem } from "./DynamicIcon";
 
 type Props = {
   label?: string;
   labelType?: keyof typeof Typography;
   labelStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
-  variant?: 'filled' | 'tonal' | 'text';
+  variant?: 'filled' | 'tonal' | 'text' | 'toggle';
+  enabeled?: boolean;
   onPress?: () => void;
+  icon?: IconItem;
 };
 
 export default function Button({
@@ -18,21 +21,25 @@ export default function Button({
   labelType = 'title-medium',
   labelStyle,
   style,
-  onPress = () => { }
+  enabeled = true,
+  onPress = () => { },
+  icon,
 }: Props) {
   const theme = useTheme();
 
   const backgroundColor = {
     filled: theme.primary,
     tonal: theme.secondaryContainer,
+    toggle: theme.surfaceContainer,
     text: 'transparent',
   }[variant] || theme.primary;
 
-  const textColor = {
+  const textColor = enabeled ? {
     filled: theme.onPrimary,
     tonal: theme.primary,
+    toggle: theme.onSurfaceVariant,
     text: theme.primary,
-  }[variant] || theme.onPrimary;
+  }[variant] || theme.onPrimary : theme.onSurface;
 
   return (
     <TouchableOpacity
@@ -40,11 +47,25 @@ export default function Button({
         backgroundColor: backgroundColor,
         padding: variant !== 'text' ? 16 : 6,
         borderRadius: 100,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        opacity: enabeled ? 1 : 0.1,
       },
         style
       ]}
-      onPress={onPress}
+      onPress={() => {
+        if (enabeled)
+          onPress();
+      }}
     >
+      {icon && <DynamicIcon
+        name={icon.name}
+        size={icon.size}
+        library={icon.library}
+        color={icon.color || textColor}
+        style={[{ marginRight: 8 }, icon.style]}
+      />
+      }
       <AppText
         type={labelType}
         style={[

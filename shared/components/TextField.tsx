@@ -8,7 +8,6 @@ type Props = {
   label?: string;
   error?: boolean;
   supportingText?: string;
-  placeholder?: string;
   secureTextEntry?: boolean;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   onChangeText?: (text: string) => void;
@@ -43,27 +42,22 @@ const TextField = forwardRef<TextInput, Props>(({
   const theme = useTheme();
 
   const [isFocused, setIsFocused] = useState(false);
-  const [displayedValue, setDisplayedValue] = useState('');
+  const [displayedValue, setDisplayedValue] = useState<string>('');
 
   const focusedColor = error ? theme.error : theme.primary;
 
+  const handleChangeValue = (value: string) => {
 
-  const handleChangeValue = (value: string | number) => {
-    let parsed: number;
-    if (typeof value == 'string') {
-      if (value === '' || value.endsWith('-')) {
-        setDisplayedValue(value ? '-' : '');
-        onChangeText?.('0');
-        return;
-      } else if (value.endsWith('.')) {
-        setDisplayedValue(value);
-        return;
-      }
+    if (value === '' || value.endsWith('-')) {
+      setDisplayedValue(value ? '-' : '');
+      onChangeText?.('0');
+      return;
+    } else if (value.endsWith('.')) {
+      setDisplayedValue(value);
+      return;
+    }
 
-      parsed = +value || 0;
-    } else
-      parsed = value;
-
+    let parsed = +value || 0;
     if (maxValue < parsed)
       parsed = maxValue;
     if (minValue > parsed)
@@ -76,7 +70,7 @@ const TextField = forwardRef<TextInput, Props>(({
   return (
     <View style={{
       alignSelf: 'stretch',
-      gap: 4
+      gap: 4,
     }}>
       <View
         style={{
@@ -84,10 +78,10 @@ const TextField = forwardRef<TextInput, Props>(({
           paddingHorizontal: isFocused ? 13 : 15,
           paddingVertical: isFocused ? 9 : 11,
           borderColor: isFocused || error ? focusedColor : theme.outline,
-          borderRadius: 4
+          borderRadius: 4,
         }}
       >
-        {(isFocused || value) && <AppText
+        {(isFocused || (type === 'number' ? displayedValue : value)) && <AppText
           type='body-small'
           style={{
             position: 'absolute',
@@ -108,7 +102,7 @@ const TextField = forwardRef<TextInput, Props>(({
                 flex: 1,
               }]}
             ref={ref}
-            placeholder={!isFocused ? label : ''}
+            placeholder={isFocused ? '' : label}
             placeholderTextColor={theme.onSurfaceVariant}
             secureTextEntry={secureTextEntry}
             autoCapitalize={autoCapitalize}
