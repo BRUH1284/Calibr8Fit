@@ -53,6 +53,7 @@ export default function Button({
       },
         style
       ]}
+      disabled={!enabeled}
       onPress={() => {
         if (enabeled)
           onPress();

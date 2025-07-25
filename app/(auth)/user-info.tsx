@@ -3,14 +3,17 @@ import Button from "@/shared/components/Button";
 import FrameDisplay from "@/shared/components/FrameDisplay";
 import TextField from "@/shared/components/TextField";
 import { useAuth } from "@/shared/hooks/useAuth";
+import { usePageValidation } from "@/shared/hooks/usePageValidation";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useNavigation } from 'expo-router';
+import { useCallback, useRef, useState } from "react";
+import { BackHandler, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import PagerView from "react-native-pager-view";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,8 +21,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function UserInfo() {
   const theme = useTheme();
   const { register } = useAuth();
+  const navigation = useNavigation();
 
   const [currentPage, setCurrentPage] = useState(1);
+  // This state is used to prevent crash when changin screens during page transition
+  const [isPageStateIdle, setIsPageStateIdle] = useState(true);
   const refPagerView = useRef<PagerView>(null);
 
   const [firstName, setFirstName] = useState('');
@@ -40,12 +46,77 @@ export default function UserInfo() {
 
   const [climate, setClimate] = useState<Climate | undefined>(undefined);
 
+  // Use the validation hook
+  const isCurrentPageValid = usePageValidation(currentPage, {
+    0: () => firstName.trim() !== '' &&
+      lastName.trim() !== '' &&
+      dateOfBirth !== undefined,
+    1: () => gender !== undefined,
+    2: () => !isNaN(parseFloat(currentWeight)) &&
+      !isNaN(parseFloat(targetWeight)) &&
+      !isNaN(parseFloat(height)),
+    3: () => activityLevel !== undefined,
+    4: () => climate !== undefined
+  });
+
+  // Custom back button handler
+  const handleBackPress = useCallback(() => {
+    if (currentPage > 0) {
+      // Go to previous page in PagerView
+      refPagerView.current?.setPage(currentPage - 1);
+      return true; // Prevent default back behavior
+    }
+    // Check if the page is idle to prevent crash when changing screens
+    if (isPageStateIdle) {
+      setIsPageStateIdle(false);
+      return false;
+    } else
+      return true; // Prevent default back behavior
+  }, [currentPage, isPageStateIdle]);
+
+  // Handle hardware back button on Android and back gesture on iOS
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+
+      // For iOS and header back button
+      const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+        if (currentPage > 0) {
+          // Prevent default behavior
+          e.preventDefault();
+          // Go to previous page instead
+          handleBackPress();
+        }
+      });
+
+      return () => {
+        backHandler.remove();
+        unsubscribe();
+      };
+    }, [handleBackPress, navigation, currentPage])
+  );
+
   const handleContinueButton = () => {
-    if (currentPage === 5) {
+    // Don't continue if current page is not valid
+    if (!isCurrentPageValid)
+      return;
+
+    if (currentPage === 4) {
+      // TODO: Implement completion logic (e.g., submit form, navigate to next screen)
+      console.log('Form completed with data:', {
+        firstName,
+        lastName,
+        dateOfBirth,
+        gender,
+        currentWeight: parseFloat(currentWeight),
+        targetWeight: parseFloat(targetWeight),
+        height: parseFloat(height),
+        activityLevel,
+        climate
+      });
       throw new Error('Not implemented: handleContinueButton');
     } else {
-      setCurrentPage(currentPage + 1);
-      refPagerView.current?.setPage(currentPage);
+      refPagerView.current?.setPage(currentPage + 1);
     }
   }
 
@@ -62,7 +133,10 @@ export default function UserInfo() {
       <PagerView
         ref={refPagerView}
         style={{ flex: 1 }}
-        scrollEnabled={true}
+        scrollEnabled={false}
+        initialPage={0}
+        onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
+        onPageScrollStateChanged={(e) => setIsPageStateIdle(e.nativeEvent.pageScrollState === 'idle')}
       >
         <View key="1" style={[styles.container, { gap: 4 }]}>
           <View style={{ gap: 4 }}>
@@ -95,6 +169,7 @@ export default function UserInfo() {
               ref={lastNameRef}
               label='Last name'
               onChangeText={setLastName}
+              onSubmitEditing={() => setShowDatePicker(true)}
               value={lastName}
             />
             <FrameDisplay
@@ -175,6 +250,7 @@ export default function UserInfo() {
               keyboardType='numeric'
               textAlign='right'
               suffix=' kg'
+              minValue={0}
             />
             <TextField
               type='number'
@@ -187,6 +263,7 @@ export default function UserInfo() {
               submitBehavior='submit'
               textAlign='right'
               suffix=' kg'
+              minValue={0}
             />
             <TextField
               type='number'
@@ -197,6 +274,7 @@ export default function UserInfo() {
               keyboardType='numeric'
               textAlign='right'
               suffix=' cm'
+              minValue={0}
             />
           </KeyboardAwareScrollView>
         </View>
@@ -301,10 +379,11 @@ export default function UserInfo() {
       </PagerView>
       <View>
         <Button
-          label='Continue'
+          label={currentPage === 4 ? 'Complete' : 'Continue'}
           labelType='title-medium'
           onPress={handleContinueButton}
           style={[styles.button, { marginHorizontal: 64 }]}
+          enabeled={isCurrentPageValid}
         />
       </View>
     </SafeAreaView >
