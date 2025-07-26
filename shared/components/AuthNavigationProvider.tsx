@@ -1,10 +1,11 @@
-import { router, Slot } from "expo-router";
+import { router, Slot, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 export default function AuthNavigationProvider() {
-  const { authenticated, isChecking } = useAuth();
+  const { authenticated, isChecking, registrationComplete } = useAuth();
+  const segments = useSegments();
 
   // Prevent splash screen from hiding while checking authentication
   useEffect(() => {
@@ -19,14 +20,19 @@ export default function AuthNavigationProvider() {
   useEffect(() => {
     if (!isChecking) {
       if (authenticated) {
-        console.log("Root layout - Navigating to tabs");
-        router.replace("/(tabs)");
-      } else {
+        if (registrationComplete) {
+          console.log("Root layout - Navigating to tabs");
+          router.replace("/(tabs)/home");
+        } else {
+          console.log("Root layout - Navigating to profile setup");
+          router.push("/(auth)/user-info");
+        }
+      } else if (segments[0] !== "(auth)") {
         console.log("Root layout - Navigating to auth");
         router.replace("/(auth)");
       }
     }
-  }, [authenticated, isChecking]);
+  }, [authenticated, registrationComplete, isChecking]);
 
   return <Slot />;
 }

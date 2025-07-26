@@ -78,12 +78,6 @@ export default function SignIn() {
           label='Sign up'
           labelType='label-large'
         />
-        <Button
-          onPress={() => router.push('/user-info')}
-          variant='text'
-          label='test'
-          labelType='label-large'
-        />
         <AppText type='label-large' style={{
           flex: 1,
           verticalAlign: 'bottom',

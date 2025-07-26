@@ -13,14 +13,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useNavigation } from 'expo-router';
 import { useCallback, useRef, useState } from "react";
-import { BackHandler, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import PagerView from "react-native-pager-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UserInfo() {
   const theme = useTheme();
-  const { register } = useAuth();
+  const { logout, setUserInfo } = useAuth();
   const navigation = useNavigation();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,41 +59,26 @@ export default function UserInfo() {
     4: () => climate !== undefined
   });
 
-  // Custom back button handler
-  const handleBackPress = useCallback(() => {
-    if (currentPage > 0) {
-      // Go to previous page in PagerView
-      refPagerView.current?.setPage(currentPage - 1);
-      return true; // Prevent default back behavior
-    }
-    // Check if the page is idle to prevent crash when changing screens
-    if (isPageStateIdle) {
-      setIsPageStateIdle(false);
-      return false;
-    } else
-      return true; // Prevent default back behavior
-  }, [currentPage, isPageStateIdle]);
-
-  // Handle hardware back button on Android and back gesture on iOS
+  // Handle hardware back button
   useFocusEffect(
     useCallback(() => {
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-      // For iOS and header back button
       const unsubscribe = navigation.addListener('beforeRemove', (e) => {
         if (currentPage > 0) {
           // Prevent default behavior
           e.preventDefault();
           // Go to previous page instead
-          handleBackPress();
+          refPagerView.current?.setPage(currentPage - 1);
+        } else if (!isPageStateIdle) { // Prevent going back if page is transitioning
+          e.preventDefault();
         }
+        else
+          logout();
       });
 
       return () => {
-        backHandler.remove();
         unsubscribe();
       };
-    }, [handleBackPress, navigation, currentPage])
+    }, [navigation, currentPage, isPageStateIdle])
   );
 
   const handleContinueButton = () => {
@@ -102,19 +87,19 @@ export default function UserInfo() {
       return;
 
     if (currentPage === 4) {
-      // TODO: Implement completion logic (e.g., submit form, navigate to next screen)
-      console.log('Form completed with data:', {
+      setUserInfo({
         firstName,
         lastName,
-        dateOfBirth,
-        gender,
-        currentWeight: parseFloat(currentWeight),
+        bio: '',
+        friendsVisible: true,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+        weight: parseFloat(currentWeight),
         targetWeight: parseFloat(targetWeight),
         height: parseFloat(height),
-        activityLevel,
-        climate
+        gender: Gender.Male,
+        activityLevel: ActivityLevel.Sedentary,
+        climate: Climate.Tropical,
       });
-      throw new Error('Not implemented: handleContinueButton');
     } else {
       refPagerView.current?.setPage(currentPage + 1);
     }
