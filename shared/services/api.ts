@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { authManager } from './authManager';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.example.com';
 
@@ -15,7 +15,7 @@ const request = async (
         headers?: Record<string, string>,
         customConfig?: Record<string, any>
     } = {}) => {
-    const token = await SecureStore.getItemAsync('access_token');
+    const token = authManager.getAccessToken();
 
     // Create the request configuration
     const config = {

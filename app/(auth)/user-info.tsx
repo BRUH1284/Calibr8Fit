@@ -9,10 +9,8 @@ import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import { useNavigation } from 'expo-router';
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import PagerView from "react-native-pager-view";
@@ -20,9 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UserInfo() {
   const theme = useTheme();
-  const { logout, setUserInfo } = useAuth();
-  const navigation = useNavigation();
-
+  const { setUserInfo } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   // This state is used to prevent crash when changin screens during page transition
   const [isPageStateIdle, setIsPageStateIdle] = useState(true);
@@ -58,28 +54,6 @@ export default function UserInfo() {
     3: () => activityLevel !== undefined,
     4: () => climate !== undefined
   });
-
-  // Handle hardware back button
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-        if (currentPage > 0) {
-          // Prevent default behavior
-          e.preventDefault();
-          // Go to previous page instead
-          refPagerView.current?.setPage(currentPage - 1);
-        } else if (!isPageStateIdle) { // Prevent going back if page is transitioning
-          e.preventDefault();
-        }
-        else
-          logout();
-      });
-
-      return () => {
-        unsubscribe();
-      };
-    }, [navigation, currentPage, isPageStateIdle])
-  );
 
   const handleContinueButton = () => {
     // Don't continue if current page is not valid
@@ -362,15 +336,13 @@ export default function UserInfo() {
           </ScrollView>
         </View>
       </PagerView>
-      <View>
-        <Button
-          label={currentPage === 4 ? 'Complete' : 'Continue'}
-          labelType='title-medium'
-          onPress={handleContinueButton}
-          style={[styles.button, { marginHorizontal: 64 }]}
-          enabeled={isCurrentPageValid}
-        />
-      </View>
+      <Button
+        label={currentPage === 4 ? 'Complete' : 'Continue'}
+        labelType='title-medium'
+        onPress={handleContinueButton}
+        style={[styles.button, { marginHorizontal: 64 }]}
+        enabeled={isCurrentPageValid}
+      />
     </SafeAreaView >
   );
 }

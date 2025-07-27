@@ -9,11 +9,10 @@ export default function AuthNavigationProvider() {
 
   // Prevent splash screen from hiding while checking authentication
   useEffect(() => {
-    if (isChecking) {
+    if (isChecking)
       SplashScreen.preventAutoHideAsync();
-    } else {
+    else
       SplashScreen.hideAsync();
-    }
   }, [isChecking]);
 
   // Redirect based on authentication status
@@ -32,7 +31,7 @@ export default function AuthNavigationProvider() {
         router.replace("/(auth)");
       }
     }
-  }, [authenticated, registrationComplete, isChecking]);
+  }, [isChecking]);
 
   return <Slot />;
 }

@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 import { api } from "./api";
+import { authManager } from './authManager';
 
 const isRegistered = async () => {
+    console.log('registration state:', await AsyncStorage.getItem('registration_state'));
     return !!(await AsyncStorage.getItem('registration_state'));
 }
 
@@ -11,11 +12,6 @@ const setRegistered = async (state: boolean) => {
         await AsyncStorage.setItem('registration_state', 'complete');
     else
         await AsyncStorage.removeItem('registration_state');
-}
-
-const setTokens = async (accessToken: string, refreshToken: string) => {
-    await SecureStore.setItemAsync('access_token', accessToken);
-    await SecureStore.setItemAsync('refresh_token', refreshToken);
 }
 
 const register = async (username: string, password: string) => {
@@ -27,10 +23,10 @@ const register = async (username: string, password: string) => {
     console.log('Register response:', response);
 
     if (response.accessToken) {
-        await setTokens(response.accessToken, response.refreshToken);
+        authManager.setTokens(response.accessToken, response.refreshToken);
         return response;
     } else {
-        throw new Error('Login failed: No token received');
+        throw new Error('Registration failed: No token received');
     }
 }
 
@@ -41,7 +37,7 @@ const login = async (username: string, password: string) => {
     });
 
     if (response.accessToken) {
-        await setTokens(response.accessToken, response.refreshToken);
+        authManager.setTokens(response.accessToken, response.refreshToken);
         return response;
     } else {
         throw new Error('Login failed: No token received');
@@ -49,8 +45,7 @@ const login = async (username: string, password: string) => {
 }
 
 const logout = async () => {
-    await SecureStore.deleteItemAsync('access_token');
-    await SecureStore.deleteItemAsync('refresh_token');
+    authManager.clearTokens();
     await setRegistered(false);
     return;
 }

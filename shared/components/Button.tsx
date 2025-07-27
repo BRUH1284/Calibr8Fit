@@ -17,7 +17,7 @@ type Props = {
 
 export default function Button({
   variant = 'filled',
-  label = "Button",
+  label,
   labelType = 'title-medium',
   labelStyle,
   style,
@@ -46,7 +46,7 @@ export default function Button({
       style={[{
         backgroundColor: backgroundColor,
         padding: variant !== 'text' ? 16 : 6,
-        borderRadius: 100,
+        borderRadius: 32,
         flexDirection: 'row',
         justifyContent: 'center',
         opacity: enabeled ? 1 : 0.1,
@@ -64,10 +64,9 @@ export default function Button({
         size={icon.size}
         library={icon.library}
         color={icon.color || textColor}
-        style={[{ marginRight: 8 }, icon.style]}
-      />
-      }
-      <AppText
+        style={[{ textAlignVertical: 'center' }, icon.style]}
+      />}
+      {label !== undefined && <AppText
         type={labelType}
         style={[
           {
@@ -75,7 +74,7 @@ export default function Button({
             textAlign: 'center'
           },
           labelStyle
-        ]}>{label}</AppText>
+        ]}>{label}</AppText>}
     </TouchableOpacity>
   );
 }

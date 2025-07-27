@@ -4,7 +4,6 @@ import TextField from "@/shared/components/TextField";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from 'expo-image';
-import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,8 +30,6 @@ export default function SignUp() {
   const handleRegister = async () => {
     try {
       await register(username, password);
-
-      router.push('/user-info');
     } catch (error: any) {
       const cause = error?.cause;
 
@@ -46,7 +43,6 @@ export default function SignUp() {
         setPasswordError(cause?.Password || '');
       }
     }
-
   };
 
   return (

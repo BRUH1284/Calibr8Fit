@@ -1,6 +1,7 @@
 import { profileService } from "@/features/profile/services/profileService";
 import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
 import { createContext, useEffect, useState } from "react";
+import { authManager } from "../services/authManager";
 import { authService } from "../services/authService";
 
 interface AuthContextProps {
@@ -20,36 +21,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
+  const init = async () => {
+    await authManager.loadTokens();
+    checkAuth();
+  };
+
   const checkAuth = async () => {
+    setIsChecking(true);
+
+    var authenticated = false;
+    var registrationComplete = false;
+
     console.log("Checking authentication status...");
+
     // Check local storage for registration state
     if (await authService.isRegistered()) {
-      setAuthenticated(true);
-      setRegistrationComplete(true);
-      setIsChecking(false);
-      return;
+      authenticated = true;
+      registrationComplete = true;
+    } else {
+      // Fetch profile settings to confirm authentication
+      try {
+        // Ensure profile settings can be fetched to confirm auth status
+        const profileSettings = await profileService.getSettings();
+
+        console.log("Profile settings fetched:", profileSettings);
+        authenticated = true;
+
+        if (profileSettings.firstName !== '')
+          registrationComplete = true;
+      } catch (error) {
+        // If fetching profile settings fails, assume not authenticated
+        console.log("Authentication check failed:", error);
+      }
     }
 
-    // Fetch profile settings to confirm authentication
-    try {
-      const profileSettings = await profileService.getSettings(); // Ensure profile settings can be fetched to confirm auth status
-
-      console.log("Profile settings fetched:", profileSettings);
-      setAuthenticated(true)
-
-      if (profileSettings.firstName !== '')
-        setRegistrationComplete(true);
-
-      setIsChecking(false);
-    } catch (error) {
-      console.log("Authentication check failed:", error);
-      setAuthenticated(false);
-      setIsChecking(false);
-    }
+    // Update context state
+    setAuthenticated(authenticated);
+    setRegistrationComplete(registrationComplete);
+    authService.setRegistered(registrationComplete);
+    setIsChecking(false);
   };
 
   useEffect(() => {
-    checkAuth();
+    init();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -73,6 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const logout = async () => {
+    console.warn("Logging out...");
     await authService.logout();
     checkAuth();
     return;
