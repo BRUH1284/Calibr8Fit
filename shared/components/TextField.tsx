@@ -88,7 +88,7 @@ const TextField = forwardRef<TextInput, Props>(({
             left: isFocused ? 10 : 12,
             top: isFocused ? -10 : -8,
             color: isFocused || error ? focusedColor : theme.onSurfaceVariant,
-            backgroundColor: theme.background,
+            backgroundColor: theme.surface,
             paddingHorizontal: 4,
           }}>{label}</AppText>}
 

@@ -1,8 +1,8 @@
 export const LightTheme = {
-    background: '#FEF7FF',
     primary: '#6750A4',
+    primaryContainer: '#D0BCFF',
     secondaryContainer: '#E8DEF8',
-    surface: '#F3EDF7',
+    surface: '#FEF7FF',
     surfaceVariant: '#E7E0EC',
     surfaceContainer: '#F3EDF7',
     onPrimary: '#FFFFFF',
@@ -12,13 +12,14 @@ export const LightTheme = {
     outlineVariant: '#CAC4D0',
     card: '#F3EDF7',
     error: '#B3261E',
+    dialogBackground: 'rgba(0, 0, 0, 0.33)',
 };
 
 export const DarkTheme = {
-    background: '#FEF7FF',
     primary: '#6750A4',
+    primaryContainer: '#D0BCFF',
     secondaryContainer: '#E8DEF8',
-    surface: '#F3EDF7',
+    surface: '#FEF7FF',
     surfaceVariant: '#E7E0EC',
     surfaceContainer: '#F3EDF7',
     onPrimary: '#FFFFFF',
@@ -28,6 +29,7 @@ export const DarkTheme = {
     outlineVariant: '#CAC4D0',
     card: '#F3EDF7',
     error: '#B3261E',
+    dialogBackground: 'rgba(0, 0, 0, 0.33)',
 };
 
 export type AppTheme = typeof LightTheme;

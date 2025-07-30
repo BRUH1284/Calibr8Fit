@@ -1,6 +1,6 @@
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
-import Button from "@/shared/components/Button";
+import TextButton from "@/shared/components/TextButton";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
@@ -26,7 +26,7 @@ export default function Profile() {
         backgroundColor: "red"
       }}
     >
-      <Button label="logout" onPress={logout} />
+      <TextButton label="logout" onPress={logout} />
       <Text>{`${profileSettings?.firstName} ${profileSettings?.lastName} Profile.`}</Text>
     </View>
   );

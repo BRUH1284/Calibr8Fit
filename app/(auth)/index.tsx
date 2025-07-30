@@ -1,6 +1,6 @@
 import AppText from "@/shared/components/AppText";
-import Button from "@/shared/components/Button";
 import Divider from "@/shared/components/Divider";
+import TextButton from "@/shared/components/TextButton";
 import TextField from "@/shared/components/TextField";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
@@ -72,7 +72,7 @@ export default function SignIn() {
         />
         <Divider />
         <AppText type='title-small' color='onSurfaceVariant' style={{ textAlign: 'center', fontWeight: '500' }}>Don’t have an account?</AppText>
-        <Button
+        <TextButton
           onPress={() => router.push('/sign-up')}
           variant='text'
           label='Sign up'
@@ -85,7 +85,7 @@ export default function SignIn() {
           textAlign: 'center'
         }}>{errorMessage}</AppText>
       </View>
-      <Button
+      <TextButton
         onPress={handleLogin}
         label='Continue'
         labelType='title-medium'

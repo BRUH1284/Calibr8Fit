@@ -1,5 +1,5 @@
 import AppText from "@/shared/components/AppText";
-import Button from "@/shared/components/Button";
+import TextButton from "@/shared/components/TextButton";
 import TextField from "@/shared/components/TextField";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
@@ -51,7 +51,7 @@ export default function SignUp() {
       gap: 32,
       padding: 32,
       justifyContent: 'flex-end',
-      backgroundColor: theme.background
+      backgroundColor: theme.surface
     }}>
       <Image style={{ height: 288, alignSelf: 'stretch', backgroundColor: 'red' }}
         source={require('@/assets/images/react-logo.png')}
@@ -73,7 +73,7 @@ export default function SignUp() {
           supportingText={passwordError}
         />
       </View>
-      <Button
+      <TextButton
         onPress={handleRegister}
         label='Continue'
         labelType='title-medium'

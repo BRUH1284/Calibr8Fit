@@ -15,7 +15,7 @@ type Props = {
   icon?: IconItem;
 };
 
-export default function Button({
+export default function TextButton({
   variant = 'filled',
   label,
   labelType = 'title-medium',
@@ -66,7 +66,7 @@ export default function Button({
         color={icon.color || textColor}
         style={[{ textAlignVertical: 'center' }, icon.style]}
       />}
-      {label !== undefined && <AppText
+      <AppText
         type={labelType}
         style={[
           {
@@ -74,7 +74,7 @@ export default function Button({
             textAlign: 'center'
           },
           labelStyle
-        ]}>{label}</AppText>}
+        ]}>{label}</AppText>
     </TouchableOpacity>
   );
 }

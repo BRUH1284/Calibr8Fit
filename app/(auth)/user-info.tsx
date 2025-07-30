@@ -1,6 +1,6 @@
 import AppText from "@/shared/components/AppText";
-import Button from "@/shared/components/Button";
 import FrameDisplay from "@/shared/components/FrameDisplay";
+import TextButton from "@/shared/components/TextButton";
 import TextField from "@/shared/components/TextField";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { usePageValidation } from "@/shared/hooks/usePageValidation";
@@ -84,7 +84,7 @@ export default function UserInfo() {
       flex: 1,
       paddingBottom: 32,
       gap: 32,
-      backgroundColor: theme.background,
+      backgroundColor: theme.surface,
     }}>
       <Image style={{ height: '20%', alignSelf: 'stretch', backgroundColor: 'red' }}
         source={require('@/assets/images/react-logo.png')}
@@ -163,14 +163,14 @@ export default function UserInfo() {
                 color: theme.onSurfaceVariant
               }}>We use this to personalize your goals, hydration, and health insights.</AppText>
           </View>
-          <Button
+          <TextButton
             label='Male'
             labelType='title-medium'
             variant={gender === Gender.Male ? 'filled' : 'toggle'}
             onPress={() => setGender(Gender.Male)}
             style={styles.button}
           />
-          <Button
+          <TextButton
             label='Female'
             labelType='title-medium'
             variant={gender === Gender.Female ? 'filled' : 'toggle'}
@@ -256,35 +256,35 @@ export default function UserInfo() {
             contentContainerStyle={{ gap: 16 }}
             showsVerticalScrollIndicator={false}
           >
-            <Button
+            <TextButton
               label='Sedentary'
               labelType='title-medium'
               variant={activityLevel === ActivityLevel.Sedentary ? 'filled' : 'toggle'}
               onPress={() => setActivityLevel(ActivityLevel.Sedentary)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='Light'
               labelType='title-medium'
               variant={activityLevel === ActivityLevel.Light ? 'filled' : 'toggle'}
               onPress={() => setActivityLevel(ActivityLevel.Light)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='Moderately'
               labelType='title-medium'
               variant={activityLevel === ActivityLevel.Moderately ? 'filled' : 'toggle'}
               onPress={() => setActivityLevel(ActivityLevel.Moderately)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='High'
               labelType='title-medium'
               variant={activityLevel === ActivityLevel.High ? 'filled' : 'toggle'}
               onPress={() => setActivityLevel(ActivityLevel.High)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='Extreme'
               labelType='title-medium'
               variant={activityLevel === ActivityLevel.Extreme ? 'filled' : 'toggle'}
@@ -312,21 +312,21 @@ export default function UserInfo() {
             contentContainerStyle={{ gap: 16 }}
             showsVerticalScrollIndicator={false}
           >
-            <Button
+            <TextButton
               label='Cold'
               labelType='title-medium'
               variant={climate === Climate.Cold ? 'filled' : 'toggle'}
               onPress={() => setClimate(Climate.Cold)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='Temperate'
               labelType='title-medium'
               variant={climate === Climate.Temperate ? 'filled' : 'toggle'}
               onPress={() => setClimate(Climate.Temperate)}
               style={styles.button}
             />
-            <Button
+            <TextButton
               label='Tropical'
               labelType='title-medium'
               variant={climate === Climate.Tropical ? 'filled' : 'toggle'}
@@ -336,7 +336,7 @@ export default function UserInfo() {
           </ScrollView>
         </View>
       </PagerView>
-      <Button
+      <TextButton
         label={currentPage === 4 ? 'Complete' : 'Continue'}
         labelType='title-medium'
         onPress={handleContinueButton}

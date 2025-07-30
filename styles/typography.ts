@@ -13,6 +13,11 @@ export const Typography = StyleSheet.create({
         fontSize: 28,
         lineHeight: 36
     },
+    'title-large': {
+        fontSize: 22,
+        lineHeight: 28,
+        fontWeight: '500'
+    },
     'title-medium': {
         fontSize: 16,
         lineHeight: 24,
@@ -26,6 +31,16 @@ export const Typography = StyleSheet.create({
     'label-large': {
         fontSize: 14,
         lineHeight: 20,
+        fontWeight: '500'
+    },
+    'label-medium': {
+        fontSize: 12,
+        lineHeight: 16,
+        fontWeight: '500'
+    },
+    'label-small': {
+        fontSize: 11,
+        lineHeight: 16,
         fontWeight: '500'
     }
 });
