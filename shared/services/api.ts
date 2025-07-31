@@ -1,6 +1,6 @@
 import { authManager } from './authManager';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.example.com';
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 const request = async (
     endpoint: string,

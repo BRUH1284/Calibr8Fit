@@ -15,6 +15,20 @@
       "when": 1753908121818,
       "tag": "0001_salty_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1753963875801,
+      "tag": "0002_safe_vulcan",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1753992163311,
+      "tag": "0003_charming_scream",
+      "breakpoints": true
     }
   ]
 }

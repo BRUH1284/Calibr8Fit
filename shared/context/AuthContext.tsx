@@ -21,6 +21,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
+  // Initialize authentication state on mount
+  useEffect(() => {
+    init();
+  }, []);
+
   const init = async () => {
     await authManager.loadTokens();
     checkAuth();
@@ -29,8 +34,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkAuth = async () => {
     setIsChecking(true);
 
-    var authenticated = false;
-    var registrationComplete = false;
+    let authenticated = false;
+    let registrationComplete = false;
 
     console.log("Checking authentication status...");
 
@@ -62,20 +67,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsChecking(false);
   };
 
-  useEffect(() => {
-    init();
-  }, []);
-
   const login = async (username: string, password: string) => {
     await authService.login(username, password);
-
     checkAuth();
     return;
   }
 
   const register = async (username: string, password: string) => {
     await authService.register(username, password);
-
     checkAuth();
     return;
   }
