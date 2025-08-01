@@ -1,13 +1,46 @@
+import { useActivity } from "@/features/activity/hooks/useActivity";
+import { useUserActivity } from "@/features/activity/hooks/useUserActivity";
 import AppText from "@/shared/components/AppText";
 import DynamicIcon, { IconItem } from "@/shared/components/DynamicIcon";
 import SearchPopup from "@/shared/components/SearchPopup";
 import TextRowAdd from "@/shared/components/TextRowAdd";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useState } from "react";
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import { FlatList, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function Overview() {
+  const { activities, fetchActivities } = useActivity();
+  const { userActivities, syncUserActivities } = useUserActivity();
   const theme = useTheme();
+
+
+  const [topRefreshing, setTopRefreshing] = useState(false);
+  const [listRefreshing, setListRefreshing] = useState(false);
+
+  const [activityQuery, setActivityQuery] = useState('');
+
+  const arrangedActivities = useMemo(() => {
+    const combinedActivities = [...activities, ...userActivities];
+
+    let result = combinedActivities
+      .filter((activity) =>
+        activity.description.toLowerCase().includes(activityQuery.toLowerCase())
+      )
+      .map((activity) => ({
+        id: 'id' in activity ? activity.id : undefined,
+        code: 'code' in activity ? activity.code : undefined,
+        name: activity.description,
+        metValue: activity.metValue,
+      }));
+
+    console.log('Filtered activities:', result);
+
+    result.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [activities, activityQuery]);
 
   const [popup, setPopup] = useState<'none' | 'activity'>('none');
 
@@ -32,42 +65,55 @@ export default function Overview() {
         supportingText: 'Supporting text 1',
         onPress() {
           setPopup('activity');
+          console.log(activities);
         },
       },
       { iconName: 'water-drop', iconLibrary: 'MaterialIcons', mainText: 'Tile 3', supportingText: 'Supporting text 1' },
       { iconName: 'monitor-weight', iconLibrary: 'MaterialIcons', mainText: '80 kg', supportingText: '75 kg' },
     ];
 
+  const onRefresh = useCallback(async (stateAction: (value: boolean) => void) => {
+    stateAction(true);
+    await fetchActivities();
+    await syncUserActivities();
+    stateAction(false);
+  }, [fetchActivities]);
+
   return (
-    <View style={{ flex: 1 }}>
-
-
+    <View
+      style={{ flex: 1 }}
+    >
       <View
         style={{
           flex: 1,
           justifyContent: "center",
           backgroundColor: theme.surface,
-          gap: 16,
         }}
       >
-        <View style={{
-          height: 144,
-          backgroundColor: theme.surfaceContainer,
-          marginHorizontal: 16,
-          borderRadius: 16,
-          flexDirection: 'row',
-        }} >
-          <View style={{ flex: 1 }} />
-        </View>
         <FlatList
-          style={{
-            paddingHorizontal: 16,
-            flexGrow: 0,
-          }}
-          contentContainerStyle={{ gap: 8 }}
+          style={{ flexGrow: 0 }}
+          contentContainerStyle={{ gap: 8, padding: 16, paddingTop: 8 }}
           columnWrapperStyle={{ gap: 8 }}
+          scrollEnabled={false}
           numColumns={2}
           data={tiles}
+          refreshControl={
+            <RefreshControl
+              refreshing={topRefreshing}
+              onRefresh={() => onRefresh(setTopRefreshing)}
+            />
+          }
+          ListHeaderComponent={
+            <View style={{
+              height: 144,
+              backgroundColor: theme.surfaceContainer,
+              marginBottom: 8,
+              borderRadius: 16,
+              flexDirection: 'row',
+            }} >
+              <View style={{ flex: 1 }} />
+            </View>
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
               style={{
@@ -91,18 +137,32 @@ export default function Overview() {
                 <AppText type='label-small' style={{ textAlign: 'right', color: theme.onSurfaceVariant }}>{item.supportingText}</AppText>
               </View>
             </TouchableOpacity>
-          )}>
-        </FlatList>
+          )}
+        />
         <View style={{
           flex: 1,
           marginHorizontal: 16,
         }} >
-          <View
+          <ScrollView
             style={{
-              flex: 1,
+              height: 200,
               backgroundColor: theme.surfaceContainer,
               borderRadius: 16,
-            }} />
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={listRefreshing}
+                onRefresh={() => onRefresh(setListRefreshing)}
+              />
+            }>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+            <AppText>asdf</AppText>
+          </ScrollView>
           <View style={{
             flexDirection: 'row',
             justifyContent: 'center',
@@ -119,33 +179,16 @@ export default function Overview() {
       <SearchPopup
         isVisible={popup === 'activity'}
         onClose={() => setPopup('none')}
+        onChangeText={setActivityQuery}
         header='Add activity'
         headerRightIcon={{ iconName: 'pencil-plus', iconLibrary: 'MaterialCommunityIcons' }}
-        flatListData={[
-          { id: 1, name: 'Running', description: 'Jogging for 30 minutes' },
-          { id: 2, name: 'Cycling', description: 'Biking for 1 hour' },
-          { id: 3, name: 'Swimming', description: 'Swimming laps for 45 minutes' },
-          { id: 4, name: 'Yoga', description: '30 minutes of yoga' },
-          { id: 5, name: 'Weightlifting', description: 'Full body workout' },
-          { id: 6, name: 'Cycling', description: 'Biking for 1 hour' },
-          { id: 7, name: 'Swimming', description: 'Swimming laps for 45 minutes' },
-          { id: 8, name: 'Yoga', description: '30 minutes of yoga' },
-          { id: 9, name: 'Weightlifting', description: 'Full body workout' },
-          { id: 10, name: 'Walking', description: 'Casual walk in the park' },
-          { id: 11, name: 'Running', description: 'Jogging for 30 minutes' },
-          { id: 12, name: 'Cycling', description: 'Biking for 1 hour' },
-          { id: 13, name: 'Swimming', description: 'Swimming laps for 45 minutes' },
-          { id: 14, name: 'Yoga', description: '30 minutes of yoga' },
-          { id: 15, name: 'Weightlifting', description: 'Full body workout' },
-          { id: 16, name: 'Cycling', description: 'Biking for 1 hour' },
-          { id: 17, name: 'Swimming', description: 'Swimming laps for 45 minutes' },
-          { id: 18, name: 'Yoga', description: '30 minutes of yoga' },
-          { id: 19, name: 'Weightlifting', description: 'Full body workout' },]}
-        flatListRenderItem={({ name, description }: any) => (
+        flatListData={arrangedActivities}
+        flatListDataKeyExtractor={(item) => item.id || item.code}
+        flatListRenderItem={({ name, metValue }) => (
           <TextRowAdd
             label={name}
             onPress={() => console.log(`Selected ${name}`)}
-            iconText={description} />
+            iconText={metValue} />
         )}
       />
     </View>

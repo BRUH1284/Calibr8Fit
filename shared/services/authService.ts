@@ -3,7 +3,6 @@ import { api } from "./api";
 import { authManager } from './authManager';
 
 const isRegistered = async () => {
-    console.log('registration state:', await AsyncStorage.getItem('registration_state'));
     return !!(await AsyncStorage.getItem('registration_state'));
 }
 
@@ -15,7 +14,8 @@ const setRegistered = async (state: boolean) => {
 }
 
 const register = async (username: string, password: string) => {
-    const response = await api.request('/auth/register', {
+    const response = await api.request({
+        endpoint: '/auth/register',
         method: 'POST',
         body: { userName: username, password, deviceId: 'device-id-placeholder' }, // Replace with actual device ID logic
     });
@@ -31,7 +31,8 @@ const register = async (username: string, password: string) => {
 }
 
 const login = async (username: string, password: string) => {
-    const response = await api.request('/auth/login', {
+    const response = await api.request({
+        endpoint: '/auth/login',
         method: 'POST',
         body: { userName: username, password, deviceId: 'device-id-placeholder' }, // Replace with actual device ID logic
     });

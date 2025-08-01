@@ -1,8 +1,8 @@
 import { useContext } from "react";
-import { ActivityContext } from "../context/ActivityContext";
+import { UserActivityContext } from "../context/UserActivityContext";
 
 export const useUserActivity = () => {
-    const context = useContext(ActivityContext);
+    const context = useContext(UserActivityContext);
 
     if (!context)
         throw new Error('useUserActivity must be used within ActivityProvider');

@@ -6,6 +6,7 @@ interface UserActivityContextProps {
   userActivities: UserActivity[];
   fetchUserActivities: () => Promise<UserActivity[]>;
   syncUserActivities: () => Promise<UserActivity[]>;
+  addUserActivity: (activity: Omit<UserActivity, 'id' | 'syncStatus' | 'updatedAt'>) => Promise<UserActivity>;
 }
 
 export const UserActivityContext = createContext<UserActivityContextProps | null>(null);
@@ -13,38 +14,51 @@ export const UserActivityContext = createContext<UserActivityContextProps | null
 export const UserActivityProvider = ({ children }: { children: React.ReactNode }) => {
   const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
 
-  // Fetch user activities when the component mounts
+  // Sync user activities when the component mounts
   useEffect(() => {
-    syncUserActivities();
+    try {
+      syncUserActivities();
+    } catch (error) {
+      // If sync fails, load local user activities
+      console.warn("Failed to sync user activities:", error);
+      loadUserActivities();
+    }
   }, []);
 
+  const loadUserActivities = async () => {
+    const localActivities = await userActivityService.loadUserActivity();
+    setUserActivities(localActivities);
+    return localActivities;
+  };
+
   const fetchUserActivities = async () => {
-    try {
-      const fetchedActivities = await userActivityService.fetchUserActivity();
-      setUserActivities(fetchedActivities);
-      return fetchedActivities;
-    } catch (error) {
-      console.error("Failed to fetch user activities:", error);
-      return [];
-    }
+    const fetchedActivities = await userActivityService.fetchUserActivity();
+    setUserActivities(fetchedActivities);
+    return fetchedActivities;
   };
 
   const syncUserActivities = async () => {
-    try {
-      const syncedActivities = await userActivityService.syncUserActivity();
-      setUserActivities(syncedActivities);
-      return syncedActivities;
-    } catch (error) {
-      console.error("Failed to sync user activities:", error);
-      return [];
-    }
+    const syncedActivities = await userActivityService.syncUserActivity();
+    setUserActivities(syncedActivities);
+    return syncedActivities;
   };
+
+  const addUserActivity =
+    async (activity: Omit<UserActivity, 'id' | 'syncStatus' | 'updatedAt'>):
+      Promise<UserActivity> => {
+      // Add a new user activity
+      const newActivity = await userActivityService.addUserActivity(activity);
+      // Update the state with the new activity
+      setUserActivities(prevActivities => [...prevActivities, newActivity]);
+      return newActivity;
+    };
 
   return (
     <UserActivityContext.Provider value={{
       userActivities,
       fetchUserActivities,
-      syncUserActivities
+      syncUserActivities,
+      addUserActivity
     }}>
       {children}
     </UserActivityContext.Provider>

@@ -31,7 +31,7 @@ export default function AuthNavigationProvider() {
         router.replace("/(auth)");
       }
     }
-  }, [isChecking]);
+  }, [isChecking, authenticated, registrationComplete]);
 
   return <Slot />;
 }

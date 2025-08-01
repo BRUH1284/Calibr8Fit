@@ -7,7 +7,8 @@ const loadActivities = async () => {
 }
 
 const fetchActivities = async () => {
-    const response = await api.request(`/activity`, {
+    const response = await api.request({
+        endpoint: '/activity',
         method: 'GET',
     });
 

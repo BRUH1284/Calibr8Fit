@@ -28,7 +28,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const init = async () => {
     await authManager.loadTokens();
-    checkAuth();
+    await checkAuth();
+    authManager.setEvent({
+      onUnauthorized: () => {
+        console.warn("Unauthorized access, clearing tokens");
+        setRegistrationComplete(false);
+        setAuthenticated(false);
+      },
+    });
   };
 
   const checkAuth = async () => {
@@ -39,24 +46,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     console.log("Checking authentication status...");
 
-    // Check local storage for registration state
-    if (await authService.isRegistered()) {
-      authenticated = true;
-      registrationComplete = true;
-    } else {
-      // Fetch profile settings to confirm authentication
+    // Check local storage for tokens
+    if (authManager.getAccessToken() && authManager.getRefreshToken()) {
       try {
         // Ensure profile settings can be fetched to confirm auth status
         const profileSettings = await profileService.getSettings();
 
-        console.log("Profile settings fetched:", profileSettings);
+        // If we can fetch profile settings, user is authenticated
         authenticated = true;
 
         if (profileSettings.firstName !== '')
           registrationComplete = true;
       } catch (error) {
         // If fetching profile settings fails, assume not authenticated
-        console.log("Authentication check failed:", error);
+        console.warn("Authentication check failed:", (error as any).status || error);
+
+        // If not 401, check local storage for auth state
+        if ((error as any).status !== 401) {
+          // assume user is authenticated if tokens exist
+          authenticated = true;
+          // Check local storage for registration state
+          if (!await authService.isRegistered())
+            registrationComplete = true;
+        }
       }
     }
 

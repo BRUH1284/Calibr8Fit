@@ -13,6 +13,7 @@ type Props = {
   searchLabel?: string;
   onChangeText?: (text: string) => void;
   flatListData?: any[];
+  flatListDataKeyExtractor?: (item: any) => string;
   flatListRenderItem: React.ComponentType<any>;
 };
 
@@ -24,6 +25,7 @@ export default function SearchPopup({
   searchLabel = 'Search',
   onChangeText,
   flatListData,
+  flatListDataKeyExtractor,
   flatListRenderItem,
 }: Props) {
   const theme = useTheme();
@@ -102,7 +104,7 @@ export default function SearchPopup({
             initialNumToRender={10}
             contentContainerStyle={{ gap: 16 }}
             data={flatListData}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={flatListDataKeyExtractor}
             renderItem={renderItem}
           />
         </View>

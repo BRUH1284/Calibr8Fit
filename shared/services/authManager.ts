@@ -1,13 +1,13 @@
 import * as SecureStore from 'expo-secure-store';
 
-type AuthEvents = {
+type AuthEvent = {
     onUnauthorized: () => void;
 };
 
 class AuthManager {
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
-    private events: AuthEvents | null = null;
+    private events: AuthEvent[] = [];
 
     async loadTokens() {
         this.accessToken = await SecureStore.getItemAsync('access_token');
@@ -30,6 +30,11 @@ class AuthManager {
         return this.refreshToken;
     }
 
+    getDeviceId() {
+        // Placeholder for actual device ID logic
+        return 'device-id-placeholder';
+    }
+
     clearTokens() {
         this.accessToken = null;
         this.refreshToken = null;
@@ -37,13 +42,16 @@ class AuthManager {
         SecureStore.deleteItemAsync('refresh_token');
     }
 
-    setEvents(events: AuthEvents) {
-        this.events = events;
+    setEvent(event: AuthEvent) {
+        this.events.push(event);
     }
 
     handleUnauthorized() {
         this.clearTokens();
-        this.events?.onUnauthorized?.();
+        // Notify all registered events about unauthorized access
+        this.events.forEach(e => {
+            e.onUnauthorized();
+        });
     }
 }
 

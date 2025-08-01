@@ -49,7 +49,7 @@ export default function SignIn() {
       gap: 32,
       justifyContent: 'flex-end',
       alignContent: 'center',
-      backgroundColor: theme.background
+      backgroundColor: theme.surface
     }}>
       <Image style={{ height: 288, alignSelf: 'stretch', backgroundColor: 'red' }}
         source={require('@/assets/images/react-logo.png')}
