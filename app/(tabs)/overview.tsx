@@ -1,24 +1,26 @@
 import { useActivity } from "@/features/activity/hooks/useActivity";
 import { useUserActivity } from "@/features/activity/hooks/useUserActivity";
 import AppText from "@/shared/components/AppText";
-import DynamicIcon, { IconItem } from "@/shared/components/DynamicIcon";
-import SearchPopup from "@/shared/components/SearchPopup";
+import { IconItem } from "@/shared/components/DynamicIcon";
+import IconButton from "@/shared/components/IconButton";
+import IconTile from "@/shared/components/IconTile";
+import Popup from "@/shared/components/Popup";
+import TextField from "@/shared/components/TextField";
 import TextRowAdd from "@/shared/components/TextRowAdd";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useCallback, useMemo, useState } from "react";
-import { FlatList, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 export default function Overview() {
   const { activities, fetchActivities } = useActivity();
-  const { userActivities, syncUserActivities } = useUserActivity();
+  const { userActivities, syncUserActivities, addUserActivity } = useUserActivity();
   const theme = useTheme();
 
 
-  const [topRefreshing, setTopRefreshing] = useState(false);
-  const [listRefreshing, setListRefreshing] = useState(false);
-
+  // State for activity search query
   const [activityQuery, setActivityQuery] = useState('');
 
+  // Memoized arranged activities based on the search query
   const arrangedActivities = useMemo(() => {
     const combinedActivities = [...activities, ...userActivities];
 
@@ -40,44 +42,66 @@ export default function Overview() {
     });
 
     return result;
-  }, [activities, activityQuery]);
+  }, [activities, userActivities, activityQuery]);
 
-  const [popup, setPopup] = useState<'none' | 'activity'>('none');
+  // State for creating a new user activity
+  const [createdActivity, setCreatedActivity] = useState({
+    description: '',
+    metValue: undefined as number | undefined,
+  });
 
-  const tiles: {
-    iconName: string;
-    iconLibrary: IconItem['library'];
-    mainText: string;
-    supportingText: string;
-    onPress?: () => void;
-  }[] = [
-      {
-        iconName: 'fastfood',
-        iconLibrary: 'MaterialIcons',
-        mainText: 'Tile 1',
-        supportingText: 'Supporting text 1',
+  const handleCreateActivity = () => {
+    addUserActivity({
+      majorHeading: 'Custom',
+      description: createdActivity.description,
+      metValue: createdActivity.metValue ? createdActivity.metValue : 0,
+    });
 
-      },
-      {
-        iconName: 'local-fire-department',
-        iconLibrary: 'MaterialIcons',
-        mainText: 'Tile 2',
-        supportingText: 'Supporting text 1',
-        onPress() {
-          setPopup('activity');
-          console.log(activities);
-        },
-      },
-      { iconName: 'water-drop', iconLibrary: 'MaterialIcons', mainText: 'Tile 3', supportingText: 'Supporting text 1' },
-      { iconName: 'monitor-weight', iconLibrary: 'MaterialIcons', mainText: '80 kg', supportingText: '75 kg' },
-    ];
+    // Reset the created activity state
+    setCreatedActivity({
+      description: '',
+      metValue: undefined,
+    });
 
-  const onRefresh = useCallback(async (stateAction: (value: boolean) => void) => {
-    stateAction(true);
+    // Close the popup after creating the activity
+    handleOpenActivityPopup();
+  }
+
+  // State for popup management
+  const [popup, setPopup] = useState<'activity' | 'userActivity'>();
+  const [onPopupBackPress, setOnPopupBackPress] = useState<() => void>(() => { });
+  const [popupHeader, setPopupHeader] = useState<string>();
+  const [popupHeaderRightIcon, setPopupHeaderRightIcon] =
+    useState<{ iconName: IconItem['name'], iconLibrary: IconItem['library'] }>();
+  const [onPopupRightButtonPress, setOnPopupRightButtonPress] = useState<() => void>(() => { });
+
+  const handleOpenActivityPopup = () => {
+    setPopup('activity');
+    setOnPopupBackPress(() => () => setPopup(undefined));
+    setPopupHeader('Activities');
+    setPopupHeaderRightIcon({
+      iconName: 'pencil-plus',
+      iconLibrary: 'MaterialCommunityIcons'
+    });
+    setOnPopupRightButtonPress(() => handleOpenUserActivityPopup);
+  };
+
+  const handleOpenUserActivityPopup = () => {
+    setPopup('userActivity');
+    setOnPopupBackPress(() => handleOpenActivityPopup);
+    setPopupHeader('Create Activity');
+    setPopupHeaderRightIcon(undefined);
+  };
+
+  // Handle refresh
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
     await fetchActivities();
     await syncUserActivities();
-    stateAction(false);
-  }, [fetchActivities]);
+    setRefreshing(false);
+  };
 
   return (
     <View
@@ -86,59 +110,82 @@ export default function Overview() {
       <View
         style={{
           flex: 1,
+          gap: 16,
           justifyContent: "center",
           backgroundColor: theme.surface,
         }}
       >
-        <FlatList
-          style={{ flexGrow: 0 }}
-          contentContainerStyle={{ gap: 8, padding: 16, paddingTop: 8 }}
-          columnWrapperStyle={{ gap: 8 }}
-          scrollEnabled={false}
-          numColumns={2}
-          data={tiles}
-          refreshControl={
-            <RefreshControl
-              refreshing={topRefreshing}
-              onRefresh={() => onRefresh(setTopRefreshing)}
-            />
-          }
-          ListHeaderComponent={
-            <View style={{
-              height: 144,
-              backgroundColor: theme.surfaceContainer,
-              marginBottom: 8,
-              borderRadius: 16,
-              flexDirection: 'row',
-            }} >
-              <View style={{ flex: 1 }} />
-            </View>
-          }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                backgroundColor: theme.surfaceContainer,
-                padding: 16,
-                borderRadius: 16,
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
+        <View style={{
+          height: 144,
+          backgroundColor: theme.surfaceContainer,
+          marginHorizontal: 16,
+          marginTop: 8,
+          borderRadius: 16,
+          flexDirection: 'row',
+        }} >
+          <View style={{ flex: 1 }} />
+        </View>
+        <View style={{
+          gap: 8,
+          paddingHorizontal: 16,
+        }}>
+          <View style={{
+            flexDirection: 'row',
+            gap: 8,
+          }}>
+            <IconTile
+              style={{ flex: 1 }}
+              text='Tile 1'
+              supportingText='Tap'
+              icon={{
+                name: 'fastfood',
+                library: 'MaterialIcons'
               }}
-              onPress={item.onPress}
-            >
-              <DynamicIcon
-                name={item.iconName}
-                size={32}
-                library={item.iconLibrary}
-                color={theme.onSurface} />
-
-              <View style={{ flex: 1 }}>
-                <AppText type='label-large' style={{ textAlign: 'right' }}>{item.mainText}</AppText>
-                <AppText type='label-small' style={{ textAlign: 'right', color: theme.onSurfaceVariant }}>{item.supportingText}</AppText>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+              onPress={() => {
+                setPopup('activity');
+                setOnPopupBackPress(() => setPopup(undefined));
+                setPopupHeader('Activities');
+                setPopupHeaderRightIcon({
+                  iconName: 'pencil-plus',
+                  iconLibrary: 'MaterialCommunityIcons'
+                });
+              }}
+            />
+            <IconTile
+              style={{ flex: 1 }}
+              text='Tile 2'
+              supportingText='Tap'
+              icon={{
+                name: 'local-fire-department',
+                library: 'MaterialIcons'
+              }}
+              onPress={handleOpenActivityPopup}
+            />
+          </View>
+          <View style={{
+            flexDirection: 'row',
+            gap: 8,
+          }}>
+            <IconTile
+              text='Tile 3'
+              supportingText='Tap'
+              icon={{
+                name: 'water-drop',
+                library: 'MaterialIcons'
+              }}
+              onPress={() => setPopup('activity')}
+            />
+            <IconTile
+              text='Tile 4'
+              supportingText='Tap'
+              icon={{
+                name: 'monitor-weight',
+                library: 'MaterialIcons'
+              }}
+              onPress={() => setPopup('activity')}
+            />
+          </View>
+        </View>
         <View style={{
           flex: 1,
           marginHorizontal: 16,
@@ -151,8 +198,8 @@ export default function Overview() {
             }}
             refreshControl={
               <RefreshControl
-                refreshing={listRefreshing}
-                onRefresh={() => onRefresh(setListRefreshing)}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
               />
             }>
             <AppText>asdf</AppText>
@@ -175,22 +222,61 @@ export default function Overview() {
           </View>
         </View>
       </View >
-
-      <SearchPopup
-        isVisible={popup === 'activity'}
-        onClose={() => setPopup('none')}
-        onChangeText={setActivityQuery}
-        header='Add activity'
-        headerRightIcon={{ iconName: 'pencil-plus', iconLibrary: 'MaterialCommunityIcons' }}
-        flatListData={arrangedActivities}
-        flatListDataKeyExtractor={(item) => item.id || item.code}
-        flatListRenderItem={({ name, metValue }) => (
-          <TextRowAdd
-            label={name}
-            onPress={() => console.log(`Selected ${name}`)}
-            iconText={metValue} />
-        )}
-      />
+      <Popup
+        isVisible={!!popup}
+        onClose={() => setPopup(undefined)}
+        onBackPress={onPopupBackPress}
+        header={popupHeader}
+        headerRightIcon={popupHeaderRightIcon}
+        onHeaderRightIconPress={onPopupRightButtonPress}
+      >
+        {(popup === 'activity') && <>
+          <TextField
+            label={'Search'}
+            onChangeText={setActivityQuery}
+          />
+          <FlatList
+            initialNumToRender={10}
+            contentContainerStyle={{ gap: 16 }}
+            data={arrangedActivities}
+            renderItem={({ item }) => (
+              <TextRowAdd
+                label={item.name}
+                onPress={() => console.log(`Selected ${item.name}`)}
+                iconText={item.metValue.toString()}
+              />
+            )}
+          />
+        </>}
+        {(popup === 'userActivity') &&
+          <>
+            <TextField
+              label={'Description'}
+              value={createdActivity.description}
+              onChangeText={(desc) => setCreatedActivity(({ ...createdActivity, description: desc }))}
+              multiline={true}
+              numberOfLines={8}
+            />
+            <TextField
+              type='number'
+              label={'MET Value'}
+              value={createdActivity.metValue?.toString()}
+              onChangeText={(value) => setCreatedActivity(({ ...createdActivity, metValue: parseFloat(value) }))}
+              suffix='100 kcal/h' //TODO: Calculate based on user weight and MET value
+              minValue={0}
+            />
+            <IconButton
+              onPress={handleCreateActivity}
+              style={{ alignSelf: 'flex-end' }}
+              icon={{
+                name: 'check',
+                size: 32,
+                library: "MaterialIcons",
+              }}
+            />
+          </>
+        }
+      </Popup>
     </View>
   );
 }

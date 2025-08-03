@@ -20,6 +20,8 @@ type Props = {
   type?: 'text' | 'number' | 'password';
   maxValue?: number;
   minValue?: number;
+  multiline?: boolean;
+  numberOfLines?: number;
 }
 
 const TextField = forwardRef<TextInput, Props>(({
@@ -37,7 +39,9 @@ const TextField = forwardRef<TextInput, Props>(({
   suffix,
   type = 'text',
   maxValue = Number.MAX_SAFE_INTEGER,
-  minValue = Number.MIN_SAFE_INTEGER
+  minValue = Number.MIN_SAFE_INTEGER,
+  multiline = false,
+  numberOfLines = 1,
 }, ref) => {
   const theme = useTheme();
 
@@ -102,6 +106,8 @@ const TextField = forwardRef<TextInput, Props>(({
                 flex: 1,
               }]}
             ref={ref}
+            multiline={multiline}
+            numberOfLines={numberOfLines}
             placeholder={isFocused ? '' : label}
             placeholderTextColor={theme.onSurfaceVariant}
             secureTextEntry={secureTextEntry}

@@ -2,6 +2,7 @@ import { db } from "@/db/db";
 import { userActivities } from "@/db/schema";
 import { api } from "@/shared/services/api";
 import { SyncStatus } from "@/shared/types/enums/dbTypes";
+import * as Crypto from 'expo-crypto';
 import { UserActivity } from "../types/userActivity";
 
 const loadUserActivity = async (): Promise<UserActivity[]> => {
@@ -101,36 +102,43 @@ const fetchUserActivity = async (): Promise<UserActivity[]> => {
 const addUserActivity =
     async (activity: Omit<UserActivity, 'id' | 'syncStatus' | 'updatedAt'>):
         Promise<UserActivity> => {
-        let newActivity = {
-            ...activity,
-            id: crypto.randomUUID(), // Generate a unique ID for the new activity
-            syncStatus: SyncStatus.NEW,
-            updatedAt: new Date().toISOString()
-        };
-
-
-        // Post the new activity to the server
         try {
-            const response = await api.request({
-                endpoint: '/activity/my',
-                method: 'POST',
-                body: [{
-                    majorHeading: newActivity.majorHeading,
-                    metValue: newActivity.metValue,
-                    description: newActivity.description,
-                    updatedAt: newActivity.updatedAt,
-                }]
-            });
-            // Assuming the server returns the created activity with its ID and updatedAt
-            newActivity = response[0];
+
+            let newActivity = {
+                ...activity,
+                id: Crypto.randomUUID(), // Generate a unique ID for the new activity
+                syncStatus: SyncStatus.NEW,
+                updatedAt: new Date().toISOString()
+            };
+            console.warn("Adding new user activity:", newActivity);
+
+            // Post the new activity to the server
+            try {
+                const response = await api.request({
+                    endpoint: '/activity/my',
+                    method: 'POST',
+                    body: [{
+                        majorHeading: newActivity.majorHeading,
+                        metValue: newActivity.metValue,
+                        description: newActivity.description,
+                        updatedAt: newActivity.updatedAt,
+                    }]
+                });
+                // Assuming the server returns the created activity with its ID and updatedAt
+                newActivity = response[0];
+            } catch (error) {
+                console.warn("Failed to add post activity:", error);
+            } finally {
+                // Regardless of the server request outcome, we insert the activity into the local database
+                await db.insert(userActivities).values(newActivity);
+            }
+
+            return newActivity;
         } catch (error) {
-            console.warn("Failed to add post activity:", error);
-        } finally {
-            // Regardless of the server request outcome, we insert the activity into the local database
-            await db.insert(userActivities).values(newActivity);
+            console.error("Failed to create new user activity:", error);
+            throw error;
         }
 
-        return newActivity;
     }
 
 export const userActivityService = {
