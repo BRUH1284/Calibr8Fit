@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1753906350023,
-      "tag": "0000_gorgeous_proteus",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1753908121818,
-      "tag": "0001_salty_vulcan",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1753963875801,
-      "tag": "0002_safe_vulcan",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1753992163311,
-      "tag": "0003_charming_scream",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1754038821915,
-      "tag": "0004_perpetual_tigra",
+      "when": 1754592598338,
+      "tag": "0000_glossy_nightmare",
       "breakpoints": true
     }
   ]

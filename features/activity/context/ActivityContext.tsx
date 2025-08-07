@@ -5,6 +5,8 @@ import { Activity } from "../types/activity";
 interface ActivityContextProps {
   activities: Activity[];
   fetchActivities: () => Promise<Activity[]>;
+  syncActivities: () => Promise<Activity[]>;
+  loadActivities: () => Promise<Activity[]>;
 }
 
 export const ActivityContext = createContext<ActivityContextProps | null>(null);
@@ -14,14 +16,14 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
 
   // Fetch activities when the component mounts
   useEffect(() => {
-    try {
-      fetchActivities();
-    } catch (error) {
-      // If fetching fails, load local activities
-      console.warn("Failed to fetch activities:", error);
-      loadActivities();
-    }
+    syncActivities();
   }, []);
+
+  const syncActivities = async () => {
+    const syncedActivities = await activityService.syncActivities();
+    setActivities(syncedActivities);
+    return syncedActivities;
+  }
 
   const fetchActivities = async () => {
     const fetchedActivities = await activityService.fetchActivities();
@@ -38,7 +40,9 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
   return (
     <ActivityContext.Provider value={{
       activities,
-      fetchActivities
+      syncActivities,
+      fetchActivities,
+      loadActivities,
     }}>
       {children}
     </ActivityContext.Provider>

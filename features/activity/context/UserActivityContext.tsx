@@ -6,7 +6,7 @@ interface UserActivityContextProps {
   userActivities: UserActivity[];
   fetchUserActivities: () => Promise<UserActivity[]>;
   syncUserActivities: () => Promise<UserActivity[]>;
-  addUserActivity: (activity: Omit<UserActivity, 'id' | 'syncStatus' | 'updatedAt'>) => Promise<UserActivity>;
+  addUserActivity: (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>) => Promise<UserActivity>;
 }
 
 export const UserActivityContext = createContext<UserActivityContextProps | null>(null);
@@ -16,13 +16,7 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
 
   // Sync user activities when the component mounts
   useEffect(() => {
-    try {
-      syncUserActivities();
-    } catch (error) {
-      // If sync fails, load local user activities
-      console.warn("Failed to sync user activities:", error);
-      loadUserActivities();
-    }
+    syncUserActivities();
   }, []);
 
   const loadUserActivities = async () => {
@@ -44,7 +38,7 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
   };
 
   const addUserActivity =
-    async (activity: Omit<UserActivity, 'id' | 'syncStatus' | 'updatedAt'>):
+    async (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>):
       Promise<UserActivity> => {
       // Add a new user activity
       const newActivity = await userActivityService.addUserActivity(activity);

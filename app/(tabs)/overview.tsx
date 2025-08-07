@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import { FlatList, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 export default function Overview() {
-  const { activities, fetchActivities } = useActivity();
+  const { activities, syncActivities } = useActivity();
   const { userActivities, syncUserActivities, addUserActivity } = useUserActivity();
   const theme = useTheme();
 
@@ -98,7 +98,7 @@ export default function Overview() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchActivities();
+    await syncActivities();
     await syncUserActivities();
     setRefreshing(false);
   };
