@@ -8,6 +8,13 @@
       "when": 1754592598338,
       "tag": "0000_glossy_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1754641341260,
+      "tag": "0001_closed_meteorite",
+      "breakpoints": true
     }
   ]
 }

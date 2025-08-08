@@ -18,46 +18,70 @@ const loadUserActivity = async (): Promise<UserActivity[]> => {
 }
 
 const syncUserActivity = async (): Promise<UserActivity[]> => {
-    // Get the last sync time for user activities
-    const lastSyncTime = await syncTimeService.getLastSyncTime(SyncEntity.UserActivities);
+    // Get the last sync time for user activities in unix seconds
+    const lastSyncTime = (await syncTimeService.getLastSyncTimeSeconds(SyncEntity.UserActivities));
 
     try {
         // Fetch user activities last update time
-        const updatedAt = new Date(await api.request({
+        const updatedAt = await api.request({
             endpoint: '/activity/my/last-updated-at',
             method: 'GET',
-        }));
+        });
 
-        if (updatedAt <= lastSyncTime)
+        // Convert updatedAt to seconds
+        const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
+
+        if (updatedAtSeconds <= lastSyncTime)
             return loadUserActivity(); // No new updates, return local data
+
 
         // Fetch modified user activities since the last sync time
         const modifiedActivities = await db
             .select()
             .from(userActivities)
-            .where(gt(userActivities.modifiedAt, lastSyncTime.toISOString()));
+            .where(gt(userActivities.modifiedAt, lastSyncTime));
 
         // Sync modified user activities with the server
-        const syncedActivities = await api.request({
+        const response = await api.request({
             endpoint: '/activity/my/sync',
             method: 'POST',
             body: {
-                lastSyncedAt: lastSyncTime.toISOString(),
-                userActivities: modifiedActivities,
+                lastSyncedAt: new Date(lastSyncTime * 1000).toISOString(), // Convert to ISO string
+                userActivities: modifiedActivities.map(activity => ({
+                    ...activity,
+                    modifiedAt: new Date(activity.modifiedAt * 1000).toISOString(), // Convert to ISO string for the server
+                })),
             },
-        }) as UserActivity[];
+        }) as {
+            syncedAt: string;
+            userActivities: {
+                id: string;
+                majorHeading: string;
+                metValue: number;
+                description: string;
+                modifiedAt: string; // ISO date string from the server
+                deleted: boolean;
+            }[];
+        };
+
+        // Convert response to UserActivity[]
+        const syncedActivities: UserActivity[] = response.userActivities.map((activity) => ({
+            ...activity,
+            // Convert modifiedAt to unix timestamp in seconds
+            modifiedAt: Math.floor(new Date(activity.modifiedAt).getTime() / 1000), // Ensure modifiedAt is in seconds
+        }));
 
         // Clear existing user activities after the last sync time
         await db
             .delete(userActivities)
-            .where(gt(userActivities.modifiedAt, lastSyncTime.toISOString()));
+            .where(gt(userActivities.modifiedAt, lastSyncTime));
 
         // Insert synced user activities
         if (syncedActivities.length !== 0)
             await db.insert(userActivities).values(syncedActivities);
 
         // Update the last sync time
-        syncTimeService.setLastSyncTime(SyncEntity.UserActivities, updatedAt);
+        await syncTimeService.setLastSyncTime(SyncEntity.UserActivities, new Date(updatedAt));
     } catch (e) {
         console.error('Failed to sync user activities:', e);
     }
@@ -79,27 +103,17 @@ const fetchUserActivity = async (): Promise<UserActivity[]> => {
 
 const addUserActivity =
     async (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>):
-        Promise<UserActivity> => {
-        // Post the new activity to the server
-        try {
-            const response = await api.request({
-                endpoint: '/activity/my',
-                method: 'POST',
-                body: {
-                    majorHeading: activity.majorHeading,
-                    metValue: activity.metValue,
-                    description: activity.description,
-                }
-            }) as UserActivity;
-            // Assuming the server returns the created activity
-            return (await db.insert(userActivities).values(response).returning())[0];
+        Promise<UserActivity[]> => {
+        // Insert a new user activity into the database
+        await db.insert(userActivities).values({
+            id: Crypto.randomUUID(),
+            ...activity
+        });
 
-        } catch (error) {
-            console.warn("Failed to post activity:", error);
-            // Regardless of the server request outcome, we insert the activity into the local database
-            return (await db.insert(userActivities).values({ id: Crypto.randomUUID(), ...activity }).returning())[0];
-        }
+        // Sync user activities to ensure the latest data is fetched
+        return await syncUserActivity();
     }
+
 
 export const userActivityService = {
     fetchUserActivity,

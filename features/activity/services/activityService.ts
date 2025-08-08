@@ -9,8 +9,8 @@ const loadActivities = async (): Promise<Activity[]> => {
 }
 
 const syncActivities = async (): Promise<Activity[]> => {
-    // Get the last sync time for activities
-    const lastSyncTime = await syncTimeService.getLastSyncTime(SyncEntity.Activities);
+    // Get the last sync time for activities in unix seconds
+    const lastSyncTime = await syncTimeService.getLastSyncTimeSeconds(SyncEntity.Activities);
 
     try {
         // Fetch activities last update time
@@ -19,15 +19,18 @@ const syncActivities = async (): Promise<Activity[]> => {
             method: 'GET',
         });
 
+        // Convert updatedAt to seconds
+        const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
+
         console.log("Last sync time:", lastSyncTime);
 
-        if (new Date(updatedAt) < lastSyncTime)
+        if (updatedAtSeconds < lastSyncTime)
             return loadActivities(); // No new updates, return local data
 
         const fetchedActivities = await fetchActivities();
 
         // Update the last sync time
-        await syncTimeService.setLastSyncTime(SyncEntity.Activities, new Date(updatedAt));
+        await syncTimeService.setLastSyncTimeSeconds(SyncEntity.Activities, updatedAtSeconds);
 
         return fetchedActivities;
     } catch (e) {

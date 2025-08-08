@@ -3,6 +3,6 @@ export interface UserActivity {
     majorHeading: string;
     metValue: number;
     description: string;
-    modifiedAt: string; // ISO date string
+    modifiedAt: number; // Unix timestamp in seconds
     deleted: boolean;
 }

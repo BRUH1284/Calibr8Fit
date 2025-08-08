@@ -80,8 +80,13 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
             throw error;
         }
 
-        // If response is ok, return the parsed JSON
-        return await response.json();
+        // If response is ok, parse the response body
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+            return await response.json();
+        } else {
+            return await response.text();
+        }
     } catch (error) {
         if (error instanceof Error) {
             console.log('API error:', error.message);

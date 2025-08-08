@@ -83,6 +83,7 @@ export default function Overview() {
       iconName: 'pencil-plus',
       iconLibrary: 'MaterialCommunityIcons'
     });
+    setActivityQuery('');
     setOnPopupRightButtonPress(() => handleOpenUserActivityPopup);
   };
 
