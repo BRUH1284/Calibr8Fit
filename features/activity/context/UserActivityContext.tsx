@@ -37,15 +37,15 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
     return syncedActivities;
   };
 
-  const addUserActivity =
-    async (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>):
-      Promise<UserActivity[]> => {
-      // Add a new user activity
-      const newActivities = await userActivityService.addUserActivity(activity);
-      // Update the state with the new activity
-      setUserActivities(newActivities);
-      return newActivities;
-    };
+  const addUserActivity = async (
+    activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>
+  ): Promise<UserActivity[]> => {
+    // Add a new user activity
+    const newActivities = await userActivityService.addUserActivity(activity);
+    // Update the state with the new activity
+    setUserActivities(newActivities);
+    return newActivities;
+  };
 
   return (
     <UserActivityContext.Provider value={{

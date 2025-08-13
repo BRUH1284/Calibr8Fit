@@ -20,8 +20,6 @@ export default function UserInfo() {
   const theme = useTheme();
   const { setUserInfo } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
-  // This state is used to prevent crash when changin screens during page transition
-  const [isPageStateIdle, setIsPageStateIdle] = useState(true);
   const refPagerView = useRef<PagerView>(null);
 
   const [firstName, setFirstName] = useState('');
@@ -95,7 +93,6 @@ export default function UserInfo() {
         scrollEnabled={false}
         initialPage={0}
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
-        onPageScrollStateChanged={(e) => setIsPageStateIdle(e.nativeEvent.pageScrollState === 'idle')}
       >
         <View key="1" style={[styles.container, { gap: 4 }]}>
           <View style={{ gap: 4 }}>
@@ -341,7 +338,7 @@ export default function UserInfo() {
         labelType='title-medium'
         onPress={handleContinueButton}
         style={[styles.button, { marginHorizontal: 64 }]}
-        enabeled={isCurrentPageValid}
+        enabled={isCurrentPageValid}
       />
     </SafeAreaView >
   );

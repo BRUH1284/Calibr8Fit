@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export enum SyncEntity {
     Activities = "activities",
     UserActivities = "user_activities",
+    ActivityRecords = "activity_records",
 }
 
 export interface SyncTimeService {

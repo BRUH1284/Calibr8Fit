@@ -10,7 +10,7 @@ type Props = {
   labelStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
   variant?: 'filled' | 'tonal' | 'text' | 'toggle';
-  enabeled?: boolean;
+  enabled?: boolean;
   onPress?: () => void;
   icon?: IconItem;
 };
@@ -21,7 +21,7 @@ export default function TextButton({
   labelType = 'title-medium',
   labelStyle,
   style,
-  enabeled = true,
+  enabled: enabled = true,
   onPress = () => { },
   icon,
 }: Props) {
@@ -34,7 +34,7 @@ export default function TextButton({
     text: 'transparent',
   }[variant] || theme.primary;
 
-  const textColor = enabeled ? {
+  const textColor = enabled ? {
     filled: theme.onPrimary,
     tonal: theme.primary,
     toggle: theme.onSurfaceVariant,
@@ -49,13 +49,13 @@ export default function TextButton({
         borderRadius: 32,
         flexDirection: 'row',
         justifyContent: 'center',
-        opacity: enabeled ? 1 : 0.1,
+        opacity: enabled ? 1 : 0.1,
       },
         style
       ]}
-      disabled={!enabeled}
+      disabled={!enabled}
       onPress={() => {
-        if (enabeled)
+        if (enabled)
           onPress();
       }}
     >

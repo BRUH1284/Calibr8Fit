@@ -1,8 +1,9 @@
-import { createContext } from "react";
+import { createContext, useEffect, useState } from "react";
 import { profileService } from "../services/profileService";
 import { ProfileSettings } from "../types/interfaces/profile";
 
 interface ProfileContextProps {
+  profileSettings?: ProfileSettings;
   fetchProfileSettings: () => Promise<ProfileSettings>;
   updateProfileSettings: (settings: ProfileSettings) => Promise<ProfileSettings>;
 }
@@ -10,16 +11,24 @@ interface ProfileContextProps {
 export const ProfileContext = createContext<ProfileContextProps | null>(null);
 
 export const ProfileProvider = ({ children }: { children: React.ReactNode }) => {
+  const [profileSettings, setProfileSettings] = useState<ProfileSettings>();
+
+  useEffect(() => {
+    fetchProfileSettings();
+  }, []);
+
   const fetchProfileSettings = async () => {
-    return await profileService.getSettings();
+    setProfileSettings(await profileService.getSettings());
+    return profileSettings!;
   };
 
   const updateProfileSettings = async (settings: ProfileSettings) => {
-    return await profileService.setSettings(settings);
+    setProfileSettings(await profileService.setSettings(settings));
+    return profileSettings!;
   };
 
   return (
-    <ProfileContext.Provider value={{ fetchProfileSettings, updateProfileSettings }}>
+    <ProfileContext.Provider value={{ profileSettings, fetchProfileSettings, updateProfileSettings }}>
       {children}
     </ProfileContext.Provider>
   );

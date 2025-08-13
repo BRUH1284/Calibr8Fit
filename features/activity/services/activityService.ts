@@ -43,7 +43,7 @@ const fetchActivities = async (): Promise<Activity[]> => {
     const response = await api.request({
         endpoint: '/activity',
         method: 'GET',
-    });
+    }) as Activity[];
 
     // Clear existing activities
     await db.delete(activities);

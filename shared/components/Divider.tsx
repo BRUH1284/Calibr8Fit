@@ -25,10 +25,10 @@ export default function Divider({
           height: orientation === 'vertical' ? '100%' : thickness,
           maxWidth: orientation === 'vertical' ? thickness : undefined,
           width: orientation === 'vertical' ? thickness : undefined,
-          alignSelf: orientation === 'vertical' ? 'auto' : 'stretch',
+          alignSelf: orientation === 'vertical' ? 'center' : 'stretch',
           flexGrow: orientation === 'horizontal' ? 1 : 0,
-          marginHorizontal: orientation === 'horizontal' ? margin : 0,
-          marginVertical: orientation === 'vertical' ? margin : 0,
+          marginHorizontal: orientation === 'horizontal' ? margin : 0.1,
+          marginVertical: orientation === 'vertical' ? margin : 0.1,
         },
         style,
       ]}

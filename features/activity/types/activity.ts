@@ -1,5 +1,5 @@
 export interface Activity {
-    code: number;
+    id: string;
     majorHeading: string;
     metValue: number;
     description: string;

@@ -1,8 +1,10 @@
 import { Typography } from "@/styles/typography";
-import { forwardRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import { KeyboardTypeOptions, TextInput, View } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
+import Divider from "./Divider";
+import IconButton from "./IconButton";
 
 type Props = {
   label?: string;
@@ -22,6 +24,7 @@ type Props = {
   minValue?: number;
   multiline?: boolean;
   numberOfLines?: number;
+  numberControls?: boolean;
 }
 
 const TextField = forwardRef<TextInput, Props>(({
@@ -33,7 +36,7 @@ const TextField = forwardRef<TextInput, Props>(({
   onChangeText,
   onSubmitEditing,
   submitBehavior,
-  value,
+  value = '',
   keyboardType,
   textAlign,
   suffix,
@@ -42,19 +45,21 @@ const TextField = forwardRef<TextInput, Props>(({
   minValue = Number.MIN_SAFE_INTEGER,
   multiline = false,
   numberOfLines = 1,
+  numberControls = false,
 }, ref) => {
   const theme = useTheme();
 
   const [isFocused, setIsFocused] = useState(false);
+  const [valueState, setValueState] = useState<number>(0);
   const [displayedValue, setDisplayedValue] = useState<string>('');
 
   const focusedColor = error ? theme.error : theme.primary;
 
-  const handleChangeValue = (value: string) => {
+  const handleChangeValue = useCallback((value: string) => {
 
     if (value === '' || value.endsWith('-')) {
       setDisplayedValue(value ? '-' : '');
-      onChangeText?.('0');
+      setValueState(0);
       return;
     } else if (value.endsWith('.')) {
       setDisplayedValue(value);
@@ -67,9 +72,16 @@ const TextField = forwardRef<TextInput, Props>(({
     if (minValue > parsed)
       parsed = minValue;
 
+    setValueState(parsed);
     onChangeText?.(parsed.toString());
     setDisplayedValue(parsed.toString());
-  }
+  }, [maxValue, minValue, onChangeText]);
+
+  useEffect(() => {
+    if (type === 'number' && value !== valueState.toString()) {
+      handleChangeValue(value);
+    }
+  }, [value]);
 
   return (
     <View style={{
@@ -122,6 +134,48 @@ const TextField = forwardRef<TextInput, Props>(({
             submitBehavior={submitBehavior}
           />
           {suffix && <AppText type='body-large' style={{ color: theme.onSurfaceVariant }}>{suffix}</AppText>}
+          {numberControls && type === 'number' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                marginVertical: isFocused ? -9 : -11,
+                marginRight: -7,
+                marginLeft: 8,
+                gap: 8,
+              }}
+            >
+              <Divider
+                orientation='vertical'
+                thickness={1}
+                style={{ backgroundColor: isFocused || error ? focusedColor : theme.outline }}
+              />
+              <IconButton
+                variant='icon'
+                icon={{
+                  name: 'remove',
+                  size: 32,
+                  library: 'MaterialIcons',
+                  color: theme.onSurfaceVariant,
+                }}
+                onPress={() => handleChangeValue((valueState - 5).toString())}
+              />
+              <Divider
+                orientation='vertical'
+                thickness={1}
+                style={{ backgroundColor: isFocused || error ? focusedColor : theme.outline }}
+              />
+              <IconButton
+                variant='icon'
+                icon={{
+                  name: 'add',
+                  size: 32,
+                  library: 'MaterialIcons',
+                  color: theme.onSurfaceVariant,
+                }}
+                onPress={() => handleChangeValue((valueState + 5).toString())}
+              />
+            </View>
+          )}
         </View>
       </View>
       {supportingText !== undefined && <AppText

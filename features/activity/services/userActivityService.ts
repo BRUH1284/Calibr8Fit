@@ -2,14 +2,17 @@ import { db } from "@/db/db";
 import { userActivities } from "@/db/schema";
 import { api } from "@/shared/services/api";
 import { SyncEntity, syncTimeService } from "@/shared/services/syncTimeService";
-import { gt } from "drizzle-orm";
+import { eq, gt, sql } from "drizzle-orm";
 import * as Crypto from 'expo-crypto';
 import { UserActivity } from "../types/userActivity";
 
 const loadUserActivity = async (): Promise<UserActivity[]> => {
     try {
         // Fetch user activities from the local database
-        return await db.select().from(userActivities);;
+        return await db
+            .select()
+            .from(userActivities)
+            .where(eq(userActivities.deleted, false));
     }
     catch (error) {
         console.warn("Failed to load user activities from local database:", error);
@@ -31,9 +34,8 @@ const syncUserActivity = async (): Promise<UserActivity[]> => {
         // Convert updatedAt to seconds
         const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
 
-        if (updatedAtSeconds <= lastSyncTime)
+        if (updatedAtSeconds === lastSyncTime)
             return loadUserActivity(); // No new updates, return local data
-
 
         // Fetch modified user activities since the last sync time
         const modifiedActivities = await db
@@ -76,16 +78,30 @@ const syncUserActivity = async (): Promise<UserActivity[]> => {
             .delete(userActivities)
             .where(gt(userActivities.modifiedAt, lastSyncTime));
 
-        // Insert synced user activities
+        console.log('Synced user activities:', syncedActivities);
+
+        // Upsert synced user activities
         if (syncedActivities.length !== 0)
-            await db.insert(userActivities).values(syncedActivities);
+            await db
+                .insert(userActivities)
+                .values(syncedActivities)
+                .onConflictDoUpdate({
+                    target: userActivities.id,
+                    set: {
+                        majorHeading: sql`excluded.major_heading`,
+                        metValue: sql`excluded.met_value`,
+                        description: sql`excluded.description`,
+                        modifiedAt: sql`excluded.modified_at`,
+                        deleted: sql`excluded.deleted`,
+                    },
+                });
 
         // Update the last sync time
         await syncTimeService.setLastSyncTime(SyncEntity.UserActivities, new Date(updatedAt));
     } catch (e) {
         console.error('Failed to sync user activities:', e);
     }
-    return loadUserActivity(); // Fallback to local data if API call fails
+    return loadUserActivity();
 }
 
 const fetchUserActivity = async (): Promise<UserActivity[]> => {
@@ -101,19 +117,18 @@ const fetchUserActivity = async (): Promise<UserActivity[]> => {
     }
 }
 
-const addUserActivity =
-    async (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>):
-        Promise<UserActivity[]> => {
-        // Insert a new user activity into the database
-        await db.insert(userActivities).values({
-            id: Crypto.randomUUID(),
-            ...activity
-        });
+const addUserActivity = async (
+    activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>
+): Promise<UserActivity[]> => {
+    // Insert a new user activity into the database
+    await db.insert(userActivities).values({
+        ...activity,
+        id: Crypto.randomUUID(),
+    });
 
-        // Sync user activities to ensure the latest data is fetched
-        return await syncUserActivity();
-    }
-
+    // Sync user activities to ensure the data is synced
+    return await syncUserActivity();
+}
 
 export const userActivityService = {
     fetchUserActivity,

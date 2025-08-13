@@ -15,6 +15,20 @@
       "when": 1754641341260,
       "tag": "0001_closed_meteorite",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1754724785955,
+      "tag": "0002_perfect_omega_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1754742234807,
+      "tag": "0003_nifty_big_bertha",
+      "breakpoints": true
     }
   ]
 }

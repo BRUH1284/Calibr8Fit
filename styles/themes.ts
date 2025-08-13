@@ -12,6 +12,8 @@ export const LightTheme = {
     outlineVariant: '#CAC4D0',
     card: '#F3EDF7',
     error: '#B3261E',
+    tertiary: '#7D5260',
+    tertiaryContainer: '#FFD8E4',
     dialogBackground: 'rgba(0, 0, 0, 0.33)',
 };
 
