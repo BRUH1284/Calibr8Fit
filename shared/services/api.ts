@@ -53,8 +53,9 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
     // Perform the API request
     try {
         const response = await fetch(`${BASE_URL}${endpoint}`, config);
+        const body = await getResponseBody(response);
 
-        if (response.status === 401) {
+        if (response.status === 401 && !body) {
             // try refresh tokens
             if (requestConfig.endpoint !== '/auth/refresh-token' && await refreshToken())
                 return request(requestConfig); // Retry the request with new tokens
@@ -65,28 +66,17 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
 
         // If response is not ok, throw an error
         if (!response.ok) {
-            let error = new Error();
-            try {
-                const errorData = await response.json();
-                error = new Error(errorData.title);
-                // Create and throw a custom error
-                error.cause = errorData.errors ? errorData.errors : errorData;
-            } catch (e) {
-                console.warn('Failed to parse error response:', e);
-                error = new Error(e as any);
-            }
+            const error = new Error(body.title);
+            // Create and throw a custom error
+            error.cause = body.errors ? body.errors : body;
+
             // Attach the status code to the error
             (error as any).status = response.status;
             throw error;
         }
 
-        // If response is ok, parse the response body
-        const contentType = response.headers.get('content-type');
-        if (contentType?.includes('application/json')) {
-            return await response.json();
-        } else {
-            return await response.text();
-        }
+        // If response is ok, return response body
+        return body;
     } catch (error) {
         if (error instanceof Error) {
             console.log('API error:', error.message);
@@ -98,6 +88,20 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
         throw error;
     }
 };
+
+async function getResponseBody(response: Response) {
+    const text = await response.text();
+
+    if (!text) {
+        return null; // empty body
+    }
+
+    try {
+        return JSON.parse(text); // assume JSON
+    } catch {
+        return text; // fallback if not JSON
+    }
+}
 
 export const api = {
     request,
