@@ -1,12 +1,11 @@
 import { db } from "@/db/db";
 import { activities, activityRecords, userActivities } from "@/db/schema";
-import { api } from "@/shared/services/api";
-import { SyncEntity, syncTimeService } from "@/shared/services/syncTimeService";
-import { and, eq, gt, inArray, InferInsertModel, InferSelectModel, lte, sql } from "drizzle-orm";
-import * as Crypto from 'expo-crypto';
+import { createSyncService } from "@/shared/services/createSyncService";
+import { SyncEntityType } from "@/shared/services/syncTimeService";
+import { and, eq, inArray, lte, sql } from "drizzle-orm";
 import { ActivityRecord } from "../types/ActivityRecord";
 
-const loadActivityRecords = async (today: boolean = false): Promise<ActivityRecord[]> => {
+const loadActivityRecords = async (today: boolean = false, includeDeleted: boolean = false): Promise<ActivityRecord[]> => {
     return db
         .select({
             id: activityRecords.id,
@@ -43,132 +42,159 @@ const loadActivityRecords = async (today: boolean = false): Promise<ActivityReco
         )
 }
 
-const syncActivityRecords = async (): Promise<ActivityRecord[]> => {
-    // Get the last sync time for activity records in unix seconds
-    const lastSyncTime = await syncTimeService.getLastSyncTimeSeconds(SyncEntity.ActivityRecords);
+// const syncActivityRecords = async (): Promise<ActivityRecord[]> => {
+//     // Get the last sync time for activity records in unix seconds
+//     const lastSyncTime = await syncTimeService.getLastSyncTimeSeconds(SyncEntityType.ActivityRecords);
 
-    try {
-        //await db.delete(activityRecords);
+//     try {
+//         // Fetch activity records last update time
+//         const updatedAt = await api.request({
+//             endpoint: '/activity-record/last-updated-at',
+//             method: 'GET',
+//         });
 
-        // Fetch activity records last update time
-        const updatedAt = await api.request({
-            endpoint: '/activity-record/last-updated-at',
-            method: 'GET',
-        });
+//         // Convert updatedAt to seconds
+//         const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
 
-        // Convert updatedAt to seconds
-        const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
+//         if (updatedAtSeconds === lastSyncTime)
+//             return loadActivityRecords(); // No new updates, return local data
 
-        if (updatedAtSeconds === lastSyncTime)
-            return loadActivityRecords(); // No new updates, return local data
+//         // Fetch modified user activities since the last sync time
+//         const modifiedActivities = await db
+//             .select()
+//             .from(activityRecords)
+//             .where(gt(activityRecords.modifiedAt, lastSyncTime));
 
-        // Fetch modified user activities since the last sync time
-        const modifiedActivities = await db
-            .select()
-            .from(activityRecords)
-            .where(gt(activityRecords.modifiedAt, lastSyncTime));
+//         console.log('Modified activity records:', modifiedActivities.length);
 
-        console.log('Modified activity records:', modifiedActivities.length);
+//         // Sync modified activity records with the server
+//         const response = await api.request({
+//             endpoint: '/activity-record/sync',
+//             method: 'POST',
+//             body: {
+//                 lastSyncedAt: new Date(lastSyncTime * 1000).toISOString(), // Convert to ISO string
+//                 activityRecords: modifiedActivities.map(({ userActivityId, ...record }) => ({
+//                     ...record,
+//                     activityId: record.activityId || userActivityId, // Use activityId or userActivityId
+//                     modifiedAt: new Date(record.modifiedAt * 1000).toISOString(), // Convert to ISO string for the server
+//                 })),
+//             },
+//         }) as {
+//             syncedAt: string;
+//             activityRecords: {
+//                 id: string;
+//                 activityId: string;
+//                 duration: number;
+//                 caloriesBurned: number;
+//                 time: number;
+//                 modifiedAt: string;
+//                 deleted: boolean;
+//             }[];
+//         };
 
-        // Sync modified activity records with the server
-        const response = await api.request({
-            endpoint: '/activity-record/sync',
-            method: 'POST',
-            body: {
-                lastSyncedAt: new Date(lastSyncTime * 1000).toISOString(), // Convert to ISO string
-                activityRecords: modifiedActivities.map(({ userActivityId, ...record }) => ({
-                    ...record,
-                    activityId: record.activityId || userActivityId, // Use activityId or userActivityId
-                    modifiedAt: new Date(record.modifiedAt * 1000).toISOString(), // Convert to ISO string for the server
-                })),
-            },
-        }) as {
-            syncedAt: string;
-            activityRecords: {
-                id: string;
-                activityId: string;
-                duration: number;
-                caloriesBurned: number;
-                time: number;
-                modifiedAt: string;
-                deleted: boolean;
-            }[];
-        };
+//         const activitiesIdSet = new Set((await db
+//             .select({ id: activities.id })
+//             .from(activities)
+//             .where(
+//                 inArray(activities.id, response.activityRecords.map(record => record.id))
+//             )
+//         ).map(row => row.id));
 
-        const activitiesIdSet = new Set((await db
-            .select({ id: activities.id })
-            .from(activities)
-            .where(
-                inArray(activities.id, response.activityRecords.map(record => record.id))
-            )
-        ).map(row => row.id));
+//         // Convert server response to local ActivityRecord format
+//         const fetchedRecords: InferSelectModel<typeof activityRecords>[] = response.activityRecords.map(record => ({
+//             ...record,
+//             activityId: activitiesIdSet.has(record.activityId) ? record.activityId : null,
+//             userActivityId: activitiesIdSet.has(record.activityId) ? null : record.activityId,
+//             time: Math.floor(new Date(record.time).getTime() / 1000), // Ensure time is in seconds
+//             modifiedAt: Math.floor(new Date(record.modifiedAt).getTime() / 1000), // Ensure modifiedAt is in seconds
+//         }));
 
-        // Convert server response to local ActivityRecord format
-        const fetchedRecords: InferSelectModel<typeof activityRecords>[] = response.activityRecords.map(record => ({
-            ...record,
-            activityId: activitiesIdSet.has(record.activityId) ? record.activityId : null,
-            userActivityId: activitiesIdSet.has(record.activityId) ? null : record.activityId,
-            time: Math.floor(new Date(record.time).getTime() / 1000), // Ensure time is in seconds
-            modifiedAt: Math.floor(new Date(record.modifiedAt).getTime() / 1000), // Ensure modifiedAt is in seconds
-        }));
+//         // Upsert synced activity records
+//         if (fetchedRecords.length !== 0)
+//             await db
+//                 .insert(activityRecords)
+//                 .values(fetchedRecords)
+//                 .onConflictDoUpdate({
+//                     target: activityRecords.id,
+//                     set: {
+//                         activityId: sql`excluded.${activityRecords.activityId}`,
+//                         userActivityId: sql`excluded.${activityRecords.userActivityId}`,
+//                         duration: sql`excluded.${activityRecords.duration}`,
+//                         caloriesBurned: sql`excluded.${activityRecords.caloriesBurned}`,
+//                         time: sql`excluded.${activityRecords.time}`,
+//                         modifiedAt: sql`excluded.${activityRecords.modifiedAt}`,
+//                         deleted: sql`excluded.${activityRecords.deleted}`,
+//                     },
+//                 });
 
-        // Clear existing activity records after the last sync time
-        await db
-            .delete(activityRecords)
-            .where(gt(activityRecords.modifiedAt, lastSyncTime));
-
-        // Upsert synced activity records
-        if (fetchedRecords.length !== 0)
-            await db
-                .insert(activityRecords)
-                .values(fetchedRecords)
-                .onConflictDoUpdate({
-                    target: activityRecords.id,
-                    set: {
-                        activityId: sql`excluded.${activityRecords.activityId}`,
-                        userActivityId: sql`excluded.${activityRecords.userActivityId}`,
-                        duration: sql`excluded.${activityRecords.duration}`,
-                        caloriesBurned: sql`excluded.${activityRecords.caloriesBurned}`,
-                        time: sql`excluded.${activityRecords.time}`,
-                        modifiedAt: sql`excluded.${activityRecords.modifiedAt}`,
-                        deleted: sql`excluded.${activityRecords.deleted}`,
-                    },
-                });
-
-        // Update the last sync time
-        await syncTimeService.setLastSyncTimeSeconds(SyncEntity.ActivityRecords, updatedAtSeconds);
-    } catch (e) {
-        console.error('Failed to fetch last updated time for activity records:', e);
-    }
-    return loadActivityRecords(true);
-}
-
-const addActivityRecord = async (
-    record: Omit<InferInsertModel<typeof activityRecords>, 'id'>
-): Promise<ActivityRecord[]> => {
-    // Insert the new activity record into the local database
-    await db.insert(activityRecords).values({
-        ...record,
-        id: Crypto.randomUUID(),
-    });
-
-    // Sync activity records to ensure the data is synced
-    return await syncActivityRecords();
-}
-
-const deleteActivityRecord = async (id: string): Promise<ActivityRecord[]> => {
-    // Mark the activity record as deleted in the local database
-    await db.update(activityRecords)
-        .set({ deleted: true })
-        .where(eq(activityRecords.id, id));
-
-    // Sync activity records to ensure the data is synced
-    return await syncActivityRecords();
-}
+//         // Update the last sync time
+//         await syncTimeService.setLastSyncTimeSeconds(SyncEntityType.ActivityRecords, updatedAtSeconds);
+//     } catch (e) {
+//         console.error('Failed to fetch last updated time for activity records:', e);
+//     }
+//     return loadActivityRecords(true);
+// }
 
 export const activityRecordService = {
-    loadActivityRecords,
-    syncActivityRecords,
-    addActivityRecord,
-    deleteActivityRecord
-};
+    ...createSyncService<
+        typeof activityRecords,
+        ActivityRecord,
+        {
+            id: string;
+            activityId: string;
+            duration: number;
+            caloriesBurned: number;
+            time: string;
+            modifiedAt: string;
+            deleted: boolean;
+        }
+    >({
+        entityType: SyncEntityType.ActivityRecords,
+        table: activityRecords,
+        endpoint: '/activity-record',
+        collectionKey: 'activityRecords',
+        mapRemoteArrayToLocal: async (remote) => {
+            const activitiesIdSet = new Set((await db
+                .select({ id: activities.id })
+                .from(activities)
+                .where(
+                    inArray(activities.id, remote.map(record => record.id))
+                )
+            ).map(row => row.id));
+
+            return remote.map((record) => ({
+                ...record,
+                activityId: activitiesIdSet.has(record.activityId) ? record.activityId : null,
+                userActivityId: activitiesIdSet.has(record.activityId) ? null : record.activityId,
+                time: new Date(record.time).getTime(), // Convert to unix timestamp
+                modifiedAt: new Date(record.modifiedAt).getTime(), // Convert to unix timestamp
+            })) as ActivityRecord[]
+        },
+        mapLocalArrayToRemote: async (local) => local.map(({ userActivityId, ...record }) => ({
+            ...record,
+            activityId: record.activityId || userActivityId, // Use activityId or userActivityId
+            modifiedAt: new Date(record.modifiedAt).toISOString(), // Convert to ISO string for the server
+            time: new Date(record.time).toISOString(), // Convert to ISO string for the server
+        }) as {
+            id: string;
+            activityId: string;
+            duration: number;
+            caloriesBurned: number;
+            time: string;
+            modifiedAt: string;
+            deleted: boolean;
+        }),
+        primaryKey: activityRecords.id,
+        upsertSet: {
+            activityId: sql.raw(`excluded.${activityRecords.activityId.name}`),
+            userActivityId: sql.raw(`excluded.${activityRecords.userActivityId.name}`),
+            duration: sql.raw(`excluded.${activityRecords.duration.name}`),
+            caloriesBurned: sql.raw(`excluded.${activityRecords.caloriesBurned.name}`),
+            time: sql.raw(`excluded.${activityRecords.time.name}`),
+            modifiedAt: sql.raw(`excluded.${activityRecords.modifiedAt.name}`),
+            deleted: sql.raw(`excluded.${activityRecords.deleted.name}`),
+        },
+        customLoad: (includeDeleted: boolean) => loadActivityRecords(false, includeDeleted),
+    }),
+    loadToday: () => loadActivityRecords(true),
+}

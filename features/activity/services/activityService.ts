@@ -1,7 +1,7 @@
 import { db } from "@/db/db";
 import { activities } from "@/db/schema";
 import { api } from "@/shared/services/api";
-import { SyncEntity, syncTimeService } from "@/shared/services/syncTimeService";
+import { SyncEntityType, syncTimeService } from "@/shared/services/syncTimeService";
 import { Activity } from "../types/activity";
 
 const loadActivities = async (): Promise<Activity[]> => {
@@ -10,27 +10,24 @@ const loadActivities = async (): Promise<Activity[]> => {
 
 const syncActivities = async (): Promise<Activity[]> => {
     // Get the last sync time for activities in unix seconds
-    const lastSyncTime = await syncTimeService.getLastSyncTimeSeconds(SyncEntity.Activities);
+    const lastSyncTime = await syncTimeService.getLastSyncTimeMilliseconds(SyncEntityType.Activities);
 
     try {
         // Fetch activities last update time
-        const updatedAt = await api.request({
+        const updatedAt = new Date(await api.request({
             endpoint: '/activity/last-updated-at',
             method: 'GET',
-        });
-
-        // Convert updatedAt to seconds
-        const updatedAtSeconds = Math.floor(new Date(updatedAt).getTime() / 1000);
+        })).getTime();
 
         console.log("Last sync time:", lastSyncTime);
 
-        if (updatedAtSeconds < lastSyncTime)
+        if (updatedAt < lastSyncTime)
             return loadActivities(); // No new updates, return local data
 
         const fetchedActivities = await fetchActivities();
 
         // Update the last sync time
-        await syncTimeService.setLastSyncTimeSeconds(SyncEntity.Activities, updatedAtSeconds);
+        await syncTimeService.setLastSyncTimeMilliseconds(SyncEntityType.Activities, updatedAt);
 
         return fetchedActivities;
     } catch (e) {

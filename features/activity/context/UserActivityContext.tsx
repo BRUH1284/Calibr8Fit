@@ -20,19 +20,19 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
   }, []);
 
   const loadUserActivities = async () => {
-    const localActivities = await userActivityService.loadUserActivity();
+    const localActivities = await userActivityService.load();
     setUserActivities(localActivities);
     return localActivities;
   };
 
   const fetchUserActivities = async () => {
-    const fetchedActivities = await userActivityService.fetchUserActivity();
+    const fetchedActivities = await userActivityService.fetch();
     setUserActivities(fetchedActivities);
     return fetchedActivities;
   };
 
   const syncUserActivities = async () => {
-    const syncedActivities = await userActivityService.syncUserActivity();
+    const syncedActivities = await userActivityService.sync();
     setUserActivities(syncedActivities);
     return syncedActivities;
   };
@@ -41,7 +41,7 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
     activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>
   ): Promise<UserActivity[]> => {
     // Add a new user activity
-    const newActivities = await userActivityService.addUserActivity(activity);
+    const newActivities = await userActivityService.add(activity);
     // Update the state with the new activity
     setUserActivities(newActivities);
     return newActivities;

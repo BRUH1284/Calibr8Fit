@@ -1,39 +1,41 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export enum SyncEntity {
+export enum SyncEntityType {
     Activities = "activities",
     UserActivities = "user_activities",
     ActivityRecords = "activity_records",
 }
 
 export interface SyncTimeService {
-    getLastSyncTime(entity: SyncEntity): Promise<Date>;
-    setLastSyncTime(entity: SyncEntity, time: Date): Promise<void>;
-    getLastSyncTimeSeconds(entity: SyncEntity): Promise<number>;
-    setLastSyncTimeSeconds(entity: SyncEntity, time: number): Promise<void>;
-    clearLastSyncTime(entity: SyncEntity): Promise<void>;
+    getLastSyncTime(entity: SyncEntityType): Promise<Date>;
+    setLastSyncTime(entity: SyncEntityType, time: Date): Promise<void>;
+    getLastSyncTimeMilliseconds(entity: SyncEntityType): Promise<number>;
+    setLastSyncTimeMilliseconds(entity: SyncEntityType, time: number): Promise<void>;
+    clearLastSyncTime(entity: SyncEntityType): Promise<void>;
 }
 
+// TODO: refactor
+
 export const syncTimeService: SyncTimeService = {
-    async getLastSyncTime(entity: SyncEntity): Promise<Date> {
+    async getLastSyncTime(entity: SyncEntityType): Promise<Date> {
         const lastSyncTime = await AsyncStorage.getItem(`lastSyncTime_${entity}`);
         return lastSyncTime ? new Date(lastSyncTime) : new Date(0); // Default to epoch if not set
     },
 
-    async setLastSyncTime(entity: SyncEntity, time: Date): Promise<void> {
-        await AsyncStorage.setItem(`lastSyncTime_${entity}`, Math.floor(time.getTime() / 1000).toString());
+    async setLastSyncTime(entity: SyncEntityType, time: Date): Promise<void> {
+        await AsyncStorage.setItem(`lastSyncTime_${entity}`, time.getTime().toString());
     },
 
-    async clearLastSyncTime(entity: SyncEntity): Promise<void> {
+    async clearLastSyncTime(entity: SyncEntityType): Promise<void> {
         await AsyncStorage.removeItem(`lastSyncTime_${entity}`);
     },
 
-    async getLastSyncTimeSeconds(entity: SyncEntity): Promise<number> {
+    async getLastSyncTimeMilliseconds(entity: SyncEntityType): Promise<number> {
         const lastSyncTime = await AsyncStorage.getItem(`lastSyncTime_${entity}`);
         return lastSyncTime ? parseInt(lastSyncTime, 10) : 0; // Default to 0 if not set
     },
 
-    async setLastSyncTimeSeconds(entity: SyncEntity, time: number): Promise<void> {
+    async setLastSyncTimeMilliseconds(entity: SyncEntityType, time: number): Promise<void> {
         await AsyncStorage.setItem(`lastSyncTime_${entity}`, time.toString());
     }
 }

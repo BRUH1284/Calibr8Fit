@@ -196,7 +196,7 @@ export default function Overview() {
 
   const handleAddActivityRecord = () => {
     addActivityRecord({
-      time: Math.floor(Date.now() / 1000),
+      time: Date.now(),
       duration: createdActivityRecord.duration,
       caloriesBurned: createdActivityRecord.caloriesBurned,
       activityId: selectedActivity!.id,
