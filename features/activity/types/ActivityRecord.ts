@@ -9,7 +9,7 @@ export interface ActivityRecord {
     userActivity: UserActivity | null; // Optional reference to the user activity
     duration: number; // Unix timestamp in seconds
     caloriesBurned: number; // Calories burned during the activity
-    time: number; // Unix timestamp in seconds
-    modifiedAt: number; // Unix timestamp in seconds
+    time: number; // Unix timestamp in milliseconds
+    modifiedAt: number; // Unix timestamp in milliseconds
     deleted: boolean; // Indicates if the record is deleted
 }

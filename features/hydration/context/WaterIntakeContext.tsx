@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { waterIntakeService } from "../services/waterIntakeService";
-import { WaterIntakeRecord } from "../types/WaterIntakeRecors";
+import { WaterIntakeRecord } from "../types/WaterIntakeRecord";
 
 interface WaterIntakeContextProps {
   todayWaterIntakeInMl: number;

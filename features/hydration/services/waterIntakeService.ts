@@ -2,7 +2,7 @@ import { waterIntakeRecords } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
-import { WaterIntakeRecord } from "../types/WaterIntakeRecors";
+import { WaterIntakeRecord } from "../types/WaterIntakeRecord";
 
 export const waterIntakeService = {
     ...createSyncService<

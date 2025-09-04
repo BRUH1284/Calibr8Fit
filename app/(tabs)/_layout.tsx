@@ -4,6 +4,7 @@ import { UserActivityProvider } from "@/features/activity/context/UserActivityCo
 import { WaterIntakeProvider } from "@/features/hydration/context/WaterIntakeContext";
 import { ProfileProvider } from "@/features/profile/context/ProfileContext";
 import { RecommendationsProvider } from "@/features/profile/context/RecommendationsContext";
+import { WeightRecordProvider } from "@/features/weight/context/WeightRecordContext";
 import DynamicIcon, { IconItem } from "@/shared/components/DynamicIcon";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { PlatformPressable } from "@react-navigation/elements";
@@ -28,48 +29,50 @@ export default function TabLayout() {
           <UserActivityProvider>
             <ActivityRecordProvider>
               <WaterIntakeProvider>
-                <SafeAreaView
-                  edges={['top']}
-                  style={{ backgroundColor: theme.surface }} />
-                <Tabs
-                  screenOptions={({ route }) => {
-                    const config = screenConfigs[route.name];
-                    return {
-                      headerShown: false,
-                      tabBarShowLabel: false,
-                      tabBarActiveTintColor: theme.primary,
-                      tabBarInactiveTintColor: theme.onSurface,
-                      tabBarStyle: {
-                        backgroundColor: theme.surfaceContainer,
-                        borderTopWidth: 0,
-                        height: 64 + 24, // 64 for tab bar height + 24 for safe area
-                      },
-                      tabBarIconStyle: {
-                        height: '100%',
-                        alignContent: 'center',
-                        justifyContent: 'center',
-                      },
-                      tabBarButton: (props) =>
-                        <PlatformPressable
-                          {...props}
-                          android_ripple={{ color: 'transparent' }}
-                        />,
-                      tabBarIcon: (props) =>
-                        <DynamicIcon
-                          name={config.name}
-                          size={32}
-                          library={config.library}
-                          color={props.color}
-                        />,
-                    };
-                  }}
-                >
-                  <Tabs.Screen name="home" />
-                  <Tabs.Screen name="overview" />
-                  <Tabs.Screen name="statistics" />
-                  <Tabs.Screen name="messenger" />
-                  <Tabs.Screen name="profile" />
-                </Tabs>
+                <WeightRecordProvider>
+                  <SafeAreaView
+                    edges={['top']}
+                    style={{ backgroundColor: theme.surface }} />
+                  <Tabs
+                    screenOptions={({ route }) => {
+                      const config = screenConfigs[route.name];
+                      return {
+                        headerShown: false,
+                        tabBarShowLabel: false,
+                        tabBarActiveTintColor: theme.primary,
+                        tabBarInactiveTintColor: theme.onSurface,
+                        tabBarStyle: {
+                          backgroundColor: theme.surfaceContainer,
+                          borderTopWidth: 0,
+                          height: 64 + 24, // 64 for tab bar height + 24 for safe area
+                        },
+                        tabBarIconStyle: {
+                          height: '100%',
+                          alignContent: 'center',
+                          justifyContent: 'center',
+                        },
+                        tabBarButton: (props) =>
+                          <PlatformPressable
+                            {...props}
+                            android_ripple={{ color: 'transparent' }}
+                          />,
+                        tabBarIcon: (props) =>
+                          <DynamicIcon
+                            name={config.name}
+                            size={32}
+                            library={config.library}
+                            color={props.color}
+                          />,
+                      };
+                    }}
+                  >
+                    <Tabs.Screen name="home" />
+                    <Tabs.Screen name="overview" />
+                    <Tabs.Screen name="statistics" />
+                    <Tabs.Screen name="messenger" />
+                    <Tabs.Screen name="profile" />
+                  </Tabs>
+                </WeightRecordProvider>
               </WaterIntakeProvider>
             </ActivityRecordProvider>
           </UserActivityProvider>

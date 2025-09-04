@@ -4,6 +4,8 @@ import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeR
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
+import WeightRecordPopup from "@/features/weight/components/WeightRecordPopup";
+import { useWeightRecord } from "@/features/weight/hooks/useWeightRecord";
 import AppText from "@/shared/components/AppText";
 import Divider from "@/shared/components/Divider";
 import IconButton from "@/shared/components/IconButton";
@@ -65,10 +67,12 @@ export default function Overview() {
 
   const [showActivities, setShowActivities] = useState(false);
   const [showWaterIntake, setShowWaterIntake] = useState(false);
+  const [showWeightRecord, setShowWeightRecord] = useState(false);
 
   const { profileSettings } = useProfile();
   const { waterIntake, rmr } = useRecommendations();
   const { todayWaterIntakeInMl } = useWaterIntake();
+  const { weight } = useWeightRecord();
 
   const {
     todayRecords,
@@ -154,13 +158,13 @@ export default function Overview() {
           onPress={() => setShowWaterIntake(true)}
         />
         <IconTile
-          text={`${profileSettings?.weight} kg`}
+          text={`${weight} kg`}
           supportingText={`${profileSettings?.targetWeight} kg`}
           icon={{
             name: 'monitor-weight',
             library: 'MaterialIcons'
           }}
-          onPress={() => { }}
+          onPress={() => setShowWeightRecord(true)}
         />
       </View>
       <View
@@ -288,6 +292,10 @@ export default function Overview() {
       <WaterIntakeRecordPopup
         visible={showWaterIntake}
         onClose={() => setShowWaterIntake(false)}
+      />
+      <WeightRecordPopup
+        visible={showWeightRecord}
+        onClose={() => setShowWeightRecord(false)}
       />
     </View>
   );
