@@ -7,7 +7,7 @@ import IconButton from "./IconButton";
 
 type Props = {
   header?: string;
-  isVisible: boolean;
+  visible?: boolean;
   onClose: () => void;
   onBackPress: () => void;
   headerRightIcon?: { iconName: IconItem['name'], iconLibrary: IconItem['library'] };
@@ -18,7 +18,7 @@ type Props = {
 
 export default function Popup({
   header,
-  isVisible,
+  visible: isVisible = true,
   onClose,
   onBackPress,
   headerRightIcon,
@@ -33,12 +33,13 @@ export default function Popup({
       statusBarTranslucent={true}
       transparent={true}
       visible={isVisible}
+      onRequestClose={onClose}
       onDismiss={onClose}
       style={{
       }}
     >
       <Pressable
-        onTouchEnd={onClose}
+        onPress={onClose}
         style={{
           position: 'absolute',
           width: '100%',

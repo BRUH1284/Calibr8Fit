@@ -1,30 +1,17 @@
-import { useActivity } from "@/features/activity/hooks/useActivity";
+import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
-import { useUserActivity } from "@/features/activity/hooks/useUserActivity";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import AppText from "@/shared/components/AppText";
 import Divider from "@/shared/components/Divider";
-import { IconItem } from "@/shared/components/DynamicIcon";
 import IconButton from "@/shared/components/IconButton";
 import IconTile from "@/shared/components/IconTile";
-import Popup from "@/shared/components/Popup";
-import TextField from "@/shared/components/TextField";
-import TextRowAdd from "@/shared/components/TextRowAdd";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { AppTheme } from "@/styles/themes";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { FlatList, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import Animated, { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
-
-interface ActivityItem {
-  id: string;
-  userActivityId?: string;
-  majorHeading: string;
-  description: string;
-  metValue: number;
-}
 
 const PAGE_COUNT = 3;
 
@@ -74,151 +61,23 @@ export default function Overview() {
   const theme = useTheme();
   const styles = useStyles(theme);
 
-  const { profileSettings } = useProfile();
-  const { caloriesBurnedCalculator, waterIntake, rmr } = useRecommendations();
+  const [showActivities, setShowActivities] = useState(false);
 
-  // Hooks to access activities, user activities, and activity records
-  const { activities, syncActivities } = useActivity();
-  const { userActivities, syncUserActivities, addUserActivity } = useUserActivity();
+  const { profileSettings } = useProfile();
+  const { waterIntake, rmr } = useRecommendations();
+
   const {
     todayRecords,
     todayCaloriesBurned,
     syncActivityRecords,
-    addActivityRecord,
     deleteActivityRecord
   } = useActivityRecord();
-
-  // State for activity search query
-  const [activityQuery, setActivityQuery] = useState('');
-
-  // Memoized arranged activities based on the search query
-  const arrangedActivities = useMemo(() => {
-    const combined = [
-      ...activities,
-      ...userActivities.map((ua) => ({
-        ...ua,
-        userActivityId: ua.id
-      }))
-    ] as ActivityItem[];
-
-    return combined
-      .filter(({ description }) =>
-        description.toLowerCase().includes(activityQuery.toLowerCase())
-      )
-      .sort((a, b) => a.description.localeCompare(b.description));
-  }, [activities, userActivities, activityQuery]);
-
-  // State for creating a new user activity
-  const [createdActivity, setCreatedActivity] = useState({
-    description: '',
-    metValue: undefined as number | undefined,
-  });
-
-  const handleCreateActivity = () => {
-    addUserActivity({
-      majorHeading: 'Custom',
-      description: createdActivity.description,
-      metValue: createdActivity.metValue ? createdActivity.metValue : 0,
-    });
-
-    // Reset the created activity state
-    setCreatedActivity({
-      description: '',
-      metValue: undefined,
-    });
-
-    // Close the popup after creating the activity
-    handleOpenActivityPopup();
-  }
-
-  // State for adding activity record
-  const [selectedActivity, setSelectedActivity] = useState<ActivityItem | undefined>(undefined);
-  const [createdActivityRecord, setCreatedActivityRecord] = useState({
-    duration: 0,
-    caloriesBurned: 0
-  });
-
-  // State for popup management
-  const [popup, setPopup] = useState<'activity' | 'userActivity' | 'activityRecord'>();
-  const [onPopupBackPress, setOnPopupBackPress] = useState<() => void>(() => { });
-  const [popupHeader, setPopupHeader] = useState<string>();
-  const [popupHeaderRightIcon, setPopupHeaderRightIcon] =
-    useState<{ iconName: IconItem['name'], iconLibrary: IconItem['library'] }>();
-  const [onPopupRightButtonPress, setOnPopupRightButtonPress] = useState<() => void>(() => { });
-
-  // Function to open popup
-  const openPopup = useCallback((
-    type: typeof popup,
-    options: {
-      header?: string;
-      headerRightIcon?: { iconName: IconItem['name'], iconLibrary: IconItem['library'] };
-      onBackPress?: () => void;
-      onRightButtonPress?: () => void;
-    }
-  ) => {
-    setPopup(type);
-    setPopupHeader(options.header || '');
-    setPopupHeaderRightIcon(options.headerRightIcon);
-    setOnPopupBackPress(() => options.onBackPress || (() => setPopup(undefined)));
-    setOnPopupRightButtonPress(() => options.onRightButtonPress || (() => { }));
-  }, []);
-
-  // Function to handle opening activity popup
-  const handleOpenActivityPopup = useCallback(() => {
-    openPopup('activity', {
-      header: 'Activities',
-      headerRightIcon: {
-        iconName: 'pencil-plus',
-        iconLibrary: 'MaterialCommunityIcons',
-      },
-      onBackPress: () => setPopup(undefined),
-      onRightButtonPress: handleOpenUserActivityPopup,
-    });
-    setActivityQuery('');
-  }, []);
-
-  // Function to handle opening user activity popup
-  const handleOpenUserActivityPopup = useCallback(() => {
-    openPopup('userActivity', {
-      header: 'Create Activity',
-      onBackPress: handleOpenActivityPopup,
-    });
-  }, []);
-
-  // Function to handle opening activity record popup
-  const handleOpenActivityRecordPopup = useCallback((activity: ActivityItem) => {
-    setSelectedActivity(activity);
-    openPopup('activityRecord', {
-      header: 'Add Activity Record',
-      onBackPress: handleOpenActivityPopup,
-    });
-  }, []);
-
-  const handleAddActivityRecord = () => {
-    addActivityRecord({
-      time: Date.now(),
-      duration: createdActivityRecord.duration,
-      caloriesBurned: createdActivityRecord.caloriesBurned,
-      activityId: selectedActivity!.id,
-      userActivityId: selectedActivity!.userActivityId,
-    });
-
-    // Reset the activity record state
-    setCreatedActivityRecord({
-      duration: 0,
-      caloriesBurned: 0,
-    });
-
-    setPopup(undefined);
-  }
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await syncActivities();
-    await syncUserActivities();
     await syncActivityRecords();
     setRefreshing(false);
   };
@@ -264,15 +123,7 @@ export default function Overview() {
             name: 'fastfood',
             library: 'MaterialIcons'
           }}
-          onPress={() => {
-            setPopup('activity');
-            setOnPopupBackPress(() => setPopup(undefined));
-            setPopupHeader('Activities');
-            setPopupHeaderRightIcon({
-              iconName: 'pencil-plus',
-              iconLibrary: 'MaterialCommunityIcons'
-            });
-          }}
+          onPress={() => { }}
         />
         <IconTile
           style={{ flex: 1 }}
@@ -282,7 +133,7 @@ export default function Overview() {
             name: 'local-fire-department',
             library: 'MaterialIcons'
           }}
-          onPress={handleOpenActivityPopup}
+          onPress={() => setShowActivities(true)}
         />
       </View>
       <View style={{
@@ -296,7 +147,7 @@ export default function Overview() {
             name: 'water-drop',
             library: 'MaterialIcons'
           }}
-          onPress={() => setPopup('activity')}
+          onPress={() => { }}
         />
         <IconTile
           text={`${profileSettings?.weight} kg`}
@@ -305,7 +156,7 @@ export default function Overview() {
             name: 'monitor-weight',
             library: 'MaterialIcons'
           }}
-          onPress={() => setPopup('activity')}
+          onPress={() => { }}
         />
       </View>
       <View
@@ -339,7 +190,7 @@ export default function Overview() {
                   library: 'MaterialIcons',
                   color: theme.onSurface,
                 }}
-                onPress={handleOpenActivityPopup}
+                onPress={() => setShowActivities(true)}
                 style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }}
               />
 
@@ -426,111 +277,10 @@ export default function Overview() {
           ))}
         </View>
       </View>
-      <Popup
-        isVisible={!!popup}
-        onClose={() => setPopup(undefined)}
-        onBackPress={onPopupBackPress}
-        header={popupHeader}
-        headerRightIcon={popupHeaderRightIcon}
-        onHeaderRightIconPress={onPopupRightButtonPress}
-      >
-        {(popup === 'activity') && <>
-          <TextField
-            label={'Search'}
-            onChangeText={setActivityQuery}
-          />
-          <FlatList
-            initialNumToRender={10}
-            contentContainerStyle={{ gap: 16 }}
-            data={arrangedActivities}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TextRowAdd
-                label={item.description}
-                onPress={() => handleOpenActivityRecordPopup(item)}
-                iconText={item.metValue.toString()}
-              />
-            )}
-          />
-        </>}
-        {(popup === 'userActivity') &&
-          <>
-            <TextField
-              label={'Description'}
-              value={createdActivity.description}
-              onChangeText={(desc) => setCreatedActivity(({
-                ...createdActivity,
-                description: desc
-              }))}
-              multiline={true}
-              numberOfLines={8}
-            />
-            <TextField
-              type='number'
-              label={'MET Value'}
-              value={createdActivity.metValue?.toString()}
-              onChangeText={(value) => setCreatedActivity(({
-                ...createdActivity,
-                metValue: parseFloat(value)
-              }))}
-              suffix={`${caloriesBurnedCalculator(createdActivity.metValue || 0, 60)} kcal/h`}
-              minValue={0}
-            />
-            <IconButton
-              onPress={handleCreateActivity}
-              style={{ alignSelf: 'flex-end' }}
-              icon={{
-                name: 'check',
-                size: 32,
-                library: "MaterialIcons",
-              }}
-            />
-          </>
-        }
-        {(popup === 'activityRecord') &&
-          <>
-            <AppText
-              style={{
-                textAlign: 'center',
-              }}
-              type='title-medium'
-            >{selectedActivity!.description}</AppText>
-            <TextField
-              type='number'
-              numberControls={true}
-              label={'Minutes'}
-              value={(createdActivityRecord?.duration / 60).toString()}
-              onChangeText={(value) => setCreatedActivityRecord({
-                duration: parseFloat(value) * 60, // Convert minutes to seconds
-                caloriesBurned: caloriesBurnedCalculator(selectedActivity!.metValue, parseFloat(value))
-              })}
-              suffix='min'
-              minValue={0}
-            />
-            <TextField
-              type='number'
-              numberControls={true}
-              label={'Calories Burned'}
-              value={createdActivityRecord?.caloriesBurned.toString()}
-              onChangeText={(value) => setCreatedActivityRecord({
-                ...createdActivityRecord!,
-                caloriesBurned: parseFloat(value)
-              })}
-              suffix='kcal'
-              minValue={0}
-            />
-            <IconButton
-              onPress={handleAddActivityRecord}
-              style={{ alignSelf: 'flex-end' }}
-              icon={{
-                name: 'check',
-                size: 32,
-                library: "MaterialIcons",
-              }}
-            />
-          </>
-        }
-      </Popup>
+      <ActivitiesPopup
+        visible={showActivities}
+        onClose={() => setShowActivities(false)}
+      />
     </View>
   );
 }

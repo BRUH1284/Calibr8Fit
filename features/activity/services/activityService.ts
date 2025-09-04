@@ -19,8 +19,6 @@ const syncActivities = async (): Promise<Activity[]> => {
             method: 'GET',
         })).getTime();
 
-        console.log("Last sync time:", lastSyncTime);
-
         if (updatedAt < lastSyncTime)
             return loadActivities(); // No new updates, return local data
 
