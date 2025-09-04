@@ -1,3 +1,4 @@
+import ActivitiesListCard from "@/features/activity/components/ActivitiesListCard";
 import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
 import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
@@ -6,14 +7,11 @@ import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import WeightRecordPopup from "@/features/weight/components/WeightRecordPopup";
 import { useWeightRecord } from "@/features/weight/hooks/useWeightRecord";
-import AppText from "@/shared/components/AppText";
-import Divider from "@/shared/components/Divider";
-import IconButton from "@/shared/components/IconButton";
 import IconTile from "@/shared/components/IconTile";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { AppTheme } from "@/styles/themes";
 import React, { useCallback, useState } from "react";
-import { FlatList, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from "react-native";
+import { NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import Animated, { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
@@ -74,21 +72,7 @@ export default function Overview() {
   const { todayWaterIntakeInMl } = useWaterIntake();
   const { weight } = useWeightRecord();
 
-  const {
-    todayRecords,
-    todayCaloriesBurned,
-    syncActivityRecords,
-    deleteActivityRecord
-  } = useActivityRecord();
-
-  // Handle refresh
-  const [refreshing, setRefreshing] = useState(false);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await syncActivityRecords();
-    setRefreshing(false);
-  };
+  const { todayCaloriesBurned } = useActivityRecord();
 
   const progressArray = usePagerProgress(PAGE_COUNT);
 
@@ -149,6 +133,7 @@ export default function Overview() {
         gap: 8,
       }}>
         <IconTile
+          style={{ flex: 1 }}
           text={`${(todayWaterIntakeInMl / 1000).toFixed(2)} l`}
           supportingText={`${waterIntake} l`}
           icon={{
@@ -158,6 +143,7 @@ export default function Overview() {
           onPress={() => setShowWaterIntake(true)}
         />
         <IconTile
+          style={{ flex: 1 }}
           text={`${weight} kg`}
           supportingText={`${profileSettings?.targetWeight} kg`}
           icon={{
@@ -177,94 +163,10 @@ export default function Overview() {
           style={{ flex: 1 }}
           onPageScroll={(e) => { HandlePageScroll(e) }}
         >
-          <View key="1" style={[styles.cardPage, { gap: 16 }]}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <AppText
-                type='title-large'
-                style={{ flex: 1 }}
-              >Activities</AppText>
-              <AppText
-                type='label-large'
-              >{`${todayCaloriesBurned} kcal`}</AppText>
-              <IconButton
-                icon={{
-                  name: 'add',
-                  size: 36,
-                  library: 'MaterialIcons',
-                  color: theme.onSurface,
-                }}
-                onPress={() => setShowActivities(true)}
-                style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }}
-              />
-
-            </View>
-            <FlatList
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={handleRefresh}
-                />
-              }
-              data={todayRecords}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    marginBottom: 8,
-                    gap: 16
-                  }}
-                >
-                  <AppText
-                    style={{ flex: 1 }}
-                    type='title-medium'
-                  >{item.activity?.description || item.userActivity?.description}</AppText>
-                  <Divider
-                    orientation='vertical'
-                  />
-                  <View style={{ width: 48 }}>
-                    <AppText
-                      style={{ textAlign: 'center' }}
-                      type='title-medium'
-                    >{item.duration / 60}</AppText>
-                    <AppText
-                      style={{ textAlign: 'center' }}
-                      color='onSurfaceVariant'
-                      type='label-small'
-                    >Minutes</AppText>
-                  </View>
-                  <View style={{ width: 48 }}>
-                    <AppText
-                      style={{ textAlign: 'center' }}
-                      type='title-medium'
-                    >{item.caloriesBurned}</AppText>
-                    <AppText
-                      style={{ textAlign: 'center' }}
-                      color='onSurfaceVariant'
-                      type='label-small'
-                    >Kcal</AppText>
-                  </View>
-                  <IconButton icon={{
-                    name: 'delete-outline',
-                    library: "MaterialIcons",
-                    size: 32,
-                    color: theme.onSurface,
-                  }}
-                    style={{ backgroundColor: theme.tertiaryContainer }}
-                    onPress={() => {
-                      // Delete the activity record
-                      deleteActivityRecord(item.id);
-                    }}
-                  />
-                </View>
-              )}
-            >
-            </FlatList>
+          <View key="1" style={styles.cardPage}>
+            <ActivitiesListCard
+              onAddActivityPress={() => setShowActivities(true)}
+            />
           </View>
           <View key="2" style={styles.cardPage}></View>
           <View key="3" style={styles.cardPage}></View>
