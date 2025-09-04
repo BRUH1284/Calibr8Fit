@@ -25,6 +25,7 @@ type Props = {
   multiline?: boolean;
   numberOfLines?: number;
   numberControls?: boolean;
+  numberStep?: number;
 }
 
 const TextField = forwardRef<TextInput, Props>(({
@@ -46,6 +47,7 @@ const TextField = forwardRef<TextInput, Props>(({
   multiline = false,
   numberOfLines = 1,
   numberControls = false,
+  numberStep = 5,
 }, ref) => {
   const theme = useTheme();
 
@@ -157,7 +159,7 @@ const TextField = forwardRef<TextInput, Props>(({
                   library: 'MaterialIcons',
                   color: theme.onSurfaceVariant,
                 }}
-                onPress={() => handleChangeValue((valueState - 5).toString())}
+                onPress={() => handleChangeValue((valueState - numberStep).toString())}
               />
               <Divider
                 orientation='vertical'
@@ -172,7 +174,7 @@ const TextField = forwardRef<TextInput, Props>(({
                   library: 'MaterialIcons',
                   color: theme.onSurfaceVariant,
                 }}
-                onPress={() => handleChangeValue((valueState + 5).toString())}
+                onPress={() => handleChangeValue((valueState + numberStep).toString())}
               />
             </View>
           )}

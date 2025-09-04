@@ -26,3 +26,11 @@ export const activityRecords = sqliteTable("activity_records", {
     modifiedAt: int('modified_at').notNull(),
     deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
 });
+
+export const waterIntakeRecords = sqliteTable("water_intake_records", {
+    id: text().primaryKey().notNull(),
+    amountInMl: real('amount_in_ml').notNull(),
+    time: int('time').notNull(),
+    modifiedAt: int('modified_at').notNull(),
+    deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
+});

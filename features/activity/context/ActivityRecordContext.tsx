@@ -10,10 +10,11 @@ interface ActivityRecordContextProps {
   todayCaloriesBurned: number;
   addActivityRecord: (
     record: Omit<InferInsertModel<typeof activityRecords>, 'id' | 'modifiedAt'>
-  ) => Promise<ActivityRecord[]>;
-  deleteActivityRecord: (id: string) => Promise<ActivityRecord[]>;
-  syncActivityRecords: () => Promise<ActivityRecord[]>;
-  loadActivityRecords: (today?: boolean) => Promise<ActivityRecord[]>;
+  ) => Promise<void>;
+  deleteActivityRecord: (id: string) => Promise<void>;
+  syncActivityRecords: () => Promise<void>;
+  loadActivityRecords: () => Promise<ActivityRecord[]>;
+  loadTodayActivityRecords: () => Promise<ActivityRecord[]>;
 }
 
 export const ActivityRecordContext = createContext<ActivityRecordContextProps | null>(null);
@@ -37,7 +38,7 @@ export const ActivityRecordProvider = (
 
   const addActivityRecord = async (
     record: Omit<InferInsertModel<typeof activityRecords>, 'id' | 'modifiedAt'>
-  ): Promise<ActivityRecord[]> => {
+  ) => {
     setTodayRecords(prevRecords => [
       ...prevRecords,
       {
@@ -45,26 +46,29 @@ export const ActivityRecordProvider = (
         id: Crypto.randomUUID(),
       } as ActivityRecord
     ]);
-    const newRecords = await activityRecordService.add(record);
-    setTodayRecords(newRecords);
-    return newRecords;
+    await activityRecordService.add(record);
+    loadTodayActivityRecords();
   };
 
-  const deleteActivityRecord = async (id: string): Promise<ActivityRecord[]> => {
+  const deleteActivityRecord = async (id: string) => {
     setTodayRecords(prevRecords => prevRecords.filter(record => record.id !== id));
-    const updatedRecords = await activityRecordService.softDelete(id);
-    setTodayRecords(updatedRecords);
-    return updatedRecords;
+    await activityRecordService.softDelete(id);
+    loadTodayActivityRecords();
   };
 
   const syncActivityRecords = async () => {
-    const syncedRecords = await activityRecordService.sync();
-    setTodayRecords(syncedRecords);
-    return syncedRecords;
+    await activityRecordService.sync();
+    loadTodayActivityRecords();
   };
 
-  const loadActivityRecords = async (today: boolean = false) => {
-    const loadedRecords = today ? await activityRecordService.loadToday() : await activityRecordService.load();
+  const loadActivityRecords = async () => {
+    const loadedRecords = await activityRecordService.load();
+    return loadedRecords;
+  };
+
+  const loadTodayActivityRecords = async () => {
+    const loadedRecords = await activityRecordService.loadToday();
+    setTodayRecords(loadedRecords);
     return loadedRecords;
   };
 
@@ -75,7 +79,8 @@ export const ActivityRecordProvider = (
       addActivityRecord,
       deleteActivityRecord,
       syncActivityRecords,
-      loadActivityRecords
+      loadActivityRecords,
+      loadTodayActivityRecords
     }}>
       {children}
     </ActivityRecordContext.Provider>

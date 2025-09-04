@@ -4,6 +4,7 @@ export enum SyncEntityType {
     Activities = "activities",
     UserActivities = "user_activities",
     ActivityRecords = "activity_records",
+    WaterIntakeRecords = "water_intake_records",
 }
 
 export interface SyncTimeService {

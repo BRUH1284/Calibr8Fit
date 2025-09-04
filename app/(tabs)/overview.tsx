@@ -1,5 +1,7 @@
 import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
+import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
+import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import AppText from "@/shared/components/AppText";
@@ -62,9 +64,11 @@ export default function Overview() {
   const styles = useStyles(theme);
 
   const [showActivities, setShowActivities] = useState(false);
+  const [showWaterIntake, setShowWaterIntake] = useState(false);
 
   const { profileSettings } = useProfile();
   const { waterIntake, rmr } = useRecommendations();
+  const { todayWaterIntakeInMl } = useWaterIntake();
 
   const {
     todayRecords,
@@ -141,13 +145,13 @@ export default function Overview() {
         gap: 8,
       }}>
         <IconTile
-          text='Tile 3'
+          text={`${(todayWaterIntakeInMl / 1000).toFixed(2)} l`}
           supportingText={`${waterIntake} l`}
           icon={{
             name: 'water-drop',
             library: 'MaterialIcons'
           }}
-          onPress={() => { }}
+          onPress={() => setShowWaterIntake(true)}
         />
         <IconTile
           text={`${profileSettings?.weight} kg`}
@@ -280,6 +284,10 @@ export default function Overview() {
       <ActivitiesPopup
         visible={showActivities}
         onClose={() => setShowActivities(false)}
+      />
+      <WaterIntakeRecordPopup
+        visible={showWaterIntake}
+        onClose={() => setShowWaterIntake(false)}
       />
     </View>
   );

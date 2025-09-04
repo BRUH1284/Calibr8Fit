@@ -4,9 +4,9 @@ import { UserActivity } from "../types/userActivity";
 
 interface UserActivityContextProps {
   userActivities: UserActivity[];
-  fetchUserActivities: () => Promise<UserActivity[]>;
-  syncUserActivities: () => Promise<UserActivity[]>;
-  addUserActivity: (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>) => Promise<UserActivity[]>;
+  fetchUserActivities: () => Promise<void>;
+  syncUserActivities: () => Promise<void>;
+  addUserActivity: (activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>) => Promise<void>;
 }
 
 export const UserActivityContext = createContext<UserActivityContextProps | null>(null);
@@ -22,29 +22,23 @@ export const UserActivityProvider = ({ children }: { children: React.ReactNode }
   const loadUserActivities = async () => {
     const localActivities = await userActivityService.load();
     setUserActivities(localActivities);
-    return localActivities;
   };
 
   const fetchUserActivities = async () => {
-    const fetchedActivities = await userActivityService.fetch();
-    setUserActivities(fetchedActivities);
-    return fetchedActivities;
+    await userActivityService.fetch();
+    loadUserActivities();
   };
 
   const syncUserActivities = async () => {
-    const syncedActivities = await userActivityService.sync();
-    setUserActivities(syncedActivities);
-    return syncedActivities;
+    await userActivityService.sync();
+    loadUserActivities();
   };
 
   const addUserActivity = async (
     activity: Omit<UserActivity, 'id' | 'modifiedAt' | 'deleted'>
-  ): Promise<UserActivity[]> => {
-    // Add a new user activity
-    const newActivities = await userActivityService.add(activity);
-    // Update the state with the new activity
-    setUserActivities(newActivities);
-    return newActivities;
+  ) => {
+    await userActivityService.add(activity);
+    loadUserActivities();
   };
 
   return (

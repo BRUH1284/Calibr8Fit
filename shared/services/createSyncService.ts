@@ -1,5 +1,5 @@
 import { db } from "@/db/db";
-import { eq, gt, InferInsertModel } from "drizzle-orm";
+import { and, eq, gt, InferInsertModel, SQL } from "drizzle-orm";
 import { SQLiteTable } from "drizzle-orm/sqlite-core";
 import * as Crypto from 'expo-crypto';
 import { SyncConfig, SyncEntity } from "../types/sync";
@@ -23,15 +23,19 @@ export function createSyncService<
         customLoad
     } = config;
 
-    const load = async (includeDeleted: boolean = false): Promise<TLocal[]> => {
+    const load = async (includeDeleted: boolean = false, loadWhere: ((alias: TTable) => SQL) | undefined = undefined): Promise<TLocal[]> => {
         if (customLoad)
             return await customLoad(includeDeleted);
+
+        const base = eq((table as any).deleted, includeDeleted);
+        const extra = loadWhere ? loadWhere(table) : loadWhere;
+        const where = extra ? and(base, extra) : base;
 
         // Load data from the local database
         return await db
             .select()
             .from(table)
-            .where(eq((table as any).deleted, includeDeleted)) as unknown as TLocal[];
+            .where(where) as unknown as TLocal[];
     }
 
     const fetch = async (): Promise<TLocal[]> => {
@@ -51,7 +55,7 @@ export function createSyncService<
         }
     }
 
-    const add = async (data: Omit<InferInsertModel<TTable>, 'id' | 'modifiedAt'>): Promise<TLocal[]> => {
+    const add = async (data: Omit<InferInsertModel<TTable>, 'id' | 'modifiedAt'>) => {
         try {
             // Insert a new entry into the database
             await db
@@ -66,10 +70,10 @@ export function createSyncService<
             throw error;
         }
         // Sync to ensure the data is synced with the server
-        return await sync();
+        await sync();
     }
 
-    const softDelete = async (id: string): Promise<TLocal[]> => {
+    const softDelete = async (id: string) => {
         try {
             // Mark the entry as deleted in the local database
             await db
@@ -84,7 +88,7 @@ export function createSyncService<
             throw error;
         }
         // Sync to ensure the deletion is synced with the server
-        return await sync();
+        await sync();
     }
 
     const lastUpdatedAt = async () => new Date(
@@ -93,7 +97,7 @@ export function createSyncService<
             method: 'GET'
         })).getTime();
 
-    const sync = async (): Promise<TLocal[]> => {
+    const sync = async () => {
         // Get the last sync time for the entity table
         const lastSync = await syncTimeService.getLastSyncTimeMilliseconds(entityType);
         try {
@@ -108,7 +112,7 @@ export function createSyncService<
 
             // If no new updates on either side, return local data
             if (updatedAt === lastSync && modifiedEntities.length === 0)
-                return load();
+                return;
 
             // Sync modified entities with the server
             const response = (await api.request({
@@ -141,7 +145,6 @@ export function createSyncService<
             console.error('Failed to sync entities:', e);
             console.log(entityType)
         }
-        return load();
     }
 
     return { load, fetch, sync, add, softDelete };

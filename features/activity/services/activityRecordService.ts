@@ -2,10 +2,19 @@ import { db } from "@/db/db";
 import { activities, activityRecords, userActivities } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
-import { and, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { ActivityRecord } from "../types/ActivityRecord";
 
 const loadActivityRecords = async (today: boolean = false, includeDeleted: boolean = false): Promise<ActivityRecord[]> => {
+    const start = new Date().setHours(0, 0, 0, 0);
+    const end = start + 24 * 60 * 60 * 1000;
+
+    const predicates = [
+        eq(activityRecords.deleted, false),
+        gte(activityRecords.time, start),
+        lt(activityRecords.time, end)
+    ];
+
     return db
         .select({
             id: activityRecords.id,
@@ -34,12 +43,7 @@ const loadActivityRecords = async (today: boolean = false, includeDeleted: boole
         .from(activityRecords)
         .leftJoin(activities, eq(activityRecords.activityId, activities.id))
         .leftJoin(userActivities, eq(activityRecords.userActivityId, userActivities.id))
-        .where(
-            and(
-                eq(activityRecords.deleted, false),
-                lte(activityRecords.time, today ? new Date().setHours(0, 0, 0, 0) / 1000 : Number.MAX_SAFE_INTEGER)
-            )
-        )
+        .where(and(...predicates))
 }
 
 export const activityRecordService = {

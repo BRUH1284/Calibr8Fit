@@ -1,4 +1,4 @@
-import { Table } from "drizzle-orm";
+import { SQL, Table } from "drizzle-orm";
 import { SyncEntityType } from "../services/syncTimeService";
 
 export type SyncEntity = {
@@ -25,5 +25,5 @@ export type SyncConfig<
     upsertSet: UpsertSet<Omit<TTable["$inferInsert"], 'id'>>;
     mapRemoteArrayToLocal?: (remote: TRemote[]) => Promise<TLocal[]>;
     mapLocalArrayToRemote?: (local: TLocal[]) => Promise<TRemote[]>;
-    customLoad?: (includeDeleted: boolean) => Promise<TLocal[]>;
+    customLoad?: (includeDeleted: boolean, loadWhere?: SQL | ((alias: TTable) => SQL)) => Promise<TLocal[]>;
 };
