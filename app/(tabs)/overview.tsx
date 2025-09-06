@@ -3,6 +3,7 @@ import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
 import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
+import FoodPopup from "@/features/nutrition/components/FoodPopup";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import WeightRecordPopup from "@/features/weight/components/WeightRecordPopup";
@@ -64,6 +65,7 @@ export default function Overview() {
   const styles = useStyles(theme);
 
   const [showActivities, setShowActivities] = useState(false);
+  const [showFood, setShowFood] = useState(false);
   const [showWaterIntake, setShowWaterIntake] = useState(false);
   const [showWeightRecord, setShowWeightRecord] = useState(false);
 
@@ -110,12 +112,12 @@ export default function Overview() {
         <IconTile
           style={{ flex: 1 }}
           text='Tile 1'
-          supportingText='Tap'
+          supportingText={`${rmr} kcal`}
           icon={{
             name: 'fastfood',
             library: 'MaterialIcons'
           }}
-          onPress={() => { }}
+          onPress={() => setShowFood(true)}
         />
         <IconTile
           style={{ flex: 1 }}
@@ -187,6 +189,10 @@ export default function Overview() {
           ))}
         </View>
       </View>
+      <FoodPopup
+        visible={showFood}
+        onClose={() => setShowFood(false)}
+      />
       <ActivitiesPopup
         visible={showActivities}
         onClose={() => setShowActivities(false)}

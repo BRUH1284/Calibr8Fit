@@ -7,6 +7,7 @@ import m0002 from './0002_perfect_omega_sentinel.sql';
 import m0003 from './0003_nifty_big_bertha.sql';
 import m0004 from './0004_massive_leo.sql';
 import m0005 from './0005_flowery_proemial_gods.sql';
+import m0006 from './0006_romantic_expediter.sql';
 
   export default {
     journal,
@@ -16,7 +17,8 @@ m0001,
 m0002,
 m0003,
 m0004,
-m0005
+m0005,
+m0006
     }
   }
   

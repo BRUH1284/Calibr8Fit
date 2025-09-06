@@ -42,3 +42,108 @@ export const weightRecords = sqliteTable("weight_records", {
     modifiedAt: int('modified_at').notNull(),
     deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
 });
+
+export const foods = sqliteTable("foods", {
+    id: text().primaryKey().notNull(),
+
+    // Basic info
+    name: text().notNull(),
+    caloricValue: real("caloric_value").notNull(),
+
+    // Macronutrients (per 100g)
+    fat: real("fat").notNull(),
+    saturatedFats: real("saturated_fats").notNull(),
+    monounsaturatedFats: real("monounsaturated_fats").notNull(),
+    polyunsaturatedFats: real("polyunsaturated_fats").notNull(),
+    carbohydrates: real("carbohydrates").notNull(),
+    sugars: real("sugars").notNull(),
+    protein: real("protein").notNull(),
+    dietaryFiber: real("dietary_fiber").notNull(),
+    water: real("water").notNull(),
+
+    // Other nutrients
+    cholesterol: real("cholesterol").notNull(),
+    sodium: real("sodium").notNull(),
+
+    // Vitamins (per 100g)
+    vitaminA: real("vitamin_a").notNull(),
+    vitaminB1Thiamine: real("vitamin_b1_thiamine").notNull(),
+    vitaminB11FolicAcid: real("vitamin_b11_folic_acid").notNull(),
+    vitaminB12: real("vitamin_b12").notNull(),
+    vitaminB2Riboflavin: real("vitamin_b2_riboflavin").notNull(),
+    vitaminB3Niacin: real("vitamin_b3_niacin").notNull(),
+    vitaminB5PantothenicAcid: real("vitamin_b5_pantothenic_acid").notNull(),
+    vitaminB6: real("vitamin_b6").notNull(),
+    vitaminC: real("vitamin_c").notNull(),
+    vitaminD: real("vitamin_d").notNull(),
+    vitaminE: real("vitamin_e").notNull(),
+    vitaminK: real("vitamin_k").notNull(),
+
+    // Minerals (mg/100g)
+    calcium: real("calcium").notNull(),
+    copper: real("copper").notNull(),
+    iron: real("iron").notNull(),
+    magnesium: real("magnesium").notNull(),
+    manganese: real("manganese").notNull(),
+    phosphorus: real("phosphorus").notNull(),
+    potassium: real("potassium").notNull(),
+    selenium: real("selenium").notNull(),
+    zinc: real("zinc").notNull(),
+
+    // Quality metric
+    nutritionDensity: real("nutrition_density").notNull(),
+});
+
+export const userFoods = sqliteTable("user_foods", {
+    id: text().primaryKey().notNull(),
+
+    // Basic info
+    name: text().notNull(),
+    caloricValue: real("caloric_value").notNull(),
+
+    // Macronutrients (per 100g)
+    fat: real("fat").notNull(),
+    saturatedFats: real("saturated_fats").notNull(),
+    monounsaturatedFats: real("monounsaturated_fats").notNull(),
+    polyunsaturatedFats: real("polyunsaturated_fats").notNull(),
+    carbohydrates: real("carbohydrates").notNull(),
+    sugars: real("sugars").notNull(),
+    protein: real("protein").notNull(),
+    dietaryFiber: real("dietary_fiber").notNull(),
+    water: real("water").notNull(),
+
+    // Other nutrients
+    cholesterol: real("cholesterol").notNull(),
+    sodium: real("sodium").notNull(),
+
+    // Vitamins (per 100g)
+    vitaminA: real("vitamin_a").notNull(),
+    vitaminB1Thiamine: real("vitamin_b1_thiamine").notNull(),
+    vitaminB11FolicAcid: real("vitamin_b11_folic_acid").notNull(),
+    vitaminB12: real("vitamin_b12").notNull(),
+    vitaminB2Riboflavin: real("vitamin_b2_riboflavin").notNull(),
+    vitaminB3Niacin: real("vitamin_b3_niacin").notNull(),
+    vitaminB5PantothenicAcid: real("vitamin_b5_pantothenic_acid").notNull(),
+    vitaminB6: real("vitamin_b6").notNull(),
+    vitaminC: real("vitamin_c").notNull(),
+    vitaminD: real("vitamin_d").notNull(),
+    vitaminE: real("vitamin_e").notNull(),
+    vitaminK: real("vitamin_k").notNull(),
+
+    // Minerals (mg/100g)
+    calcium: real("calcium").notNull(),
+    copper: real("copper").notNull(),
+    iron: real("iron").notNull(),
+    magnesium: real("magnesium").notNull(),
+    manganese: real("manganese").notNull(),
+    phosphorus: real("phosphorus").notNull(),
+    potassium: real("potassium").notNull(),
+    selenium: real("selenium").notNull(),
+    zinc: real("zinc").notNull(),
+
+    // Quality metric
+    nutritionDensity: real("nutrition_density").notNull(),
+
+    modifiedAt: int('modified_at').notNull(),
+    deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
+});
