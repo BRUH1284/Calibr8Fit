@@ -35,8 +35,6 @@ export default function Popup({
       visible={isVisible}
       onRequestClose={onClose}
       onDismiss={onClose}
-      style={{
-      }}
     >
       <Pressable
         onPress={onClose}

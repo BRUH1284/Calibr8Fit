@@ -1,12 +1,16 @@
 import { IconItem } from "@/shared/components/DynamicIcon";
-import IconButton from "@/shared/components/IconButton";
 import Popup from "@/shared/components/Popup";
+import TextButton from "@/shared/components/TextButton";
 import TextField from "@/shared/components/TextField";
 import TextRowAdd from "@/shared/components/TextRowAdd";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, RefreshControl } from "react-native";
+import { useTheme } from "@/shared/hooks/useTheme";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import PagerView from "react-native-pager-view";
 import { useFood } from "../hooks/useFood";
 import { useUserFood } from "../hooks/useUserFood";
+import FoodPopupCreateFoodContent from "./FoodPopupCreateFoodContent";
+import FoodPopupCreateMealContent from "./FoodPopupCreateMealContent";
 
 interface FoodItem {
   id: string;
@@ -21,14 +25,18 @@ type Props = {
 };
 
 export default function FoodPopup({ visible, onClose }: Props) {
-  const [mode, setMode] = useState<'food' | 'createFood' | 'foodRecord'>('food');
+  const theme = useTheme();
+
+  const [mode, setMode] = useState<'food' | 'creation' | 'mealRecord'>('food');
+  const [currentPage, setCurrentPage] = useState(0);
+  const pagerRef = useRef<PagerView>(null);
   const [header, setHeader] = useState<string>();
   const [headerRightIcon, setHeaderRightIcon] =
     useState<{ iconName: IconItem['name'], iconLibrary: IconItem['library'] }>();
   const [onRightButtonPress, setOnRightButtonPress] = useState<() => void>(() => { });
 
   const { foods, syncFoods } = useFood();
-  const { userFoods, syncUserFoods, addUserFood } = useUserFood();
+  const { userFoods, syncUserFoods } = useUserFood();
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -43,61 +51,23 @@ export default function FoodPopup({ visible, onClose }: Props) {
   // State for food search query
   const [foodQuery, setFoodQuery] = useState('');
 
-  // Memoized arranged foods based on the search query
-  const arrangedFoods = useMemo(() => {
-    const combined = [
+  const combinedFoods = useMemo(() => {
+    return [
       ...foods,
       ...userFoods.map((uf) => ({
         ...uf,
-        userFoodId: uf.id
+        userFoodId: uf.id,
       }))
     ] as FoodItem[];
-
-    return combined
-      .filter(({ name }) =>
+  }, [foods, userFoods]);
+  // Memoized arranged foods based on the search query
+  const arrangedFoods = useMemo(() => {
+    return combinedFoods
+      .filter(({ name, id }) =>
         name.toLowerCase().includes(foodQuery.toLowerCase())
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [foods, userFoods, foodQuery]);
-
-  // State for adding user food
-  const [createdFood, setCreatedFood] = useState({
-    name: '',
-    caloricValue: 0,
-    fat: 0,
-    saturatedFats: 0,
-    monounsaturatedFats: 0,
-    polyunsaturatedFats: 0,
-    carbohydrates: 0,
-    sugars: 0,
-    protein: 0,
-    dietaryFiber: 0,
-    water: 0,
-    cholesterol: 0,
-    sodium: 0,
-    vitaminA: 0,
-    vitaminB1Thiamine: 0,
-    vitaminB11FolicAcid: 0,
-    vitaminB12: 0,
-    vitaminB2Riboflavin: 0,
-    vitaminB3Niacin: 0,
-    vitaminB5PantothenicAcid: 0,
-    vitaminB6: 0,
-    vitaminC: 0,
-    vitaminD: 0,
-    vitaminE: 0,
-    vitaminK: 0,
-    calcium: 0,
-    copper: 0,
-    iron: 0,
-    magnesium: 0,
-    manganese: 0,
-    phosphorus: 0,
-    potassium: 0,
-    selenium: 0,
-    zinc: 0,
-    nutritionDensity: 0,
-  });
+  }, [combinedFoods, foodQuery]);
 
   const setFoodMode = useCallback(() => {
     setMode('food');
@@ -106,101 +76,18 @@ export default function FoodPopup({ visible, onClose }: Props) {
       iconName: 'pencil-plus',
       iconLibrary: 'MaterialCommunityIcons'
     });
-    setOnRightButtonPress(() => setFoodCreationMode);
+    setOnRightButtonPress(() => setCreationMode);
   }, []);
 
-  const setFoodCreationMode = useCallback(() => {
-    setMode('createFood');
-    setHeader('Create Food');
+  const setCreationMode = useCallback(() => {
+    setMode('creation');
+    setHeader('Create Food or Meal');
     setHeaderRightIcon(undefined);
   }, []);
 
-  const handleCreateFood = useCallback(() => {
-    addUserFood({
-      name: createdFood.name,
-      caloricValue: createdFood.caloricValue ? createdFood.caloricValue : 0,
-
-      fat: 0,
-      saturatedFats: 0,
-      monounsaturatedFats: 0,
-      polyunsaturatedFats: 0,
-      carbohydrates: 0,
-      sugars: 0,
-      protein: 0,
-      dietaryFiber: 0,
-      water: 0,
-      cholesterol: 0,
-      sodium: 0,
-      vitaminA: 0,
-      vitaminB1Thiamine: 0,
-      vitaminB11FolicAcid: 0,
-      vitaminB12: 0,
-      vitaminB2Riboflavin: 0,
-      vitaminB3Niacin: 0,
-      vitaminB5PantothenicAcid: 0,
-      vitaminB6: 0,
-      vitaminC: 0,
-      vitaminD: 0,
-      vitaminE: 0,
-      vitaminK: 0,
-      calcium: 0,
-      copper: 0,
-      iron: 0,
-      magnesium: 0,
-      manganese: 0,
-      phosphorus: 0,
-      potassium: 0,
-      selenium: 0,
-      zinc: 0,
-      nutritionDensity: 0,
-    });
-
-    // Reset the created food state
-    setCreatedFood({
-      name: '',
-      caloricValue: 0,
-      fat: 0,
-      saturatedFats: 0,
-      monounsaturatedFats: 0,
-      polyunsaturatedFats: 0,
-      carbohydrates: 0,
-      sugars: 0,
-      protein: 0,
-      dietaryFiber: 0,
-      water: 0,
-      cholesterol: 0,
-      sodium: 0,
-      vitaminA: 0,
-      vitaminB1Thiamine: 0,
-      vitaminB11FolicAcid: 0,
-      vitaminB12: 0,
-      vitaminB2Riboflavin: 0,
-      vitaminB3Niacin: 0,
-      vitaminB5PantothenicAcid: 0,
-      vitaminB6: 0,
-      vitaminC: 0,
-      vitaminD: 0,
-      vitaminE: 0,
-      vitaminK: 0,
-      calcium: 0,
-      copper: 0,
-      iron: 0,
-      magnesium: 0,
-      manganese: 0,
-      phosphorus: 0,
-      potassium: 0,
-      selenium: 0,
-      zinc: 0,
-      nutritionDensity: 0,
-    });
-
-    setFoodMode();
-  }, [createdFood]);
-
   useEffect(() => {
-    if (visible) {
+    if (visible)
       setFoodMode();
-    }
   }, [visible]);
 
   return (
@@ -240,40 +127,46 @@ export default function FoodPopup({ visible, onClose }: Props) {
           />
         </>
       }
-      {(mode === 'createFood') &&
+      {(mode === 'creation') &&
         <>
-          <TextField
-            label={'Name'}
-            value={createdFood.name}
-            onChangeText={(name) => setCreatedFood(({
-              ...createdFood,
-              name: name
-            }))}
-            multiline={true}
-            numberOfLines={8}
-          />
-          <TextField
-            type='number'
-            label={'Caloric Value'}
-            value={createdFood.caloricValue?.toString()}
-            onChangeText={(value) => setCreatedFood(({
-              ...createdFood,
-              caloricValue: parseFloat(value)
-            }))}
-            suffix={`kcal`}
-            minValue={0}
-          />
-          <IconButton
-            onPress={handleCreateFood}
-            style={{ alignSelf: 'flex-end' }}
-            icon={{
-              name: 'check',
-              size: 32,
-              library: "MaterialIcons",
-            }}
-          />
-        </>
-      }
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 16
+            }}>
+            <TextButton
+              label='Food'
+              variant={currentPage === 0 ? 'filled' : 'toggle'}
+              onPress={() => pagerRef.current?.setPage(0)}
+              style={styles.toggleButton}
+            />
+            <TextButton
+              label='Meal'
+              variant={currentPage === 1 ? 'filled' : 'toggle'}
+              onPress={() => pagerRef.current?.setPage(1)}
+              style={styles.toggleButton}
+            />
+          </View>
+          <PagerView
+            ref={pagerRef}
+            style={{ height: '91%', marginHorizontal: -16 }}
+            onPageSelected={e => setCurrentPage(e.nativeEvent.position)}>
+            <View key="1" style={{ gap: 16, paddingHorizontal: 16 }}>
+              <FoodPopupCreateFoodContent onDone={() => { }} />
+            </View>
+            <View key="2" style={{ gap: 16, paddingHorizontal: 16 }}>
+              <FoodPopupCreateMealContent onDone={() => { }} />
+            </View>
+          </PagerView>
+        </>}
     </Popup>
   );
 }
+
+const styles = StyleSheet.create({
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 4,
+  },
+})

@@ -18,8 +18,6 @@ export interface SyncTimeService {
     clearLastSyncTime(entity: SyncEntityType): Promise<void>;
 }
 
-// TODO: refactor
-
 export const syncTimeService: SyncTimeService = {
     async getLastSyncTime(entity: SyncEntityType): Promise<Date> {
         const lastSyncTime = await AsyncStorage.getItem(`lastSyncTime_${entity}`);

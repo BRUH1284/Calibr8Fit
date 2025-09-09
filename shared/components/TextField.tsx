@@ -1,6 +1,6 @@
 import { Typography } from "@/styles/typography";
 import { forwardRef, useCallback, useEffect, useState } from "react";
-import { KeyboardTypeOptions, TextInput, View } from "react-native";
+import { KeyboardTypeOptions, StyleProp, TextInput, View, ViewStyle } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import Divider from "./Divider";
@@ -26,6 +26,7 @@ type Props = {
   numberOfLines?: number;
   numberControls?: boolean;
   numberStep?: number;
+  style?: StyleProp<ViewStyle>
 }
 
 const TextField = forwardRef<TextInput, Props>(({
@@ -48,6 +49,7 @@ const TextField = forwardRef<TextInput, Props>(({
   numberOfLines = 1,
   numberControls = false,
   numberStep = 5,
+  style
 }, ref) => {
   const theme = useTheme();
 
@@ -86,10 +88,11 @@ const TextField = forwardRef<TextInput, Props>(({
   }, [value]);
 
   return (
-    <View style={{
+    <View style={[{
       alignSelf: 'stretch',
       gap: 4,
-    }}>
+      paddingTop: 4,
+    }, style]}>
       <View
         style={{
           borderWidth: isFocused ? 3 : 1,
