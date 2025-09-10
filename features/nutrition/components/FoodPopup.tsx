@@ -8,13 +8,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import { useFood } from "../hooks/useFood";
+import { useMeal } from "../hooks/useMeal";
 import { useUserFood } from "../hooks/useUserFood";
+import { calcCaloricValue } from "../types/meal";
 import FoodPopupCreateFoodContent from "./FoodPopupCreateFoodContent";
 import FoodPopupCreateMealContent from "./FoodPopupCreateMealContent";
 
-interface FoodItem {
+interface FoodMealItem {
   id: string;
   userFoodId?: string;
+  userMealId?: string;
   name: string;
   caloricValue: number;
 }
@@ -37,6 +40,7 @@ export default function FoodPopup({ visible, onClose }: Props) {
 
   const { foods, syncFoods } = useFood();
   const { userFoods, syncUserFoods } = useUserFood();
+  const { meals } = useMeal();
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -52,16 +56,24 @@ export default function FoodPopup({ visible, onClose }: Props) {
   const [foodQuery, setFoodQuery] = useState('');
 
   const combinedFoods = useMemo(() => {
+    //console.log(meals[0].mealIngredients.reduce((sum, item) => sum + (item.food ?? item.userFood)!.caloricValue * item.quantity / 100, 0));
     return [
       ...foods,
       ...userFoods.map((uf) => ({
         ...uf,
         userFoodId: uf.id,
+      })),
+      ...meals.map((m) => ({
+        ...m,
+        userMealId: m.id,
+        //caloricValue: 123,
+        caloricValue: calcCaloricValue(m),
       }))
-    ] as FoodItem[];
-  }, [foods, userFoods]);
+    ] as FoodMealItem[];
+  }, [foods, userFoods, meals]);
   // Memoized arranged foods based on the search query
-  const arrangedFoods = useMemo(() => {
+  const arrangedFoodsAndMeals = useMemo(() => {
+    //console.log(combinedFoods);
     return combinedFoods
       .filter(({ name, id }) =>
         name.toLowerCase().includes(foodQuery.toLowerCase())
@@ -115,13 +127,13 @@ export default function FoodPopup({ visible, onClose }: Props) {
             }
             initialNumToRender={10}
             contentContainerStyle={{ gap: 16 }}
-            data={arrangedFoods}
+            data={arrangedFoodsAndMeals}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TextRowAdd
                 label={item.name}
                 onPress={() => { }}
-                iconText={item.caloricValue.toString()}
+                iconText={`${item.caloricValue.toString()} kcal`}
               />
             )}
           />

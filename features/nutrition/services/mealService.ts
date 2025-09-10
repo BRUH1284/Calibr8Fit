@@ -2,9 +2,9 @@ import { db } from "@/db/db";
 import { foods, userFoods, userMealIngredients, userMeals } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
-import { gt, inArray, InferInsertModel, sql } from "drizzle-orm";
+import { eq, gt, inArray, InferInsertModel, sql } from "drizzle-orm";
 import * as Crypto from 'expo-crypto';
-import { AddMeal, Meal } from "../types/meal";
+import { AddMeal, Meal, MealIngredient } from "../types/meal";
 
 const upsert = async (data: Meal[]) => {
     // Select all food IDs and make a Set
@@ -27,20 +27,12 @@ const upsert = async (data: Meal[]) => {
     await db
         .insert(userMealIngredients)
         .values(data.flatMap(meal => meal.mealIngredients.map(ingredient => ({
-            id: ingredient.id,
+            id: Crypto.randomUUID(),
             userMealId: meal.id,
             foodId: foodIdsSet.has(ingredient.foodId!) ? ingredient.foodId : undefined,
             userFoodId: userFoodIdsSet.has(ingredient.foodId!) ? ingredient.foodId : undefined,
             quantity: ingredient.quantity,
-        }))))
-        .onConflictDoUpdate({
-            target: userMealIngredients.id,
-            set: {
-                foodId: sql.raw(`excluded.${userMealIngredients.foodId.name}`),
-                userFoodId: sql.raw(`excluded.${userMealIngredients.userFoodId.name}`),
-                quantity: sql.raw(`excluded.${userMealIngredients.quantity.name}`),
-            }
-        });
+        }))));
 
     // Upsert meals
     await db
@@ -79,6 +71,74 @@ const getModifiedSince = async (since: number): Promise<Meal[]> => {
         .where(inArray(userMealIngredients.userMealId, mealIds))
 
     const ingredientsByMealId: Record<string, typeof ingredients> = {};
+    for (const ingredient of ingredients) {
+        if (!ingredientsByMealId[ingredient.userMealId])
+            ingredientsByMealId[ingredient.userMealId] = [];
+        ingredientsByMealId[ingredient.userMealId].push(ingredient);
+    }
+
+    return meals.map(meal => ({
+        ...meal,
+        mealIngredients: (ingredientsByMealId[meal.id] || []).map(ingredient => ({
+            ...ingredient,
+            foodId: ingredient.foodId === null ? undefined : ingredient.foodId,
+            userFoodId: ingredient.userFoodId === null ? undefined : ingredient.userFoodId,
+        })),
+    }));
+}
+
+const add = async (meal: AddMeal) => {
+    try {
+        const mealId = Crypto.randomUUID();
+
+        // Insert meal ingredients
+        await db
+            .insert(userMealIngredients)
+            .values(meal.mealIngredients.map(ingredient => ({
+                id: Crypto.randomUUID(),
+                userMealId: mealId,
+                foodId: ingredient.foodId,
+                userFoodId: ingredient.userFoodId,
+                quantity: ingredient.quantity,
+            })));
+
+        // Insert meal
+        await db
+            .insert(userMeals)
+            .values({
+                id: mealId,
+                name: meal.name,
+                notes: meal.notes,
+                modifiedAt: Date.now(),
+            } as InferInsertModel<typeof userMeals>);
+    } catch (error) {
+        console.error("Failed to insert local data:", error);
+        throw error;
+    }
+    await syncService.sync();
+}
+
+const load = async (): Promise<Meal[]> => {
+    const meals = await db
+        .select()
+        .from(userMeals);
+
+    if (meals.length === 0) return [];
+
+    const mealIds = meals.map(meal => meal.id);
+    const ingredients = (await db
+        .select()
+        .from(userMealIngredients)
+        .where(inArray(userMealIngredients.userMealId, mealIds))
+        .leftJoin(foods, eq(userMealIngredients.foodId, foods.id))
+        .leftJoin(userFoods, eq(userMealIngredients.userFoodId, userFoods.id)))
+        .map(({ user_meal_ingredients, foods, user_foods }) => ({
+            ...user_meal_ingredients,
+            food: foods,
+            userFood: user_foods,
+        })) as MealIngredient[];
+
+    const ingredientsByMealId: Record<string, MealIngredient[]> = {};
     for (const ingredient of ingredients) {
         if (!ingredientsByMealId[ingredient.userMealId])
             ingredientsByMealId[ingredient.userMealId] = [];
@@ -145,34 +205,6 @@ const syncService = createSyncService<
 
 export const mealService = {
     ...syncService,
-    add: async (meal: AddMeal) => {
-        try {
-            const mealId = Crypto.randomUUID();
-
-            // Insert meal ingredients
-            await db
-                .insert(userMealIngredients)
-                .values(meal.mealIngredients.map(ingredient => ({
-                    id: Crypto.randomUUID(),
-                    userMealId: mealId,
-                    foodId: ingredient.foodId,
-                    userFoodId: ingredient.userFoodId,
-                    quantity: ingredient.quantity,
-                })));
-
-            // Insert meal
-            await db
-                .insert(userMeals)
-                .values({
-                    id: mealId,
-                    name: meal.name,
-                    notes: meal.notes,
-                    modifiedAt: Date.now(),
-                } as InferInsertModel<typeof userMeals>);
-        } catch (error) {
-            console.error("Failed to insert local data:", error);
-            throw error;
-        }
-        await syncService.sync();
-    }
+    add,
+    load
 }
