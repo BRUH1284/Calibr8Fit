@@ -26,4 +26,6 @@ export type SyncConfig<
     mapRemoteArrayToLocal?: (remote: TRemote[]) => Promise<TLocal[]>;
     mapLocalArrayToRemote?: (local: TLocal[]) => Promise<TRemote[]>;
     customLoad?: (includeDeleted: boolean, loadWhere?: SQL | ((alias: TTable) => SQL)) => Promise<TLocal[]>;
+    customUpsert?: (data: TLocal[]) => Promise<void>;
+    customModifiedSince?: (since: number) => Promise<TLocal[]>;
 };

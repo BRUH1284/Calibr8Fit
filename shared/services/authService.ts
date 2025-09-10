@@ -1,6 +1,8 @@
+import { clearAllTables } from '@/db/db';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from "./api";
 import { authManager } from './authManager';
+import { syncTimeService } from './syncTimeService';
 
 const isRegistered = async () => {
     return !!(await AsyncStorage.getItem('registration_state'));
@@ -47,6 +49,8 @@ const login = async (username: string, password: string) => {
 
 const logout = async () => {
     authManager.clearTokens();
+    clearAllTables();
+    syncTimeService.clearAllLastSyncTimes();
     await setRegistered(false);
     return;
 }

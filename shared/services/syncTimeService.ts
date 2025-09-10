@@ -8,6 +8,7 @@ export enum SyncEntityType {
     WeightRecords = "weight_records",
     Foods = "foods",
     UserFoods = "user_foods",
+    Meals = "meals",
 }
 
 export interface SyncTimeService {
@@ -16,6 +17,7 @@ export interface SyncTimeService {
     getLastSyncTimeMilliseconds(entity: SyncEntityType): Promise<number>;
     setLastSyncTimeMilliseconds(entity: SyncEntityType, time: number): Promise<void>;
     clearLastSyncTime(entity: SyncEntityType): Promise<void>;
+    clearAllLastSyncTimes(): Promise<void>;
 }
 
 export const syncTimeService: SyncTimeService = {
@@ -30,6 +32,12 @@ export const syncTimeService: SyncTimeService = {
 
     async clearLastSyncTime(entity: SyncEntityType): Promise<void> {
         await AsyncStorage.removeItem(`lastSyncTime_${entity}`);
+    },
+
+    async clearAllLastSyncTimes(): Promise<void> {
+        const keys = await AsyncStorage.getAllKeys();
+        const syncTimeKeys = keys.filter(key => key.startsWith('lastSyncTime_'));
+        await AsyncStorage.multiRemove(syncTimeKeys);
     },
 
     async getLastSyncTimeMilliseconds(entity: SyncEntityType): Promise<number> {

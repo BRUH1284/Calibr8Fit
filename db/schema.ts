@@ -1,4 +1,5 @@
-import { int, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { check, int, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const activities = sqliteTable("activities", {
     id: text().primaryKey().notNull(),
@@ -25,7 +26,12 @@ export const activityRecords = sqliteTable("activity_records", {
     time: int('time').notNull(),
     modifiedAt: int('modified_at').notNull(),
     deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
-});
+},
+    (table) => [
+        check(`activity_or_user_activity_check`,
+            sql`(${table.activityId} IS NOT NULL) != (${table.userActivityId} IS NOT NULL)`),
+    ]
+);
 
 export const waterIntakeRecords = sqliteTable("water_intake_records", {
     id: text().primaryKey().notNull(),
@@ -147,3 +153,24 @@ export const userFoods = sqliteTable("user_foods", {
     modifiedAt: int('modified_at').notNull(),
     deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
 });
+
+export const userMeals = sqliteTable("user_meals", {
+    id: text().primaryKey().notNull(),
+    name: text().notNull(),
+    notes: text(),
+    modifiedAt: int('modified_at').notNull(),
+    deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
+});
+
+export const userMealIngredients = sqliteTable("user_meal_ingredients", {
+    id: text().primaryKey().notNull(),
+    userMealId: text('user_meal_id').references(() => userMeals.id).notNull(),
+    foodId: text('food_id').references(() => foods.id),
+    userFoodId: text('user_food_id').references(() => userFoods.id),
+    quantity: int('quantity_in_grams').notNull(),
+},
+    (table) => [
+        check(`food_or_user_food_check`,
+            sql`(${table.foodId} IS NOT NULL) != (${table.userFoodId} IS NOT NULL)`),
+    ]
+);

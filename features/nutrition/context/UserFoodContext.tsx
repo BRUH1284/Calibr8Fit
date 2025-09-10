@@ -4,7 +4,7 @@ import { UserFood } from "../types/userFood";
 
 interface UserFoodContextProps {
   userFoods: UserFood[];
-  fetchUserFoods: () => Promise<void>;
+  fetchUserFoods: () => Promise<UserFood[]>;
   syncUserFoods: () => Promise<void>;
   addUserFood: (food: Omit<UserFood, 'id' | 'modifiedAt' | 'deleted'>) => Promise<void>;
 }
@@ -25,8 +25,7 @@ export const UserFoodProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const fetchUserFoods = async () => {
-    await userFoodService.fetch();
-    loadUserFoods();
+    return await userFoodService.fetch();
   };
 
   const syncUserFoods = async () => {

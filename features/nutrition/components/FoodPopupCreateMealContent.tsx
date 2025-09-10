@@ -7,6 +7,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useFood } from "../hooks/useFood";
+import { useMeal } from "../hooks/useMeal";
 import { useUserFood } from "../hooks/useUserFood";
 
 interface Props {
@@ -25,6 +26,7 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
 
   const { foods } = useFood();
   const { userFoods } = useUserFood();
+  const { addMeal } = useMeal();
 
   const [ingredientMode, setAddIngredientMode] = useState(false);
 
@@ -72,7 +74,15 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
 
 
   const handleCreateMeal = useCallback(() => {
-    //TODO
+    addMeal({
+      name: createdMeal.name,
+      notes: createdMeal.notes,
+      mealIngredients: ingredients.map(ing => ({
+        foodId: ing.food.userFoodId ? undefined : ing.food.id,
+        userFoodId: ing.food.userFoodId ? ing.food.id : undefined,
+        quantity: ing.quantityInGrams,
+      }))
+    });
     onDone();
   }, [createdMeal, ingredients]);
 
@@ -121,10 +131,7 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
           data={ingredients}
           keyExtractor={(it) => it.food.id}
           renderItem={({ item }) => (
-            <View
-              style={{
-              }}
-            >
+            <>
               <AppText
                 type='body-large'
               >{item.food.name}</AppText>
@@ -167,7 +174,7 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
                   onPress={() => removeIngredient(item.food.id)}
                 />
               </View>
-            </View>
+            </>
           )}
         />
         <IconButton

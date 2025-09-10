@@ -20,7 +20,9 @@ export function createSyncService<
         mapLocalArrayToRemote,
         primaryKey,
         upsertSet,
-        customLoad
+        customLoad,
+        customUpsert,
+        customModifiedSince,
     } = config;
 
     const load = async (includeDeleted: boolean = false, loadWhere: ((alias: TTable) => SQL) | undefined = undefined): Promise<TLocal[]> => {
@@ -97,6 +99,25 @@ export function createSyncService<
             method: 'GET'
         })).getTime();
 
+    const getModifiedSince = async (since: number): Promise<TLocal[]> => {
+        if (customModifiedSince)
+            return await customModifiedSince(since);
+        return await db
+            .select()
+            .from(table)
+            .where(gt((table as any).modifiedAt, since)) as TLocal[];
+    }
+
+    const upsert = async (data: TLocal[]) => {
+        if (customUpsert)
+            await customUpsert(data);
+        else
+            await db
+                .insert(table)
+                .values(data)
+                .onConflictDoUpdate({ target: primaryKey as any, set: upsertSet as any });
+    }
+
     const sync = async () => {
         // Get the last sync time for the entity table
         const lastSync = await syncTimeService.getLastSyncTimeMilliseconds(entityType);
@@ -105,10 +126,9 @@ export function createSyncService<
             const updatedAt = await lastUpdatedAt();
 
             // Fetch modified entities since the last sync time
-            const modifiedEntities = await db
-                .select()
-                .from(table)
-                .where(gt((table as any).modifiedAt, lastSync)) as TLocal[];
+            const modifiedEntities = await getModifiedSince(lastSync);
+
+            console.log(`Syncing ${entityType}:`, modifiedEntities);
 
             // If no new updates on either side, return local data
             if (updatedAt === lastSync && modifiedEntities.length === 0)
@@ -135,10 +155,7 @@ export function createSyncService<
 
             // Insert new/updated entries
             if (inserts.length)
-                await db
-                    .insert(table)
-                    .values(inserts)
-                    .onConflictDoUpdate({ target: primaryKey as any, set: upsertSet as any });
+                await upsert(inserts);
 
             await syncTimeService.setLastSyncTimeMilliseconds(entityType, new Date(response.lastSyncedAt).getTime());
         } catch (e) {
