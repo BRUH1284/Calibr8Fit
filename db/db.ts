@@ -3,6 +3,7 @@ import * as SQLite from 'expo-sqlite';
 import {
     activities,
     activityRecords,
+    consumptionRecords,
     foods,
     userActivities,
     userFoods,
@@ -21,6 +22,7 @@ export const clearAllTables = async (): Promise<void> => {
         // Delete from tables with foreign key dependencies first
         await db.delete(userMealIngredients);
         await db.delete(activityRecords);
+        await db.delete(consumptionRecords);
 
         // Then delete from other tables
         await db.delete(userMeals);

@@ -174,3 +174,19 @@ export const userMealIngredients = sqliteTable("user_meal_ingredients", {
             sql`(${table.foodId} IS NOT NULL) != (${table.userFoodId} IS NOT NULL)`),
     ]
 );
+
+export const consumptionRecords = sqliteTable("consumption_records", {
+    id: text().primaryKey().notNull(),
+    foodId: text('food_id').references(() => foods.id),
+    userFoodId: text('user_food_id').references(() => userFoods.id),
+    userMealId: text('user_meal_id').references(() => userMeals.id),
+    quantity: int('quantity_in_grams').notNull(),
+    time: int('time').notNull(),
+    modifiedAt: int('modified_at').notNull(),
+    deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
+},
+    (table) => [
+        check(`food_or_user_food_or_meal_check`,
+            sql`((${table.foodId} IS NOT NULL)::int + (${table.userFoodId} IS NOT NULL)::int + (${table.userMealId} IS NOT NULL)::int) = 1`),
+    ]
+);

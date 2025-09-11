@@ -9,6 +9,7 @@ export enum SyncEntityType {
     Foods = "foods",
     UserFoods = "user_foods",
     Meals = "meals",
+    ConsumptionRecords = "consumption_records",
 }
 
 export interface SyncTimeService {

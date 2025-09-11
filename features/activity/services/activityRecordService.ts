@@ -3,17 +3,17 @@ import { activities, activityRecords, userActivities } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
 import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
-import { ActivityRecord } from "../types/ActivityRecord";
+import { ActivityRecord } from "../types/activityRecord";
 
 const loadActivityRecords = async (today: boolean = false, includeDeleted: boolean = false): Promise<ActivityRecord[]> => {
     const start = new Date().setHours(0, 0, 0, 0);
     const end = start + 24 * 60 * 60 * 1000;
 
-    const predicates = [
+    const predicates = today ? [
         eq(activityRecords.deleted, false),
         gte(activityRecords.time, start),
         lt(activityRecords.time, end)
-    ];
+    ] : [];
 
     return db
         .select({
@@ -104,7 +104,7 @@ export const activityRecordService = {
             time: sql.raw(`excluded.${activityRecords.time.name}`),
             modifiedAt: sql.raw(`excluded.${activityRecords.modifiedAt.name}`),
             deleted: sql.raw(`excluded.${activityRecords.deleted.name}`),
-        },
+        }, //TODO: remove custom load for service?
         customLoad: (includeDeleted: boolean) => loadActivityRecords(false, includeDeleted),
     }),
     loadToday: () => loadActivityRecords(true),

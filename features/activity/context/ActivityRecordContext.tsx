@@ -3,7 +3,7 @@ import { InferInsertModel } from "drizzle-orm";
 import * as Crypto from 'expo-crypto';
 import { createContext, useEffect, useState } from "react";
 import { activityRecordService } from "../services/activityRecordService";
-import { ActivityRecord } from "../types/ActivityRecord";
+import { ActivityRecord } from "../types/activityRecord";
 
 interface ActivityRecordContextProps {
   todayRecords: ActivityRecord[];
