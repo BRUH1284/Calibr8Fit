@@ -13,8 +13,9 @@ import { useUserFood } from "../hooks/useUserFood";
 import { calcCaloricValue } from "../types/meal";
 import FoodPopupCreateFoodContent from "./FoodPopupCreateFoodContent";
 import FoodPopupCreateMealContent from "./FoodPopupCreateMealContent";
+import FoodPopupCreateRecordContent from "./FoodPopupCreateRecordContent";
 
-interface FoodMealItem {
+export interface FoodMealItem {
   id: string;
   userFoodId?: string;
   userMealId?: string;
@@ -30,7 +31,7 @@ type Props = {
 export default function FoodPopup({ visible, onClose }: Props) {
   const theme = useTheme();
 
-  const [mode, setMode] = useState<'food' | 'creation' | 'mealRecord'>('food');
+  const [mode, setMode] = useState<'food' | 'creation' | 'record'>('food');
   const [currentPage, setCurrentPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const [header, setHeader] = useState<string>();
@@ -56,7 +57,6 @@ export default function FoodPopup({ visible, onClose }: Props) {
   const [foodQuery, setFoodQuery] = useState('');
 
   const combinedFoods = useMemo(() => {
-    //console.log(meals[0].mealIngredients.reduce((sum, item) => sum + (item.food ?? item.userFood)!.caloricValue * item.quantity / 100, 0));
     return [
       ...foods,
       ...userFoods.map((uf) => ({
@@ -66,7 +66,6 @@ export default function FoodPopup({ visible, onClose }: Props) {
       ...meals.map((m) => ({
         ...m,
         userMealId: m.id,
-        //caloricValue: 123,
         caloricValue: calcCaloricValue(m),
       }))
     ] as FoodMealItem[];
@@ -97,6 +96,20 @@ export default function FoodPopup({ visible, onClose }: Props) {
     setHeaderRightIcon(undefined);
   }, []);
 
+  const [selectedFoodItem, setSelectedFoodItem] = useState<FoodMealItem | undefined>(undefined);
+
+  const createRecord = useCallback((recordItem: FoodMealItem) => {
+    setSelectedFoodItem(recordItem);
+    setMode('record');
+    setHeader('Add Record');
+    setHeaderRightIcon(undefined);
+  }, []);
+
+  const close = useCallback(() => {
+    onClose();
+    setFoodQuery('');
+  }, [onClose, setFoodMode]);
+
   useEffect(() => {
     if (visible)
       setFoodMode();
@@ -105,8 +118,8 @@ export default function FoodPopup({ visible, onClose }: Props) {
   return (
     <Popup
       visible={visible}
-      onClose={onClose}
-      onBackPress={mode === 'food' ? onClose : setFoodMode}
+      onClose={close}
+      onBackPress={mode === 'food' ? close : setFoodMode}
       header={header}
       headerRightIcon={headerRightIcon}
       onHeaderRightIconPress={onRightButtonPress}
@@ -132,7 +145,7 @@ export default function FoodPopup({ visible, onClose }: Props) {
             renderItem={({ item }) => (
               <TextRowAdd
                 label={item.name}
-                onPress={() => { }}
+                onPress={() => createRecord(item)}
                 iconText={`${item.caloricValue.toString()} kcal`}
               />
             )}
@@ -165,13 +178,18 @@ export default function FoodPopup({ visible, onClose }: Props) {
             style={{ height: '91%', marginHorizontal: -16 }}
             onPageSelected={e => setCurrentPage(e.nativeEvent.position)}>
             <View key="1" style={{ gap: 16, paddingHorizontal: 16 }}>
-              <FoodPopupCreateFoodContent onDone={() => { }} />
+              <FoodPopupCreateFoodContent onDone={close} />
             </View>
             <View key="2" style={{ gap: 16, paddingHorizontal: 16 }}>
-              <FoodPopupCreateMealContent onDone={() => { }} />
+              <FoodPopupCreateMealContent onDone={close} />
             </View>
           </PagerView>
         </>}
+      {(mode === 'record' && selectedFoodItem) &&
+        <FoodPopupCreateRecordContent
+          item={selectedFoodItem}
+          onDone={close}
+        />}
     </Popup>
   );
 }

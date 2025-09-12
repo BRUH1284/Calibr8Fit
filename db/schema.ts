@@ -187,6 +187,6 @@ export const consumptionRecords = sqliteTable("consumption_records", {
 },
     (table) => [
         check(`food_or_user_food_or_meal_check`,
-            sql`((${table.foodId} IS NOT NULL)::int + (${table.userFoodId} IS NOT NULL)::int + (${table.userMealId} IS NOT NULL)::int) = 1`),
+            sql`( (${table.foodId} IS NOT NULL) + (${table.userFoodId} IS NOT NULL) + (${table.userMealId} IS NOT NULL) ) = 1`),
     ]
 );

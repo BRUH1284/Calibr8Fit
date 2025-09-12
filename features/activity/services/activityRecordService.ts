@@ -104,8 +104,7 @@ export const activityRecordService = {
             time: sql.raw(`excluded.${activityRecords.time.name}`),
             modifiedAt: sql.raw(`excluded.${activityRecords.modifiedAt.name}`),
             deleted: sql.raw(`excluded.${activityRecords.deleted.name}`),
-        }, //TODO: remove custom load for service?
-        customLoad: (includeDeleted: boolean) => loadActivityRecords(false, includeDeleted),
+        },
     }),
     loadToday: () => loadActivityRecords(true),
 }

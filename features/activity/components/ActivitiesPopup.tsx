@@ -124,7 +124,7 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
       time: Date.now(),
       duration: createdActivityRecord.duration,
       caloriesBurned: createdActivityRecord.caloriesBurned,
-      activityId: selectedActivity!.id,
+      activityId: selectedActivity!.userActivityId ? undefined : selectedActivity!.id,
       userActivityId: selectedActivity!.userActivityId,
     });
 

@@ -3,6 +3,7 @@ import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
 import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
+import ConsumptionListCard from "@/features/nutrition/components/ConsumptionListCard";
 import FoodPopup from "@/features/nutrition/components/FoodPopup";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
@@ -170,7 +171,11 @@ export default function Overview() {
               onAddActivityPress={() => setShowActivities(true)}
             />
           </View>
-          <View key="2" style={styles.cardPage}></View>
+          <View key="2" style={styles.cardPage}>
+            <ConsumptionListCard
+              onAddPress={() => setShowFood(true)}
+            />
+          </View>
           <View key="3" style={styles.cardPage}></View>
         </PagerView>
         <View style={{

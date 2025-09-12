@@ -60,6 +60,8 @@ export function createSyncService<
     const add = async (data: Omit<InferInsertModel<TTable>, 'id' | 'modifiedAt'>) => {
         try {
             // Insert a new entry into the database
+            console.log('createdRecord', data);
+
             await db
                 .insert(table)
                 .values({

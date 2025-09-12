@@ -1,6 +1,5 @@
 import { consumptionRecords } from "@/db/schema";
 import { InferInsertModel } from "drizzle-orm";
-import * as Crypto from 'expo-crypto';
 import { createContext, useEffect, useState } from "react";
 import { consumptionRecordService } from "../services/consumptionRecordService";
 import { calcCaloricValue, ConsumptionRecord } from "../types/consumptionRecord";
@@ -40,21 +39,6 @@ export const ConsumptionRecordProvider = (
   const addConsumptionRecord = async (
     record: Omit<InferInsertModel<typeof consumptionRecords>, 'id' | 'modifiedAt'>
   ) => {
-    const newRecord: ConsumptionRecord = {
-      id: Crypto.randomUUID(),
-      foodId: record.foodId || null,
-      userFoodId: record.userFoodId || null,
-      userMealId: record.userMealId || null,
-      quantity: record.quantity,
-      time: record.time,
-      food: null,
-      userFood: null,
-      userMeal: null,
-      modifiedAt: Date.now(),
-      deleted: false,
-    };
-
-    setTodayRecords(prevRecords => [...prevRecords, newRecord]);
     await consumptionRecordService.add(record);
     loadTodayConsumptionRecords();
   };

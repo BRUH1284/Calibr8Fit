@@ -9,6 +9,7 @@ import m0004 from './0004_massive_leo.sql';
 import m0005 from './0005_flowery_proemial_gods.sql';
 import m0006 from './0006_romantic_expediter.sql';
 import m0007 from './0007_hot_wilson_fisk.sql';
+import m0008 from './0008_productive_puck.sql';
 
   export default {
     journal,
@@ -20,7 +21,8 @@ m0003,
 m0004,
 m0005,
 m0006,
-m0007
+m0007,
+m0008
     }
   }
   

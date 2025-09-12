@@ -57,6 +57,13 @@
       "when": 1757492707829,
       "tag": "0007_hot_wilson_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1757663262158,
+      "tag": "0008_productive_puck",
+      "breakpoints": true
     }
   ]
 }
