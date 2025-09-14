@@ -6,10 +6,16 @@ type Props = {
   type?: keyof typeof Typography;
   color?: keyof ReturnType<typeof useTheme>;
   style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   children: React.ReactNode;
 };
 
-export default function AppText({ type = 'headline-medum', color = 'onSurface', style, children, ...props }: Props) {
+export default function AppText({
+  type = 'headline-medium',
+  color = 'onSurface', style,
+  children,
+  ...props }: Props) {
   const theme = useTheme();
 
   return (

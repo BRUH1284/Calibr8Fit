@@ -3,8 +3,8 @@ import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
 import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
-import ConsumptionListCard from "@/features/nutrition/components/ConsumptionListCard";
 import FoodPopup from "@/features/nutrition/components/FoodPopup";
+import RationListCard from "@/features/nutrition/components/RationListCard";
 import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionRecord";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
@@ -15,9 +15,9 @@ import ProgressCarousel from "@/shared/components/ProgressCarousel";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { AppTheme } from "@/styles/themes";
 import React, { useCallback, useState } from "react";
-import { Animated, NativeSyntheticEvent, StyleSheet, View } from "react-native";
+import { NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import Animated, { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
 const PAGE_COUNT = 3;
 
@@ -78,7 +78,6 @@ export default function Overview() {
   const { todayWaterIntakeInMl } = useWaterIntake();
   const { weight } = useWeightRecord();
   const { todayCaloriesConsumed } = useConsumptionRecord();
-
   const { todayCaloriesBurned } = useActivityRecord();
 
   const progressArray = usePagerProgress(PAGE_COUNT);
@@ -175,7 +174,7 @@ export default function Overview() {
             />
           </View>
           <View key="2" style={styles.cardPage}>
-            <ConsumptionListCard
+            <RationListCard
               onAddPress={() => setShowFood(true)}
             />
           </View>

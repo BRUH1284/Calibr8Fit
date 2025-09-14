@@ -76,7 +76,17 @@ export default function ProgressCarousel() {
       });
     }
 
-    return result.reverse();
+    result.reverse();
+
+    const tomorrowDate = new Date().setDate(new Date().getDate() + 1);
+    result.push({
+      waterProgress: 0,
+      burnProgress: 0,
+      rationProgress: 0,
+      date: new Date(tomorrowDate).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'numeric' })
+    });
+
+    return result;
   };
 
 

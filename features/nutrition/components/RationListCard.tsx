@@ -1,17 +1,18 @@
 import AppText from "@/shared/components/AppText";
-import Divider from "@/shared/components/Divider";
 import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { compactFull } from "@/shared/utils/date";
 import { useMemo, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { useConsumptionRecord } from "../hooks/useConsumptionRecord";
 import { calcCaloricValue } from "../types/consumptionRecord";
+import RationItem from "./RationItem";
 
 type Props = {
   onAddPress: () => void;
 };
 
-export default function ConsumptionListCard({ onAddPress }: Props) {
+export default function RationListCard({ onAddPress }: Props) {
   const theme = useTheme();
 
   const {
@@ -21,12 +22,13 @@ export default function ConsumptionListCard({ onAddPress }: Props) {
     deleteConsumptionRecord
   } = useConsumptionRecord();
 
-  const items = useMemo(() => todayRecords
+  const minimalRecords = useMemo(() => todayRecords
     .map(r => ({
       id: r.id,
-      name: r.food?.name || r.userFood?.name || r.userMeal?.name,
+      name: r.food?.name || r.userFood?.name || r.userMeal?.name || 'Unknown Food',
       calories: calcCaloricValue(r),
       quantity: r.quantity,
+      time: compactFull(new Date(r.time)),
     })), [todayRecords]);
 
   // Handle refresh
@@ -68,56 +70,10 @@ export default function ConsumptionListCard({ onAddPress }: Props) {
         refreshControl={<RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh} />}
-        data={items}
+        data={minimalRecords}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: 'row',
-              marginBottom: 8,
-              gap: 16
-            }}
-          >
-            <AppText
-              style={{ flex: 1 }}
-              type='title-medium'
-            >{item.name}</AppText>
-            <Divider
-              orientation='vertical' />
-            <View style={{ width: 48 }}>
-              <AppText
-                style={{ textAlign: 'center' }}
-                type='title-medium'
-              >{item.quantity}</AppText>
-              <AppText
-                style={{ textAlign: 'center' }}
-                color='onSurfaceVariant'
-                type='label-small'
-              >Grams</AppText>
-            </View>
-            <View style={{ width: 48 }}>
-              <AppText
-                style={{ textAlign: 'center' }}
-                type='title-medium'
-              >{item.calories}</AppText>
-              <AppText
-                style={{ textAlign: 'center' }}
-                color='onSurfaceVariant'
-                type='label-small'
-              >Kcal</AppText>
-            </View>
-            <IconButton icon={{
-              name: 'delete-outline',
-              library: "MaterialIcons",
-              size: 32,
-              color: theme.onSurface,
-            }}
-              style={{ backgroundColor: theme.tertiaryContainer }}
-              onPress={() => {
-                // Delete the record
-                deleteConsumptionRecord(item.id);
-              }} />
-          </View>
+          <RationItem item={item} onDelete={deleteConsumptionRecord} />
         )}
       >
       </FlatList>

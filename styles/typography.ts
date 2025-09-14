@@ -9,7 +9,7 @@ export const Typography = StyleSheet.create({
         fontSize: 12,
         lineHeight: 16
     },
-    'headline-medum': {
+    'headline-medium': {
         fontSize: 28,
         lineHeight: 36
     },
