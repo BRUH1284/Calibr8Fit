@@ -1,132 +1,216 @@
-import React from "react";
-import { View } from "react-native";
-import Animated, { useAnimatedProps, useSharedValue, withTiming } from "react-native-reanimated";
-import Svg, { Circle, G } from 'react-native-svg';
+import React, { useMemo } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import Svg, { Circle, G } from "react-native-svg";
 import { useTheme } from "../hooks/useTheme";
 import DynamicIcon, { IconItem } from "./DynamicIcon";
 
 type Ring = {
   color: string;
   backgroundColor?: string;
-  progress: number;
-  progressStart?: number;
+  progress: number; // 0..1
 };
 
 type Props = {
-  size: number
-  strokeWidth: number,
-  fill?: string,
-  animationDuration?: number;
+  size: number;
+  strokeWidth: number;
+  fill?: string;
   rings: Ring[];
   iconSize?: number;
   icons?: IconItem[];
 };
 
+type ComputedRing = {
+  r: number;
+  C: number;
+  offset: number;
+  bg?: string;
+  stroke: string;
+  dotX: number;
+  dotY: number;
+  dotR: number;
+};
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+function clamp01(v: number) {
+  if (v <= 0) return 0;
+  if (v >= 1) return 1;
+  return v;
+}
 
-export default function CircularProgress({
+function CircularProgressBase({
   size,
   strokeWidth,
   fill = "none",
-  animationDuration = 1000,
   rings,
   icons = [],
-  iconSize = 24,
+  iconSize,
 }: Props) {
   const theme = useTheme();
 
-  const iconContainerSize = (size - rings.length * strokeWidth) / 2 * Math.SQRT2;
-  iconSize = iconSize || iconContainerSize / Math.ceil(Math.sqrt(icons.length)) * 0.85;;
-  return (
-    <View style={{
-      width: size,
-      height: size,
-      position: 'relative',
-      margin: 32
-    }}>
-      <Svg width={size} height={size}>
-        {rings.map((ring, index) => {
-          const progressStart = ring.progressStart || 0;
-          const progress = useSharedValue(progressStart);
+  // Precompute all ring geometry once per prop change.
+  const computedRings = useMemo<ComputedRing[]>(() => {
+    const list: ComputedRing[] = [];
 
-          React.useEffect(() => {
-            progress.value = withTiming(ring.progress, { duration: animationDuration });
-          }, [ring.progress]);
+    for (let i = 0; i < rings.length; i++) {
+      const ring = rings[i];
+      const ringSize = size - i * strokeWidth;
+      // Centerline radius for this ring (keeps spacing consistent)
+      const r = (ringSize - (i + 1) * strokeWidth) / 2;
 
-          const ringSize = size - index * strokeWidth;
-          const ringRadius = (ringSize - (index + 1) * strokeWidth) / 2;
-          const ringCircumference = ringRadius * 2 * Math.PI;
+      // Skip invalid/negative radii (too many rings for given size)
+      if (r <= 0) continue;
 
-          const animatedProps = useAnimatedProps(() => {
-            const strokeDashoffset =
-              (ringCircumference - (ringCircumference * progress.value));
-            return {
-              strokeDashoffset: strokeDashoffset,
-            };
-          });
+      const C = 2 * Math.PI * r;
+      const p = clamp01(ring.progress ?? 0);
+      const offset = C * (1 - p);
 
-          const dotX = ringSize - strokeWidth / 2;
-          const dotY = size / 2;
-          const dotR = strokeWidth / 2;
+      // Dot at the "start" (3 o'clock). The whole group is rotated -90°
+      const dotX = size - (i + 0.5) * strokeWidth;
+      const dotY = size / 2;
+      const dotR = strokeWidth / 2;
 
+      list.push({
+        r,
+        C,
+        offset,
+        bg: ring.backgroundColor,
+        stroke: ring.color,
+        dotX,
+        dotY,
+        dotR,
+      });
+    }
 
-          return (
-            <G key={index} rotation="-90" origin={`${size / 2}, ${size / 2}`}>
-              <Circle
-                stroke={ring.backgroundColor || theme.surfaceVariant}
-                fill={fill}
-                cx={size / 2}
-                cy={size / 2}
-                r={ringRadius}
-                strokeWidth={strokeWidth}
-              />
-              <AnimatedCircle
-                stroke={ring.color}
-                fill="none"
-                cx={size / 2}
-                cy={size / 2}
-                r={ringRadius}
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-                strokeDasharray={`${ringCircumference}, ${ringCircumference}`}
-                animatedProps={animatedProps}
-              />
-              <Circle
-                cx={dotX}
-                cy={dotY}
-                r={dotR}
-                fill={ring.color}
-              />
-            </G>
-          );
-        })}
-      </Svg>
-      {/* Center icon */}
-      <View style={{
-        position: 'absolute',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        top: '50%',
-        left: '50%',
+    return list;
+  }, [rings, size, strokeWidth]);
+
+  // Icon area sizing (kept stable & not mutating props)
+  const iconContainerSize = useMemo(() => {
+    const raw = ((size - rings.length * strokeWidth) / 2) * Math.SQRT2;
+    return Math.max(0, raw);
+  }, [size, rings.length, strokeWidth]);
+
+  const resolvedIconSize = useMemo(() => {
+    if (iconSize) return iconSize;
+    const count = Math.max(1, icons.length);
+    const perRow = Math.ceil(Math.sqrt(count));
+    return (iconContainerSize / perRow) * 0.85;
+  }, [iconSize, icons.length, iconContainerSize]);
+
+  const iconWrapperStyle = useMemo(
+    () => [
+      styles.iconWrapper,
+      {
         width: iconContainerSize,
         height: iconContainerSize,
         transform: [
           { translateX: -iconContainerSize / 2 },
-          { translateY: -iconContainerSize / 2 }
-        ]
-      }}>
-        {icons.map((icon, index) =>
-          <DynamicIcon
+          { translateY: -iconContainerSize / 2 },
+        ],
+        // Hint the platform to rasterize this static sub-tree
+        ...(Platform.OS === "ios"
+          ? { shouldRasterizeIOS: true as const }
+          : { renderToHardwareTextureAndroid: true as const }),
+      },
+    ],
+    [iconContainerSize]
+  );
+
+  return (
+    <View style={[styles.root, { width: size, height: size }]}>
+      <Svg width={size} height={size} pointerEvents="none">
+        {computedRings.map((g, index) => (
+          <G
             key={index}
-            name={icon.name}
-            size={iconSize}
-            library={icon.library}
-            color={icon.color || theme.onSurface}
-            style={icon.style}
-          />)}
+            rotation="-90"
+            origin={`${size / 2}, ${size / 2}`}
+          >
+            <Circle
+              stroke={g.bg || theme.surfaceVariant}
+              fill={fill}
+              cx={size / 2}
+              cy={size / 2}
+              r={g.r}
+              strokeWidth={strokeWidth}
+            />
+            <Circle
+              stroke={g.stroke}
+              fill="none"
+              cx={size / 2}
+              cy={size / 2}
+              r={g.r}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={`${g.C} ${g.C}`}
+              strokeDashoffset={g.offset}
+            />
+            <Circle cx={g.dotX} cy={g.dotY} r={g.dotR} fill={g.stroke} />
+          </G>
+        ))}
+      </Svg>
+
+      {/* Center icons */}
+      <View style={iconWrapperStyle}>
+        <View style={styles.iconRow}>
+          {icons.map((icon, i) => (
+            <DynamicIcon
+              key={`${icon.library}:${icon.name}:${i}`}
+              name={icon.name}
+              size={resolvedIconSize}
+              library={icon.library}
+              color={icon.color || theme.onSurface}
+              style={icon.style}
+            />
+          ))}
+        </View>
       </View>
     </View>
   );
 }
+
+// Simple memoization to avoid re-renders if inputs don’t change
+function ringsEqual(a: Ring[], b: Ring[]) {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const ra = a[i];
+    const rb = b[i];
+    if (
+      ra.progress !== rb.progress ||
+      ra.color !== rb.color ||
+      ra.backgroundColor !== rb.backgroundColor
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const CircularProgress = React.memo(
+  CircularProgressBase,
+  (prev, next) =>
+    prev.size === next.size &&
+    prev.strokeWidth === next.strokeWidth &&
+    prev.fill === next.fill &&
+    ringsEqual(prev.rings, next.rings) &&
+    prev.iconSize === next.iconSize &&
+    prev.icons === next.icons
+);
+
+export default CircularProgress;
+
+const styles = StyleSheet.create({
+  root: {
+    position: "relative",
+  },
+  iconWrapper: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    justifyContent: "center",
+  },
+  iconRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+});

@@ -5,15 +5,12 @@ import { SyncEntityType } from "@/shared/services/syncTimeService";
 import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { ActivityRecord } from "../types/activityRecord";
 
-const loadActivityRecords = async (today: boolean = false, includeDeleted: boolean = false): Promise<ActivityRecord[]> => {
-    const start = new Date().setHours(0, 0, 0, 0);
-    const end = start + 24 * 60 * 60 * 1000;
-
-    const predicates = today ? [
+const loadInRange = async (start: number, end: number): Promise<ActivityRecord[]> => {
+    const predicates = [
         eq(activityRecords.deleted, false),
         gte(activityRecords.time, start),
         lt(activityRecords.time, end)
-    ] : [];
+    ];
 
     return db
         .select({
@@ -44,6 +41,13 @@ const loadActivityRecords = async (today: boolean = false, includeDeleted: boole
         .leftJoin(activities, eq(activityRecords.activityId, activities.id))
         .leftJoin(userActivities, eq(activityRecords.userActivityId, userActivities.id))
         .where(and(...predicates))
+}
+
+const loadToday = async (): Promise<ActivityRecord[]> => {
+    const start = new Date().setHours(0, 0, 0, 0);
+    const end = start + 24 * 60 * 60 * 1000;
+
+    return loadInRange(start, end);
 }
 
 export const activityRecordService = {
@@ -106,5 +110,6 @@ export const activityRecordService = {
             deleted: sql.raw(`excluded.${activityRecords.deleted.name}`),
         },
     }),
-    loadToday: () => loadActivityRecords(true),
+    loadToday,
+    loadInRange,
 }

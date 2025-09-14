@@ -5,17 +5,19 @@ import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeR
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
 import ConsumptionListCard from "@/features/nutrition/components/ConsumptionListCard";
 import FoodPopup from "@/features/nutrition/components/FoodPopup";
+import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionRecord";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import WeightRecordPopup from "@/features/weight/components/WeightRecordPopup";
 import { useWeightRecord } from "@/features/weight/hooks/useWeightRecord";
 import IconTile from "@/shared/components/IconTile";
+import ProgressCarousel from "@/shared/components/ProgressCarousel";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { AppTheme } from "@/styles/themes";
 import React, { useCallback, useState } from "react";
-import { NativeSyntheticEvent, StyleSheet, View } from "react-native";
+import { Animated, NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import Animated, { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
 const PAGE_COUNT = 3;
 
@@ -61,6 +63,7 @@ const useStyles = (theme: AppTheme) => React.useMemo(() => StyleSheet.create({
   },
 }), [theme]);
 
+
 export default function Overview() {
   const theme = useTheme();
   const styles = useStyles(theme);
@@ -71,14 +74,14 @@ export default function Overview() {
   const [showWeightRecord, setShowWeightRecord] = useState(false);
 
   const { profileSettings } = useProfile();
-  const { waterIntake, rmr } = useRecommendations();
+  const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
   const { todayWaterIntakeInMl } = useWaterIntake();
   const { weight } = useWeightRecord();
+  const { todayCaloriesConsumed } = useConsumptionRecord();
 
   const { todayCaloriesBurned } = useActivityRecord();
 
   const progressArray = usePagerProgress(PAGE_COUNT);
-
   const HandlePageScroll = useCallback((e: NativeSyntheticEvent<Readonly<{
     position: number;
     offset: number;
@@ -102,9 +105,9 @@ export default function Overview() {
         backgroundColor: theme.surfaceContainer,
         marginVertical: 8,
         borderRadius: 16,
-        flexDirection: 'row',
+        justifyContent: 'center',
       }} >
-        <View style={{ flex: 1 }} />
+        <ProgressCarousel />
       </View>
       <View style={{
         flexDirection: 'row',
@@ -112,8 +115,8 @@ export default function Overview() {
       }}>
         <IconTile
           style={{ flex: 1 }}
-          text='Tile 1'
-          supportingText={`${rmr} kcal`}
+          text={`${todayCaloriesConsumed} kcal`}
+          supportingText={`${consumptionTarget} kcal`}
           icon={{
             name: 'fastfood',
             library: 'MaterialIcons'
@@ -123,7 +126,7 @@ export default function Overview() {
         <IconTile
           style={{ flex: 1 }}
           text={`${todayCaloriesBurned} kcal`}
-          supportingText={`${rmr} kcal`}
+          supportingText={`${burnTarget} kcal`}
           icon={{
             name: 'local-fire-department',
             library: 'MaterialIcons'

@@ -15,6 +15,7 @@ interface ActivityRecordContextProps {
   syncActivityRecords: () => Promise<void>;
   loadActivityRecords: () => Promise<ActivityRecord[]>;
   loadTodayActivityRecords: () => Promise<ActivityRecord[]>;
+  loadInRange: (start: number, end: number) => Promise<ActivityRecord[]>;
 }
 
 export const ActivityRecordContext = createContext<ActivityRecordContextProps | null>(null);
@@ -72,6 +73,8 @@ export const ActivityRecordProvider = (
     return loadedRecords;
   };
 
+  const loadInRange = activityRecordService.loadInRange;
+
   return (
     <ActivityRecordContext.Provider value={{
       todayRecords,
@@ -80,7 +83,8 @@ export const ActivityRecordProvider = (
       deleteActivityRecord,
       syncActivityRecords,
       loadActivityRecords,
-      loadTodayActivityRecords
+      loadTodayActivityRecords,
+      loadInRange
     }}>
       {children}
     </ActivityRecordContext.Provider>

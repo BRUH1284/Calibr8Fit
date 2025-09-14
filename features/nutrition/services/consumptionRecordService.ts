@@ -6,15 +6,12 @@ import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { ConsumptionRecord } from "../types/consumptionRecord";
 import { MealIngredient } from "../types/meal";
 
-const load = async (today: boolean = false): Promise<ConsumptionRecord[]> => {
-    const start = new Date().setHours(0, 0, 0, 0);
-    const end = start + 24 * 60 * 60 * 1000;
-
-    const predicates = today ? [
+const loadInRange = async (start: number, end: number): Promise<ConsumptionRecord[]> => {
+    const predicates = [
         eq(consumptionRecords.deleted, false),
         gte(consumptionRecords.time, start),
         lt(consumptionRecords.time, end)
-    ] : [];
+    ];
 
     const records = await db
         .select({
@@ -69,6 +66,13 @@ const load = async (today: boolean = false): Promise<ConsumptionRecord[]> => {
             })),
         }
     }));
+}
+
+const loadToday = async (): Promise<ConsumptionRecord[]> => {
+    const start = new Date().setHours(0, 0, 0, 0);
+    const end = start + 24 * 60 * 60 * 1000;
+
+    return loadInRange(start, end);
 }
 
 const syncService = createSyncService<
@@ -126,6 +130,6 @@ const syncService = createSyncService<
 
 export const consumptionRecordService = {
     ...syncService,
-    load,
-    loadToday: () => load(true),
+    loadToday,
+    loadInRange,
 };

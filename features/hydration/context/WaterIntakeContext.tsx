@@ -8,6 +8,7 @@ interface WaterIntakeContextProps {
   loadWaterIntake: () => Promise<WaterIntakeRecord[]>;
   loadTodayWaterIntakeRecords: () => Promise<WaterIntakeRecord[]>;
   addWaterIntakeRecord: (record: { time: number; amountInMl: number }) => Promise<void>;
+  loadInRange: (start: number, end: number) => Promise<WaterIntakeRecord[]>;
 }
 
 export const WaterIntakeContext = createContext<WaterIntakeContextProps | null>(null);
@@ -44,10 +45,12 @@ export const WaterIntakeProvider = (
   const loadWaterIntake = waterIntakeService.load;
 
   const loadTodayWaterIntakeRecords = async () => {
-    const records = await waterIntakeService.loadTodayWaterIntakeRecords();
+    const records = await waterIntakeService.loadToday();
     setTodayWaterIntakeRecords(records);
     return records;
   };
+
+  const loadInRange = waterIntakeService.loadInRange;
 
   return (
     <WaterIntakeContext.Provider value={{
@@ -55,7 +58,8 @@ export const WaterIntakeProvider = (
       syncWaterIntake,
       loadWaterIntake,
       loadTodayWaterIntakeRecords,
-      addWaterIntakeRecord
+      addWaterIntakeRecord,
+      loadInRange
     }}>
       {children}
     </WaterIntakeContext.Provider>

@@ -14,6 +14,7 @@ interface ConsumptionRecordContextProps {
   syncConsumptionRecords: () => Promise<void>;
   loadConsumptionRecords: () => Promise<ConsumptionRecord[]>;
   loadTodayConsumptionRecords: () => Promise<ConsumptionRecord[]>;
+  loadInRange: (start: number, end: number) => Promise<ConsumptionRecord[]>;
 }
 
 export const ConsumptionRecordContext = createContext<ConsumptionRecordContextProps | null>(null);
@@ -65,6 +66,8 @@ export const ConsumptionRecordProvider = (
     return loadedRecords;
   };
 
+  const loadInRange = consumptionRecordService.loadInRange;
+
   return (
     <ConsumptionRecordContext.Provider value={{
       todayRecords,
@@ -73,7 +76,8 @@ export const ConsumptionRecordProvider = (
       deleteConsumptionRecord,
       syncConsumptionRecords,
       loadConsumptionRecords,
-      loadTodayConsumptionRecords
+      loadTodayConsumptionRecords,
+      loadInRange
     }}>
       {children}
     </ConsumptionRecordContext.Provider>

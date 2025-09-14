@@ -46,6 +46,41 @@ const rmrCalculator = (
     return Math.round(result);
 };
 
+const clamp = (v: number, min: number, max: number) => Math.min(min, Math.max(v, max));
+
+const DIET_SHARE = 0.7;
+const KCAL_PER_KG = 7700;
+const MAX_DAILY_WEIGHT_CHANGE_KG = 0.5;
+
+const dailyDelta = (weight: number, targetWeight: number) => {
+    const weightDiff = clamp(targetWeight - weight, -5, 5);
+    // 7700 kcal per kg of body weight
+    const sign = Math.sign(targetWeight - weight); // + for gain, − for loss
+    const kgPerDay = MAX_DAILY_WEIGHT_CHANGE_KG / 7;
+    return Math.round(sign * kgPerDay * KCAL_PER_KG); // kcal/day to add (gain) or subtract (loss)
+}
+
+const consumptionCalculator = (
+    gender: Gender,
+    activityLevel: ActivityLevel,
+    weight: number,
+    targetWeight: number,
+    height: number,
+    age: number
+) => {
+    const maintenance = rmrCalculator(gender, activityLevel, weight, height, age); // should be TDEE
+    const delta = dailyDelta(weight, targetWeight);
+    return Math.round(maintenance + delta * DIET_SHARE);
+};
+
+const burningCalculator = (
+    weight: number,
+    targetWeight: number,
+) => {
+    const delta = dailyDelta(weight, targetWeight);
+    return delta < 0 ? Math.round(Math.abs(delta) * (1 - DIET_SHARE)) : 0;
+};
+
 // Daily water intake calculator 
 const waterCalculator = (
     gender: Gender,
@@ -53,7 +88,7 @@ const waterCalculator = (
     weight: number,
     userClimate: Climate
 ) => {
-    const genderMultiplier = gender === Gender.Male ? 0.67 : 0.5;
+    const genderMultiplier = gender === Gender.Male ? 0.035 : 0.03;
 
     const weightMultiplier = genderMultiplier * weight;
 
@@ -79,10 +114,10 @@ const waterCalculator = (
     let climateValue = 0;
     switch (userClimate) {
         case Climate.Cold:
-            climateValue = 0.2;
+            climateValue = 0;
             break;
         case Climate.Temperate:
-            climateValue = 0;
+            climateValue = 0.25;
             break;
         case Climate.Tropical:
             climateValue = 0.5;
@@ -97,4 +132,6 @@ export const recommendationsService = {
     caloriesBurnedCalculator,
     rmrCalculator,
     waterCalculator,
+    burningCalculator,
+    consumptionCalculator,
 };

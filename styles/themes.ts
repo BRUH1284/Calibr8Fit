@@ -14,6 +14,9 @@ export const LightTheme = {
     error: '#B3261E',
     tertiary: '#7D5260',
     tertiaryContainer: '#FFD8E4',
+    water: '#1AA9FF',
+    food: '#FFC300',
+    exercise: '#FD6C13',
     dialogBackground: 'rgba(0, 0, 0, 0.33)',
 };
 
@@ -31,6 +34,9 @@ export const DarkTheme = {
     outlineVariant: '#CAC4D0',
     card: '#F3EDF7',
     error: '#B3261E',
+    water: '#1AA9FF',
+    food: '#FFC300',
+    exercise: '#FD6C13',
     dialogBackground: 'rgba(0, 0, 0, 0.33)',
 };
 
