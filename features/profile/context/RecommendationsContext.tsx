@@ -1,7 +1,7 @@
 import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
 import { recommendationsService } from "../services/recommendationsService";
 
@@ -33,13 +33,13 @@ export const RecommendationsProvider = ({ children }: { children: React.ReactNod
     setConsumptionTarget(getConsumptionTarget());
   }, [profileSettings]);
 
-  const caloriesBurnedCalculator = (met: number, minutes: number): number => {
-    return recommendationsService.caloriesBurnedCalculator(
+  const caloriesBurnedCalculator = useCallback((met: number, minutes: number): number => {
+    return recommendationsService.activityEstimateCaloriesBurned(
       met,
       minutes,
       profileSettings?.weight || 0,
     );
-  };
+  }, [profileSettings?.weight]);
 
   const age = new Date().getFullYear() - new Date(profileSettings?.dateOfBirth ?? new Date()).getFullYear();
 

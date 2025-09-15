@@ -87,18 +87,10 @@ export const activityRecordService = {
         },
         mapLocalArrayToRemote: async (local) => local.map(({ userActivityId, ...record }) => ({
             ...record,
-            activityId: record.activityId || userActivityId, // Use activityId or userActivityId
+            activityId: record.activityId || userActivityId!, // Use activityId or userActivityId
             modifiedAt: new Date(record.modifiedAt).toISOString(), // Convert to ISO string for the server
             time: new Date(record.time).toISOString(), // Convert to ISO string for the server
-        }) as {
-            id: string;
-            activityId: string;
-            duration: number;
-            caloriesBurned: number;
-            time: string;
-            modifiedAt: string;
-            deleted: boolean;
-        }),
+        })),
         primaryKey: activityRecords.id,
         upsertSet: {
             activityId: sql.raw(`excluded.${activityRecords.activityId.name}`),

@@ -190,3 +190,18 @@ export const consumptionRecords = sqliteTable("consumption_records", {
             sql`( (${table.foodId} IS NOT NULL) + (${table.userFoodId} IS NOT NULL) + (${table.userMealId} IS NOT NULL) ) = 1`),
     ]
 );
+
+export const dailyBurnTarget = sqliteTable("daily_burn_target", {
+    id: text().primaryKey().notNull(),
+    activity_id: text('activity_id').references(() => activities.id).notNull(),
+    user_activity_id: text('user_activity_id').references(() => userActivities.id).notNull(),
+    duration: int('duration').notNull(),
+    modifiedAt: int('modified_at').notNull(),
+    deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
+},
+
+    (table) => [
+        check(`activity_or_user_activity_check`,
+            sql`(${table.activity_id} IS NOT NULL) != (${table.user_activity_id} IS NOT NULL)`),
+    ]
+);

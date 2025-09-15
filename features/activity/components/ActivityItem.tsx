@@ -10,8 +10,8 @@ type ActivityItemProps = {
     id: string;
     description: string;
     duration: number; // in minutes
-    caloriesBurned: number;
-    time: string;
+    calories: number;
+    time?: string;
   };
   onDelete: (id: string) => void;
 };
@@ -29,12 +29,14 @@ const ActivityItem = memo(({ item, onDelete }: ActivityItemProps) => {
           {item.description}
         </AppText>
 
-        <AppText
-          style={{ color: theme.onSurfaceVariant }}
-          type='label-small'
-        >
-          {item.time}
-        </AppText>
+        {item.time && (
+          <AppText
+            style={{ color: theme.onSurfaceVariant }}
+            type='label-small'
+          >
+            {item.time}
+          </AppText>
+        )}
       </View>
 
       <Divider orientation="vertical" />
@@ -54,7 +56,7 @@ const ActivityItem = memo(({ item, onDelete }: ActivityItemProps) => {
 
       <View style={styles.column}>
         <AppText style={styles.centerText} type="title-medium">
-          {item.caloriesBurned}
+          {item.calories}
         </AppText>
         <AppText
           style={styles.centerText}

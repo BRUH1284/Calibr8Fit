@@ -1,5 +1,4 @@
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
-import AppText from "@/shared/components/AppText";
 import { IconItem } from "@/shared/components/DynamicIcon";
 import IconButton from "@/shared/components/IconButton";
 import Popup from "@/shared/components/Popup";
@@ -8,24 +7,17 @@ import TextRowAdd from "@/shared/components/TextRowAdd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl } from "react-native";
 import { useActivity } from "../hooks/useActivity";
-import { useActivityRecord } from "../hooks/useActivityRecord";
 import { useUserActivity } from "../hooks/useUserActivity";
-
-interface ActivityItem {
-  id: string;
-  userActivityId?: string;
-  majorHeading: string;
-  description: string;
-  metValue: number;
-}
+import { ActivityItem } from "../types/activityRecord";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
+  onActivityAdd: (activity: ActivityItem) => void;
 };
 
-export default function ActivitiesPopup({ visible, onClose }: Props) {
-  const [mode, setMode] = useState<'activity' | 'createActivity' | 'activityRecord'>('activity');
+export default function ActivitiesPopup({ visible, onClose, onActivityAdd }: Props) {
+  const [mode, setMode] = useState<'activity' | 'createActivity'>('activity');
   const [header, setHeader] = useState<string>();
   const [headerRightIcon, setHeaderRightIcon] =
     useState<{ iconName: IconItem['name'], iconLibrary: IconItem['library'] }>();
@@ -33,7 +25,6 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
 
   const { activities, syncActivities } = useActivity();
   const { userActivities, syncUserActivities, addUserActivity } = useUserActivity();
-  const { addActivityRecord } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
   // Handle refresh
@@ -72,13 +63,6 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
     metValue: 0,
   });
 
-  // State for adding activity record
-  const [selectedActivity, setSelectedActivity] = useState<ActivityItem | undefined>(undefined);
-  const [createdActivityRecord, setCreatedActivityRecord] = useState({
-    duration: 0,
-    caloriesBurned: 0
-  });
-
   const setActivityMode = useCallback(() => {
     setMode('activity');
     setHeader('Activities');
@@ -92,14 +76,6 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
   const setActivityCreationMode = useCallback(() => {
     setMode('createActivity');
     setHeader('Create Activity');
-    setHeaderRightIcon(undefined);
-  }, []);
-
-  const setActivityRecordMode = useCallback((activity: ActivityItem) => {
-    setSelectedActivity(activity);
-
-    setMode('activityRecord');
-    setHeader('Add Activity Record');
     setHeaderRightIcon(undefined);
   }, []);
 
@@ -118,25 +94,6 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
 
     setActivityMode();
   }, [createdActivity]);
-
-  const handleAddActivityRecord = useCallback(() => {
-    addActivityRecord({
-      time: Date.now(),
-      duration: createdActivityRecord.duration,
-      caloriesBurned: createdActivityRecord.caloriesBurned,
-      activityId: selectedActivity!.userActivityId ? undefined : selectedActivity!.id,
-      userActivityId: selectedActivity!.userActivityId,
-    });
-
-    // Reset the activity record state
-    setCreatedActivityRecord({
-      duration: 0,
-      caloriesBurned: 0,
-    });
-
-    onClose();
-  }, [createdActivityRecord]);
-
 
   useEffect(() => {
     if (visible) {
@@ -174,7 +131,7 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
             renderItem={({ item }) => (
               <TextRowAdd
                 label={item.description}
-                onPress={() => setActivityRecordMode(item)}
+                onPress={() => onActivityAdd(item)}
                 iconText={item.metValue.toString()}
               />
             )}
@@ -206,49 +163,6 @@ export default function ActivitiesPopup({ visible, onClose }: Props) {
           />
           <IconButton
             onPress={handleCreateActivity}
-            style={{ alignSelf: 'flex-end' }}
-            icon={{
-              name: 'check',
-              size: 32,
-              library: "MaterialIcons",
-            }}
-          />
-        </>
-      }
-      {(mode === 'activityRecord') &&
-        <>
-          <AppText
-            style={{
-              textAlign: 'center',
-            }}
-            type='title-medium'
-          >{selectedActivity!.description}</AppText>
-          <TextField
-            type='number'
-            numberControls={true}
-            label={'Minutes'}
-            value={(createdActivityRecord?.duration / 60).toString()}
-            onChangeText={(value) => setCreatedActivityRecord({
-              duration: parseFloat(value) * 60, // Convert minutes to seconds
-              caloriesBurned: caloriesBurnedCalculator(selectedActivity!.metValue, parseFloat(value))
-            })}
-            suffix='min'
-            minValue={0}
-          />
-          <TextField
-            type='number'
-            numberControls={true}
-            label={'Calories Burned'}
-            value={createdActivityRecord?.caloriesBurned.toString()}
-            onChangeText={(value) => setCreatedActivityRecord({
-              ...createdActivityRecord!,
-              caloriesBurned: parseFloat(value)
-            })}
-            suffix='kcal'
-            minValue={0}
-          />
-          <IconButton
-            onPress={handleAddActivityRecord}
             style={{ alignSelf: 'flex-end' }}
             icon={{
               name: 'check',

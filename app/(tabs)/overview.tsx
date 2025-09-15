@@ -1,6 +1,9 @@
 import ActivitiesListCard from "@/features/activity/components/ActivitiesListCard";
 import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
+import ActivityRecordPopup from "@/features/activity/components/ActivityRecordPopup";
+import DailyBurnListCard from "@/features/activity/components/DailyBurnListCard";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
+import { ActivityItem } from "@/features/activity/types/activityRecord";
 import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
 import FoodPopup from "@/features/nutrition/components/FoodPopup";
@@ -72,6 +75,9 @@ export default function Overview() {
   const [showFood, setShowFood] = useState(false);
   const [showWaterIntake, setShowWaterIntake] = useState(false);
   const [showWeightRecord, setShowWeightRecord] = useState(false);
+  const [showAddDailyBurn, setShowAddDailyBurn] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityItem>();
+  const [showAddActivityRecord, setShowAddActivityRecord] = useState(false);
 
   const { profileSettings } = useProfile();
   const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
@@ -178,7 +184,11 @@ export default function Overview() {
               onAddPress={() => setShowFood(true)}
             />
           </View>
-          <View key="3" style={styles.cardPage}></View>
+          <View key="3" style={styles.cardPage}>
+            <DailyBurnListCard
+              onAddTargetPress={() => setShowAddDailyBurn(true)}
+            />
+          </View>
         </PagerView>
         <View style={{
           flexDirection: 'row',
@@ -203,7 +213,25 @@ export default function Overview() {
       <ActivitiesPopup
         visible={showActivities}
         onClose={() => setShowActivities(false)}
+        onActivityAdd={(activity) => {
+          setSelectedActivity(activity);
+          setShowAddActivityRecord(true);
+          setShowActivities(false);
+        }}
       />
+      {selectedActivity && (<ActivityRecordPopup
+        visible={showAddActivityRecord}
+        activity={selectedActivity!}
+        onClose={() => {
+          setShowAddActivityRecord(false);
+          setSelectedActivity(undefined);
+        }}
+        onBackPress={() => {
+          setShowAddActivityRecord(false);
+          setShowActivities(true);
+          setSelectedActivity(undefined);
+        }}
+      />)}
       <WaterIntakeRecordPopup
         visible={showWaterIntake}
         onClose={() => setShowWaterIntake(false)}

@@ -16,6 +16,7 @@ interface ActivityRecordContextProps {
   loadActivityRecords: () => Promise<ActivityRecord[]>;
   loadTodayActivityRecords: () => Promise<ActivityRecord[]>;
   loadInRange: (start: number, end: number) => Promise<ActivityRecord[]>;
+  todayActivityCaloriesBurned: (activityId: string) => number;
 }
 
 export const ActivityRecordContext = createContext<ActivityRecordContextProps | null>(null);
@@ -73,7 +74,11 @@ export const ActivityRecordProvider = (
     return loadedRecords;
   };
 
-  const loadInRange = activityRecordService.loadInRange;
+  const todayActivityCaloriesBurned = (activityId: string) =>
+    todayRecords
+      .filter(record => record.activityId === activityId || record.userActivityId === activityId)
+      .reduce((total, record) => total + record.caloriesBurned, 0);
+
 
   return (
     <ActivityRecordContext.Provider value={{
@@ -84,7 +89,8 @@ export const ActivityRecordProvider = (
       syncActivityRecords,
       loadActivityRecords,
       loadTodayActivityRecords,
-      loadInRange
+      loadInRange: activityRecordService.loadInRange,
+      todayActivityCaloriesBurned
     }}>
       {children}
     </ActivityRecordContext.Provider>

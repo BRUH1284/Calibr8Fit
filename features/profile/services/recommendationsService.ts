@@ -2,7 +2,7 @@ import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
 
-const caloriesBurnedCalculator = (met: number, minutes: number, weight: number) => {
+const activityEstimateCaloriesBurned = (met: number, minutes: number, weight: number) => {
     const result = weight * met * minutes / 60;
     return Math.round(result);
 };
@@ -129,7 +129,7 @@ const waterCalculator = (
 }
 
 export const recommendationsService = {
-    caloriesBurnedCalculator,
+    activityEstimateCaloriesBurned,
     rmrCalculator,
     waterCalculator,
     burningCalculator,

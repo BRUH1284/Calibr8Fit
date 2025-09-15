@@ -1,5 +1,6 @@
 import ActivitiesPopup from '@/features/activity/components/ActivitiesPopup';
 import { useActivityRecord } from '@/features/activity/hooks/useActivityRecord';
+import { ActivityItem } from '@/features/activity/types/activityRecord';
 import WaterIntakeRecordPopup from '@/features/hydration/components/WaterIntakeRecordPopup';
 import { useWaterIntake } from '@/features/hydration/hooks/useWaterIntake';
 import FoodPopup from '@/features/nutrition/components/FoodPopup';
@@ -90,8 +91,9 @@ export default function Index() {
       />
       <ActivitiesPopup
         visible={showActivities}
-        onClose={() => setShowActivities(false)}
-      />
+        onClose={() => setShowActivities(false)} onActivityAdd={function (activity: ActivityItem): void {
+          throw new Error('Function not implemented.');
+        }} />
       <WaterIntakeRecordPopup
         visible={showWaterIntake}
         onClose={() => setShowWaterIntake(false)}

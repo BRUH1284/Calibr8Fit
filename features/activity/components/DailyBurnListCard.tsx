@@ -1,43 +1,38 @@
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { compactFull } from "@/shared/utils/date";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useActivityRecord } from "../hooks/useActivityRecord";
+import { useDailyBurn } from "../hooks/useDailyBurn";
 import ActivityItem from "./ActivityItem";
 
 type Props = {
-  onAddActivityPress: () => void;
+  onAddTargetPress: () => void;
 };
 
-export default function ActivitiesListCard({ onAddActivityPress }: Props) {
+export default function DailyBurnListCard({ onAddTargetPress }: Props) {
   const theme = useTheme();
 
-  const {
-    todayRecords,
-    todayCaloriesBurned,
-    syncActivityRecords,
-    deleteActivityRecord
-  } = useActivityRecord();
+  const { targets, todayCaloriesBurned, deleteDailyBurnTarget, syncDailyBurnTargets } = useDailyBurn();
+  const { todayActivityCaloriesBurned, todayRecords } = useActivityRecord();
 
-  const minimalRecords = useMemo(() =>
-    todayRecords.map(r => ({
-      id: r.id,
-      description: r.activity?.description || r.userActivity?.description || 'Unknown Activity',
-      duration: r.duration,
-      calories: r.caloriesBurned,
-      time: compactFull(new Date(r.time)),
-    })), [todayRecords]);
+  const minimalTargets = useMemo(() =>
+    targets.map(t => ({
+      id: t.id,
+      description: t.activity?.description || t.userActivity?.description || 'Unknown Activity',
+      duration: t.duration,
+      calories: todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!),
+    })), [targets, todayActivityCaloriesBurned, todayRecords]);
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await syncActivityRecords();
+    await syncDailyBurnTargets();
     setRefreshing(false);
-  }, [syncActivityRecords]);
+  }, [syncDailyBurnTargets]);
 
   return (
     <View style={styles.container}>
@@ -45,7 +40,7 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
         <AppText
           type='title-large'
           style={{ flex: 1 }}
-        >Activities</AppText>
+        >Daily Burn</AppText>
         <AppText
           type='label-large'
         >{`${todayCaloriesBurned} kcal`}</AppText>
@@ -56,7 +51,7 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
             library: 'MaterialIcons',
             color: theme.onSurface,
           }}
-          onPress={onAddActivityPress}
+          onPress={onAddTargetPress}
           style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }} />
       </View>
       <FlatList
@@ -68,10 +63,10 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
         initialNumToRender={8}
         windowSize={5}
         removeClippedSubviews
-        data={minimalRecords}
+        data={minimalTargets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ActivityItem item={item} onDelete={deleteActivityRecord} />
+          <ActivityItem item={item} onDelete={deleteDailyBurnTarget} />
         )}
 
       >
