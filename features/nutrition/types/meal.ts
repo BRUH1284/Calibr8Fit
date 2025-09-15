@@ -37,3 +37,11 @@ export interface AddMeal {
         quantity: number;
     }[];
 }
+
+export interface FoodMealItem {
+    id: string;
+    userFoodId?: string;
+    userMealId?: string;
+    name: string;
+    caloricValue: number;
+}

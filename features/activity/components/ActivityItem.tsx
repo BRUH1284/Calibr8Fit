@@ -43,7 +43,7 @@ const ActivityItem = memo(({ item, onDelete }: ActivityItemProps) => {
 
       <View style={styles.column}>
         <AppText style={styles.centerText} type="title-medium">
-          {item.duration}
+          {item.duration / 60}
         </AppText>
         <AppText
           style={styles.centerText}

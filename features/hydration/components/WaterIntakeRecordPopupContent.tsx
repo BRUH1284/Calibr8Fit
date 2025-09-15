@@ -1,15 +1,14 @@
 import IconButton from "@/shared/components/IconButton";
-import Popup from "@/shared/components/Popup";
+import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useState } from "react";
 import { useWaterIntake } from "../hooks/useWaterIntake";
 
 type Props = {
-  visible: boolean;
   onClose: () => void;
 };
 
-export default function WaterIntakeRecordPopup({ visible, onClose }: Props) {
+export default function WaterIntakeRecordPopupContent({ onClose }: Props) {
   const { addWaterIntakeRecord } = useWaterIntake();
   const [waterIntakeInMl, setWaterIntakeInMl] = useState<number>(0);
 
@@ -26,11 +25,9 @@ export default function WaterIntakeRecordPopup({ visible, onClose }: Props) {
   }, [waterIntakeInMl]);
 
   return (
-    <Popup
-      visible={visible}
-      onClose={onClose}
+    <PopupContentBase
+      header='Add Water Intake Record'
       onBackPress={onClose}
-      header={'Add Water Intake Record'}
     >
       <>
         <TextField
@@ -53,6 +50,6 @@ export default function WaterIntakeRecordPopup({ visible, onClose }: Props) {
           }}
         />
       </>
-    </Popup>
+    </PopupContentBase>
   );
 }

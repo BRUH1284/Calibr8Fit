@@ -1,9 +1,5 @@
-import ActivitiesPopup from '@/features/activity/components/ActivitiesPopup';
 import { useActivityRecord } from '@/features/activity/hooks/useActivityRecord';
-import { ActivityItem } from '@/features/activity/types/activityRecord';
-import WaterIntakeRecordPopup from '@/features/hydration/components/WaterIntakeRecordPopup';
 import { useWaterIntake } from '@/features/hydration/hooks/useWaterIntake';
-import FoodPopup from '@/features/nutrition/components/FoodPopup';
 import { useConsumptionRecord } from '@/features/nutrition/hooks/useConsumptionRecord';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useRecommendations } from '@/features/profile/hooks/useRecommendations';
@@ -85,7 +81,7 @@ export default function Index() {
         />
 
       </ScrollView>
-      <FoodPopup
+      {/* <FoodPopup
         visible={showFood}
         onClose={() => setShowFood(false)}
       />
@@ -94,10 +90,10 @@ export default function Index() {
         onClose={() => setShowActivities(false)} onActivityAdd={function (activity: ActivityItem): void {
           throw new Error('Function not implemented.');
         }} />
-      <WaterIntakeRecordPopup
+      <WaterIntakeRecordPopupContent
         visible={showWaterIntake}
         onClose={() => setShowWaterIntake(false)}
-      />
+      /> */}
     </>
   );
 }

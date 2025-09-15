@@ -193,8 +193,8 @@ export const consumptionRecords = sqliteTable("consumption_records", {
 
 export const dailyBurnTarget = sqliteTable("daily_burn_target", {
     id: text().primaryKey().notNull(),
-    activity_id: text('activity_id').references(() => activities.id).notNull(),
-    user_activity_id: text('user_activity_id').references(() => userActivities.id).notNull(),
+    activityId: text('activity_id').references(() => activities.id),
+    userActivityId: text('user_activity_id').references(() => userActivities.id),
     duration: int('duration').notNull(),
     modifiedAt: int('modified_at').notNull(),
     deleted: int('deleted', { mode: 'boolean' }).notNull().default(false),
@@ -202,6 +202,6 @@ export const dailyBurnTarget = sqliteTable("daily_burn_target", {
 
     (table) => [
         check(`activity_or_user_activity_check`,
-            sql`(${table.activity_id} IS NOT NULL) != (${table.user_activity_id} IS NOT NULL)`),
+            sql`(${table.activityId} IS NOT NULL) != (${table.userActivityId} IS NOT NULL)`),
     ]
 );

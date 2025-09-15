@@ -1,19 +1,23 @@
 import ActivitiesListCard from "@/features/activity/components/ActivitiesListCard";
-import ActivitiesPopup from "@/features/activity/components/ActivitiesPopup";
-import ActivityRecordPopup from "@/features/activity/components/ActivityRecordPopup";
+import ActivitiesListPopupContent from "@/features/activity/components/ActivitiesListPopupContent";
+import ActivityRecordPopupContent from "@/features/activity/components/ActivityRecordPopupContent";
 import DailyBurnListCard from "@/features/activity/components/DailyBurnListCard";
+import DailyBurnPopupContent from "@/features/activity/components/DailyBurnPopupContent";
 import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
+import { useDailyBurn } from "@/features/activity/hooks/useDailyBurn";
 import { ActivityItem } from "@/features/activity/types/activityRecord";
-import WaterIntakeRecordPopup from "@/features/hydration/components/WaterIntakeRecordPopup";
+import WaterIntakeRecordPopupContent from "@/features/hydration/components/WaterIntakeRecordPopupContent";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
-import FoodPopup from "@/features/nutrition/components/FoodPopup";
+import FoodListPopupContent from "@/features/nutrition/components/FoodListPopupContent";
+import FoodRecordPopupContent from "@/features/nutrition/components/FoodRecordPopupContent";
 import RationListCard from "@/features/nutrition/components/RationListCard";
 import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionRecord";
 import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
-import WeightRecordPopup from "@/features/weight/components/WeightRecordPopup";
+import WeightRecordPopup from "@/features/weight/components/WeightRecordPopupContent";
 import { useWeightRecord } from "@/features/weight/hooks/useWeightRecord";
 import IconTile from "@/shared/components/IconTile";
+import Popup from "@/shared/components/Popup";
 import ProgressCarousel from "@/shared/components/ProgressCarousel";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { AppTheme } from "@/styles/themes";
@@ -71,13 +75,7 @@ export default function Overview() {
   const theme = useTheme();
   const styles = useStyles(theme);
 
-  const [showActivities, setShowActivities] = useState(false);
-  const [showFood, setShowFood] = useState(false);
-  const [showWaterIntake, setShowWaterIntake] = useState(false);
-  const [showWeightRecord, setShowWeightRecord] = useState(false);
-  const [showAddDailyBurn, setShowAddDailyBurn] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityItem>();
-  const [showAddActivityRecord, setShowAddActivityRecord] = useState(false);
+  const [popupContent, setPopupContent] = useState<React.ReactNode>();
 
   const { profileSettings } = useProfile();
   const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
@@ -95,6 +93,51 @@ export default function Overview() {
     for (let i = 0; i < PAGE_COUNT; i++)
       progressArray[i].value = i === position ? 1 - offset : i === position + 1 ? offset : 0;
   }, [progressArray]);
+
+  const openFoodPopup = useCallback(() => {
+    setPopupContent(
+      <FoodListPopupContent
+        onClose={() => setPopupContent(undefined)}
+        onFoodSelect={(item) => setPopupContent(
+          <FoodRecordPopupContent
+            item={item}
+            onClose={() => setPopupContent(undefined)}
+          />
+        )}
+      />
+    );
+  }, []);
+
+  const openActivitiesPopup = useCallback(() => {
+    setPopupContent(
+      <ActivitiesListPopupContent
+        onClose={() => setPopupContent(undefined)}
+        onActivitySelect={(item: ActivityItem) => setPopupContent(
+          <ActivityRecordPopupContent
+            activity={item}
+            onClose={() => setPopupContent(undefined)}
+          />
+        )}
+      />
+    );
+  }, []);
+
+  const { targets } = useDailyBurn();
+
+  const openDailyBurnPopup = useCallback(() => {
+    setPopupContent(
+      <ActivitiesListPopupContent
+        onClose={() => setPopupContent(undefined)}
+        bannedIdList={new Set(targets.map(t => t.activityId ?? t.userActivityId!))}
+        onActivitySelect={(item: ActivityItem) => setPopupContent(
+          <DailyBurnPopupContent
+            activity={item}
+            onClose={() => setPopupContent(undefined)}
+          />
+        )}
+      />
+    );
+  }, [targets]);
 
   return (
     <View
@@ -126,7 +169,7 @@ export default function Overview() {
             name: 'fastfood',
             library: 'MaterialIcons'
           }}
-          onPress={() => setShowFood(true)}
+          onPress={openFoodPopup}
         />
         <IconTile
           style={{ flex: 1 }}
@@ -136,7 +179,7 @@ export default function Overview() {
             name: 'local-fire-department',
             library: 'MaterialIcons'
           }}
-          onPress={() => setShowActivities(true)}
+          onPress={openActivitiesPopup}
         />
       </View>
       <View style={{
@@ -151,7 +194,11 @@ export default function Overview() {
             name: 'water-drop',
             library: 'MaterialIcons'
           }}
-          onPress={() => setShowWaterIntake(true)}
+          onPress={() => setPopupContent(
+            <WaterIntakeRecordPopupContent
+              onClose={() => setPopupContent(undefined)}
+            />
+          )}
         />
         <IconTile
           style={{ flex: 1 }}
@@ -161,7 +208,10 @@ export default function Overview() {
             name: 'monitor-weight',
             library: 'MaterialIcons'
           }}
-          onPress={() => setShowWeightRecord(true)}
+          onPress={() => setPopupContent(
+            <WeightRecordPopup
+              onClose={() => setPopupContent(undefined)}
+            />)}
         />
       </View>
       <View
@@ -176,17 +226,17 @@ export default function Overview() {
         >
           <View key="1" style={styles.cardPage}>
             <ActivitiesListCard
-              onAddActivityPress={() => setShowActivities(true)}
+              onAddActivityPress={openActivitiesPopup}
             />
           </View>
           <View key="2" style={styles.cardPage}>
             <RationListCard
-              onAddPress={() => setShowFood(true)}
+              onAddPress={openFoodPopup}
             />
           </View>
           <View key="3" style={styles.cardPage}>
             <DailyBurnListCard
-              onAddTargetPress={() => setShowAddDailyBurn(true)}
+              onAddTargetPress={openDailyBurnPopup}
             />
           </View>
         </PagerView>
@@ -206,39 +256,10 @@ export default function Overview() {
           ))}
         </View>
       </View>
-      <FoodPopup
-        visible={showFood}
-        onClose={() => setShowFood(false)}
-      />
-      <ActivitiesPopup
-        visible={showActivities}
-        onClose={() => setShowActivities(false)}
-        onActivityAdd={(activity) => {
-          setSelectedActivity(activity);
-          setShowAddActivityRecord(true);
-          setShowActivities(false);
-        }}
-      />
-      {selectedActivity && (<ActivityRecordPopup
-        visible={showAddActivityRecord}
-        activity={selectedActivity!}
-        onClose={() => {
-          setShowAddActivityRecord(false);
-          setSelectedActivity(undefined);
-        }}
-        onBackPress={() => {
-          setShowAddActivityRecord(false);
-          setShowActivities(true);
-          setSelectedActivity(undefined);
-        }}
-      />)}
-      <WaterIntakeRecordPopup
-        visible={showWaterIntake}
-        onClose={() => setShowWaterIntake(false)}
-      />
-      <WeightRecordPopup
-        visible={showWeightRecord}
-        onClose={() => setShowWeightRecord(false)}
+      <Popup
+        visible={!!popupContent}
+        onClose={() => setPopupContent(undefined)}
+        children={popupContent}
       />
     </View>
   );

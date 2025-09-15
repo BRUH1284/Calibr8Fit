@@ -1,7 +1,7 @@
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
-import Popup from "@/shared/components/Popup";
+import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useState } from "react";
 import { useActivityRecord } from "../hooks/useActivityRecord";
@@ -9,12 +9,10 @@ import { ActivityItem } from "../types/activityRecord";
 
 type Props = {
   activity: ActivityItem;
-  visible: boolean;
   onClose: () => void;
-  onBackPress: () => void;
 };
 
-export default function ActivityRecordPopup({ activity, visible, onClose, onBackPress }: Props) {
+export default function ActivityRecordPopupContent({ activity, onClose }: Props) {
   const { addActivityRecord } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
@@ -43,10 +41,8 @@ export default function ActivityRecordPopup({ activity, visible, onClose, onBack
   }, [createdActivityRecord]);
 
   return (
-    <Popup
-      visible={visible}
-      onClose={onClose}
-      onBackPress={onBackPress}
+    <PopupContentBase
+      onBackPress={onClose}
       header={'Add Activity Record'}
     >
       <>
@@ -90,6 +86,6 @@ export default function ActivityRecordPopup({ activity, visible, onClose, onBack
           }}
         />
       </>
-    </Popup>
+    </PopupContentBase>
   );
 }

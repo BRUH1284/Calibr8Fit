@@ -11,6 +11,7 @@ import m0006 from './0006_romantic_expediter.sql';
 import m0007 from './0007_hot_wilson_fisk.sql';
 import m0008 from './0008_productive_puck.sql';
 import m0009 from './0009_violet_cargill.sql';
+import m0010 from './0010_shocking_lake.sql';
 
   export default {
     journal,
@@ -24,7 +25,8 @@ m0005,
 m0006,
 m0007,
 m0008,
-m0009
+m0009,
+m0010
     }
   }
   

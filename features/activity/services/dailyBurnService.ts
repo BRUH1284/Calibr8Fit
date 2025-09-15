@@ -15,8 +15,8 @@ const loadInRange = async (start: number, end: number): Promise<DailyBurnTarget[
     return await db
         .select({
             id: dailyBurnTarget.id,
-            activityId: dailyBurnTarget.activity_id,
-            userActivityId: dailyBurnTarget.user_activity_id,
+            activityId: dailyBurnTarget.activityId,
+            userActivityId: dailyBurnTarget.userActivityId,
             duration: dailyBurnTarget.duration,
             modifiedAt: dailyBurnTarget.modifiedAt,
             deleted: dailyBurnTarget.deleted,
@@ -36,8 +36,8 @@ const loadInRange = async (start: number, end: number): Promise<DailyBurnTarget[
             },
         })
         .from(dailyBurnTarget)
-        .leftJoin(activities, eq(dailyBurnTarget.activity_id, activities.id))
-        .leftJoin(userActivities, eq(dailyBurnTarget.user_activity_id, userActivities.id))
+        .leftJoin(activities, eq(dailyBurnTarget.activityId, activities.id))
+        .leftJoin(userActivities, eq(dailyBurnTarget.userActivityId, userActivities.id))
         .where(and(...predicates));
 }
 
@@ -88,8 +88,8 @@ const syncService = createSyncService<
     })),
     primaryKey: dailyBurnTarget.id,
     upsertSet: {
-        activity_id: sql.raw(`excluded.${dailyBurnTarget.activity_id.name}`),
-        user_activity_id: sql.raw(`excluded.${dailyBurnTarget.user_activity_id.name}`),
+        activityId: sql.raw(`excluded.${dailyBurnTarget.activityId.name}`),
+        userActivityId: sql.raw(`excluded.${dailyBurnTarget.userActivityId.name}`),
         duration: sql.raw(`excluded.${dailyBurnTarget.duration.name}`),
         modifiedAt: sql.raw(`excluded.${dailyBurnTarget.modifiedAt.name}`),
         deleted: sql.raw(`excluded.${dailyBurnTarget.deleted.name}`),
