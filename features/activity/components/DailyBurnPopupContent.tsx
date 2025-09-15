@@ -56,21 +56,11 @@ export default function DailyBurnPopupContent({ activity, onClose }: Props) {
           suffix='min'
           minValue={0}
         />
-        <AppText>
+        <AppText
+          type='title-medium'
+        >
           {`Estimated Calories Burned: ${calories} kcal`}
         </AppText>
-        {/* <TextField
-          type='number'
-          numberControls={true}
-          label={'Calories Burned'}
-          value={createdActivityRecord?.caloriesBurned.toString()}
-          onChangeText={(value) => setCreatedActivityRecord({
-            ...createdActivityRecord!,
-            caloriesBurned: parseFloat(value)
-          })}
-          suffix='kcal'
-          minValue={0}
-        /> */}
         <IconButton
           onPress={handleAddDailyBurnTarget}
           style={{ alignSelf: 'flex-end' }}

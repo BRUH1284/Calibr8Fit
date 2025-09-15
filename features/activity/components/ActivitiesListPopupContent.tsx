@@ -166,7 +166,7 @@ export default function ActivitiesListPopupContent({ onClose, onActivitySelect, 
                 <TextRowAdd
                   label={item.description}
                   onPress={() => onActivitySelect(item)}
-                  iconText={item.metValue.toString()}
+                  iconText={`${item.metValue.toString()} MET`}
                 />
               )}
             />

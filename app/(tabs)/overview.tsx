@@ -122,6 +122,22 @@ export default function Overview() {
     );
   }, []);
 
+  const openWaterIntakePopup = useCallback(() => {
+    setPopupContent(
+      <WaterIntakeRecordPopupContent
+        onClose={() => setPopupContent(undefined)}
+      />
+    );
+  }, []);
+
+  const openWeightRecordPopup = useCallback(() => {
+    setPopupContent(
+      <WeightRecordPopup
+        onClose={() => setPopupContent(undefined)}
+      />)
+  }
+    , []);
+
   const { targets } = useDailyBurn();
 
   const openDailyBurnPopup = useCallback(() => {
@@ -194,11 +210,7 @@ export default function Overview() {
             name: 'water-drop',
             library: 'MaterialIcons'
           }}
-          onPress={() => setPopupContent(
-            <WaterIntakeRecordPopupContent
-              onClose={() => setPopupContent(undefined)}
-            />
-          )}
+          onPress={openWaterIntakePopup}
         />
         <IconTile
           style={{ flex: 1 }}
@@ -208,10 +220,7 @@ export default function Overview() {
             name: 'monitor-weight',
             library: 'MaterialIcons'
           }}
-          onPress={() => setPopupContent(
-            <WeightRecordPopup
-              onClose={() => setPopupContent(undefined)}
-            />)}
+          onPress={openWeightRecordPopup}
         />
       </View>
       <View

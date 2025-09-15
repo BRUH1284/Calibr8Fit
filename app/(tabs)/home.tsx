@@ -1,21 +1,63 @@
+import ActivitiesListPopupContent from '@/features/activity/components/ActivitiesListPopupContent';
+import ActivityRecordPopupContent from '@/features/activity/components/ActivityRecordPopupContent';
+import DailyBurnProgressList from '@/features/activity/components/DailyBurnProgressList';
 import { useActivityRecord } from '@/features/activity/hooks/useActivityRecord';
+import { ActivityItem } from '@/features/activity/types/activityRecord';
+import WaterIntakeRecordPopupContent from '@/features/hydration/components/WaterIntakeRecordPopupContent';
 import { useWaterIntake } from '@/features/hydration/hooks/useWaterIntake';
+import FoodListPopupContent from '@/features/nutrition/components/FoodListPopupContent';
+import FoodRecordPopupContent from '@/features/nutrition/components/FoodRecordPopupContent';
 import { useConsumptionRecord } from '@/features/nutrition/hooks/useConsumptionRecord';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useRecommendations } from '@/features/profile/hooks/useRecommendations';
 import AppText from '@/shared/components/AppText';
 import IconAddProgressIndicator from '@/shared/components/IconAddProgressIndicator';
 import IconButton from '@/shared/components/IconButton';
+import Popup from '@/shared/components/Popup';
 import { useTheme } from '@/shared/hooks/useTheme';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 export default function Index() {
   const theme = useTheme();
 
-  const [showActivities, setShowActivities] = useState(false);
-  const [showFood, setShowFood] = useState(false);
-  const [showWaterIntake, setShowWaterIntake] = useState(false);
+  const [popupContent, setPopupContent] = useState<React.ReactNode>();
+
+  const openFoodPopup = useCallback(() => {
+    setPopupContent(
+      <FoodListPopupContent
+        onClose={() => setPopupContent(undefined)}
+        onFoodSelect={(item) => setPopupContent(
+          <FoodRecordPopupContent
+            item={item}
+            onClose={() => setPopupContent(undefined)}
+          />
+        )}
+      />
+    );
+  }, []);
+
+  const openActivitiesPopup = useCallback(() => {
+    setPopupContent(
+      <ActivitiesListPopupContent
+        onClose={() => setPopupContent(undefined)}
+        onActivitySelect={(item: ActivityItem) => setPopupContent(
+          <ActivityRecordPopupContent
+            activity={item}
+            onClose={() => setPopupContent(undefined)}
+          />
+        )}
+      />
+    );
+  }, []);
+
+  const openWaterIntakePopup = useCallback(() => {
+    setPopupContent(
+      <WaterIntakeRecordPopupContent
+        onClose={() => setPopupContent(undefined)}
+      />
+    );
+  }, []);
 
   const { profileSettings } = useProfile();
   const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
@@ -59,7 +101,7 @@ export default function Index() {
             library: 'MaterialIcons',
             size: 24,
           }}
-          onAddPress={() => setShowActivities(true)}
+          onAddPress={openActivitiesPopup}
         />
         <IconAddProgressIndicator
           progress={rationProgress}
@@ -68,7 +110,7 @@ export default function Index() {
             library: 'MaterialIcons',
             size: 24,
           }}
-          onAddPress={() => setShowFood(true)}
+          onAddPress={openFoodPopup}
         />
         <IconAddProgressIndicator
           progress={waterProgress}
@@ -77,23 +119,16 @@ export default function Index() {
             library: 'MaterialIcons',
             size: 24,
           }}
-          onAddPress={() => setShowWaterIntake(true)}
+          onAddPress={openWaterIntakePopup}
         />
+        <DailyBurnProgressList />
 
       </ScrollView>
-      {/* <FoodPopup
-        visible={showFood}
-        onClose={() => setShowFood(false)}
+      <Popup
+        visible={!!popupContent}
+        onClose={() => setPopupContent(undefined)}
+        children={popupContent}
       />
-      <ActivitiesPopup
-        visible={showActivities}
-        onClose={() => setShowActivities(false)} onActivityAdd={function (activity: ActivityItem): void {
-          throw new Error('Function not implemented.');
-        }} />
-      <WaterIntakeRecordPopupContent
-        visible={showWaterIntake}
-        onClose={() => setShowWaterIntake(false)}
-      /> */}
     </>
   );
 }

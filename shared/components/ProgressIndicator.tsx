@@ -80,78 +80,83 @@ const ProgressIndicator = memo(
     });
 
     return (
-      <View
-        style={[
-          styles.track,
-          {
-            height,
-            borderRadius: height / 2,
-          },
-          style
-        ]}
-        onLayout={e => {
-          const w = e.nativeEvent.layout.width;
-          containerWidth.value = w;
-        }}
-      >
-        <Animated.View
-          style={[
-            styles.fill,
-            {
-              height,
-              backgroundColor: color,
-            },
-            barStyle
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.fill,
-            {
-              height,
-              backgroundColor: backgroundColor,
-            },
-            trackStyle]}
-        />
-        <Animated.View
-          style={[
-            styles.fill,
-            trackCapStyle,
-            {
-              height,
-              width: height,
-              borderRadius: height / 2,
-              backgroundColor: backgroundColor,
-            }]}
-        />
-        <Animated.View
-          style={[
-            styles.fill,
-            barCapStyle,
-            {
-              height,
-              width: height,
-              borderRadius: height / 2,
-              backgroundColor: color,
-            }]}
-        />
+      <View style={[styles.container, style]}>
         <View
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            height,
-            width: height,
-            borderRadius: height / 2,
-            backgroundColor: color
+          style={[
+            styles.track,
+            {
+              height,
+              borderRadius: height / 2,
+            },
+          ]}
+          onLayout={e => {
+            const w = e.nativeEvent.layout.width;
+            containerWidth.value = w;
           }}
-        />
+        >
+          <Animated.View
+            style={[
+              styles.fill,
+              {
+                height,
+                backgroundColor: color,
+              },
+              barStyle
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.fill,
+              {
+                height,
+                backgroundColor: backgroundColor,
+              },
+              trackStyle]}
+          />
+          <Animated.View
+            style={[
+              styles.fill,
+              trackCapStyle,
+              {
+                height,
+                width: height,
+                borderRadius: height / 2,
+                backgroundColor: backgroundColor,
+              }]}
+          />
+          <Animated.View
+            style={[
+              styles.fill,
+              barCapStyle,
+              {
+                height,
+                width: height,
+                borderRadius: height / 2,
+                backgroundColor: color,
+              }]}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              height,
+              width: height,
+              borderRadius: height / 2,
+              backgroundColor: color
+            }}
+          />
+        </View>
       </View>
     );
   }
 );
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    flexShrink: 1,
+  },
   track: {
     overflow: "hidden",
     flex: 1,
