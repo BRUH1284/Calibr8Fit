@@ -39,7 +39,7 @@ export default function TextRowAdd({
           size: 24,
           color: theme.onSurface
         }}
-        style={{ backgroundColor: theme.primaryContainer }} />
+        style={{ backgroundColor: theme.primaryVariant }} />
     </View>
   );
 }

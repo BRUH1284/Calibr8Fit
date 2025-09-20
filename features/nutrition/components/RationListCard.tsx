@@ -3,7 +3,7 @@ import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { compactFull } from "@/shared/utils/date";
 import { useMemo, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useConsumptionRecord } from "../hooks/useConsumptionRecord";
 import { calcCaloricValue } from "../types/consumptionRecord";
 import RationItem from "./RationItem";
@@ -41,13 +41,8 @@ export default function RationListCard({ onAddPress }: Props) {
   };
 
   return (
-    <View style={{ gap: 16 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
+    <View style={styles.container}>
+      <View style={styles.header}>
         <AppText
           type='title-large'
           style={{ flex: 1 }}
@@ -63,7 +58,7 @@ export default function RationListCard({ onAddPress }: Props) {
             color: theme.onSurface,
           }}
           onPress={onAddPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }} />
+          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
 
       </View>
       <FlatList
@@ -80,3 +75,19 @@ export default function RationListCard({ onAddPress }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  listItem: {
+    flexDirection: "row",
+    marginBottom: 8,
+    gap: 16,
+  }
+});

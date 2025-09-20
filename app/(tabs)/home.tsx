@@ -1,6 +1,7 @@
 import ActivitiesListPopupContent from '@/features/activity/components/ActivitiesListPopupContent';
 import ActivityRecordPopupContent from '@/features/activity/components/ActivityRecordPopupContent';
 import DailyBurnProgressList from '@/features/activity/components/DailyBurnProgressList';
+import { useActivity } from '@/features/activity/hooks/useActivity';
 import { useActivityRecord } from '@/features/activity/hooks/useActivityRecord';
 import { ActivityItem } from '@/features/activity/types/activityRecord';
 import WaterIntakeRecordPopupContent from '@/features/hydration/components/WaterIntakeRecordPopupContent';
@@ -8,6 +9,7 @@ import { useWaterIntake } from '@/features/hydration/hooks/useWaterIntake';
 import FoodListPopupContent from '@/features/nutrition/components/FoodListPopupContent';
 import FoodRecordPopupContent from '@/features/nutrition/components/FoodRecordPopupContent';
 import { useConsumptionRecord } from '@/features/nutrition/hooks/useConsumptionRecord';
+import { useFood } from '@/features/nutrition/hooks/useFood';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useRecommendations } from '@/features/profile/hooks/useRecommendations';
 import AppText from '@/shared/components/AppText';
@@ -15,10 +17,11 @@ import IconAddProgressIndicator from '@/shared/components/IconAddProgressIndicat
 import IconButton from '@/shared/components/IconButton';
 import Popup from '@/shared/components/Popup';
 import { useTheme } from '@/shared/hooks/useTheme';
+import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 
-export default function Index() {
+export default function Home() {
   const theme = useTheme();
 
   const [popupContent, setPopupContent] = useState<React.ReactNode>();
@@ -61,23 +64,45 @@ export default function Index() {
 
   const { profileSettings } = useProfile();
   const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
-  const { todayWaterIntakeInMl } = useWaterIntake();
-  const { todayCaloriesConsumed } = useConsumptionRecord();
-  const { todayCaloriesBurned } = useActivityRecord();
+  const { todayWaterIntakeInMl, syncWaterIntake } = useWaterIntake();
+  const { syncFoods } = useFood();
+  const { todayCaloriesConsumed, syncConsumptionRecords } = useConsumptionRecord();
+  const { todayCaloriesBurned, syncActivityRecords } = useActivityRecord();
+  const { syncActivities } = useActivity();
 
   const burnProgress = burnTarget ? Math.min(todayCaloriesBurned / burnTarget, 1) : 1;
   const rationProgress = consumptionTarget ? Math.min(todayCaloriesConsumed / consumptionTarget, 1) : 0;
   const waterProgress = todayWaterIntakeInMl / 1000 / waterIntake;
 
+  // Handle refresh
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await syncWaterIntake();
+    await syncActivities();
+    await syncFoods();
+    await syncConsumptionRecords();
+    await syncActivityRecords();
+    setRefreshing(false);
+  };
+
   return (
     <>
-      <ScrollView contentContainerStyle={{
-        flex: 1,
-        paddingHorizontal: 16,
-        backgroundColor: theme.surface,
-        gap: 8,
-      }}
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh} />
+        }
+        contentContainerStyle={{
+          flex: 1,
+          paddingHorizontal: 16,
+          backgroundColor: theme.surface,
+          gap: 8,
+        }}
       >
+
         <View style={{
           flexDirection: 'row',
           justifyContent: 'space-between'
@@ -92,6 +117,7 @@ export default function Index() {
               size: 24,
             }}
             variant='icon'
+            onPress={() => router.push('/profile/userSearch')}
           />
         </View>
         <IconAddProgressIndicator

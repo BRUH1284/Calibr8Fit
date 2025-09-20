@@ -54,10 +54,10 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
             name: 'add',
             size: 36,
             library: 'MaterialIcons',
-            color: theme.onSurface,
+            color: theme.onPrimaryVariant,
           }}
           onPress={onAddActivityPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }} />
+          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
       </View>
       <FlatList
         refreshControl={
@@ -93,11 +93,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 8,
     gap: 16,
-  },
-  column: {
-    width: 48,
-  },
-  centerText: {
-    textAlign: "center",
   },
 });

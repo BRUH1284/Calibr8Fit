@@ -5,6 +5,16 @@ export const Typography = StyleSheet.create({
         fontSize: 16,
         lineHeight: 24
     },
+    'body-medium': {
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: '500'
+    },
+    'body-medium-bold': {
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: '700'
+    },
     'body-small': {
         fontSize: 12,
         lineHeight: 16
@@ -16,7 +26,12 @@ export const Typography = StyleSheet.create({
     'title-large': {
         fontSize: 22,
         lineHeight: 28,
-        fontWeight: '400'
+        fontWeight: '500'
+    },
+    'title-large-bold': {
+        fontSize: 22,
+        lineHeight: 28,
+        fontWeight: '600'
     },
     'title-medium': {
         fontSize: 16,

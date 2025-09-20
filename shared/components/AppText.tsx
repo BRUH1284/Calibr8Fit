@@ -13,7 +13,8 @@ type Props = {
 
 export default function AppText({
   type = 'headline-medium',
-  color = 'onSurface', style,
+  color = 'onSurface',
+  style,
   children,
   ...props }: Props) {
   const theme = useTheme();

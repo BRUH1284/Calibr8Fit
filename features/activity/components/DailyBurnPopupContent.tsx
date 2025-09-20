@@ -54,7 +54,7 @@ export default function DailyBurnPopupContent({ activity, onClose }: Props) {
           value={(duration / 60).toString()}
           onChangeText={(value) => setDuration(parseInt(value) * 60)}
           suffix='min'
-          minValue={0}
+          minValue={1}
         />
         <AppText
           type='title-medium'

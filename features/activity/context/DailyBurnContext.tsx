@@ -66,7 +66,6 @@ export const DailyBurnProvider = (
   };
 
   const deleteDailyBurnTarget = async (id: string) => {
-    setTodayTargets(prevTargets => prevTargets.filter(target => target.id !== id));
     await dailyBurnService.softDelete(id);
     loadTodayDailyBurnTargets();
   };

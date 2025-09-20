@@ -28,9 +28,11 @@ export default function IconTile({
         flexGrow: 1,
         padding: 16,
         borderRadius: 16,
-        backgroundColor: backgroundColor || theme.surfaceContainer,
+        backgroundColor: backgroundColor || theme.surface,
         alignItems: 'center',
         flexDirection: 'row',
+        borderWidth: 1,
+        borderColor: theme.outline
       }, style]}
       onPress={onPress}
     >

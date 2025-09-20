@@ -42,7 +42,8 @@ export default function TabLayout() {
                           <DailyBurnProvider>
                             <SafeAreaView
                               edges={['top']}
-                              style={{ backgroundColor: theme.surface }} />
+                              style={{ backgroundColor: theme.surface }} >
+                            </SafeAreaView>
                             <Tabs
                               screenOptions={({ route }) => {
                                 const config = screenConfigs[route.name];
@@ -80,7 +81,7 @@ export default function TabLayout() {
                               <Tabs.Screen name="overview" />
                               <Tabs.Screen name="statistics" />
                               <Tabs.Screen name="messenger" />
-                              <Tabs.Screen name="profile" />
+                              <Tabs.Screen name="myProfile" />
                             </Tabs>
                           </DailyBurnProvider>
                         </WeightRecordProvider>

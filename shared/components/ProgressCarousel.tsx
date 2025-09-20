@@ -106,18 +106,18 @@ export default function ProgressCarousel() {
           strokeWidth={6}
           rings={[
             {
-              color: theme.exercise,
-              backgroundColor: theme.surfaceVariant,
+              color: theme.orange,
+              backgroundColor: theme.surfaceContainer,
               progress: item.burnProgress,
             },
             {
-              color: theme.food,
-              backgroundColor: theme.surfaceVariant,
+              color: theme.yellow,
+              backgroundColor: theme.surfaceContainer,
               progress: item.rationProgress,
             },
             {
-              color: theme.water,
-              backgroundColor: theme.surfaceVariant,
+              color: theme.blue,
+              backgroundColor: theme.surfaceContainer,
               progress: item.waterProgress,
             },
           ]}
@@ -125,17 +125,17 @@ export default function ProgressCarousel() {
             {
               name: 'local-fire-department',
               library: 'MaterialIcons',
-              color: item.burnProgress >= 1 ? theme.exercise : theme.surfaceVariant,
+              color: item.burnProgress >= 1 ? theme.orange : theme.surfaceContainer,
             },
             {
               name: 'fastfood',
               library: 'MaterialIcons',
-              color: item.rationProgress >= 1 ? theme.food : theme.surfaceVariant,
+              color: item.rationProgress >= 1 ? theme.yellow : theme.surfaceContainer,
             },
             {
               name: 'water-drop',
               library: 'MaterialIcons',
-              color: item.waterProgress >= 1 ? theme.water : theme.surfaceVariant,
+              color: item.waterProgress >= 1 ? theme.blue : theme.surfaceContainer,
             }
           ]}
         />

@@ -52,7 +52,7 @@ export default function DailyBurnListCard({ onAddTargetPress }: Props) {
             color: theme.onSurface,
           }}
           onPress={onAddTargetPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryContainer }} />
+          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
       </View>
       <FlatList
         refreshControl={
@@ -88,11 +88,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 8,
     gap: 16,
-  },
-  column: {
-    width: 48,
-  },
-  centerText: {
-    textAlign: "center",
   },
 });

@@ -1,4 +1,4 @@
-import { router, Slot, useSegments } from "expo-router";
+import { router, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
@@ -33,5 +33,5 @@ export default function AuthNavigationProvider() {
     }
   }, [isChecking, authenticated, registrationComplete]);
 
-  return <Slot />;
+  return null;
 }

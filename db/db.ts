@@ -4,6 +4,7 @@ import {
     activities,
     activityRecords,
     consumptionRecords,
+    dailyBurnTarget,
     foods,
     userActivities,
     userFoods,
@@ -23,6 +24,7 @@ export const clearAllTables = async (): Promise<void> => {
         await db.delete(userMealIngredients);
         await db.delete(activityRecords);
         await db.delete(consumptionRecords);
+        await db.delete(dailyBurnTarget);
 
         // Then delete from other tables
         await db.delete(userMeals);

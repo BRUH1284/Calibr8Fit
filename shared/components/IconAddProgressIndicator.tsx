@@ -27,22 +27,23 @@ export default function IconAddProgressIndicator({
         name={icon.name}
         library={icon.library}
         size={icon.size}
+        color={icon.color}
       />
       <ProgressIndicator
         color={theme.primary}
-        backgroundColor={theme.surfaceVariant}
+        backgroundColor={theme.surfaceContainer}
         progress={progress}
       />
       <IconButton
         icon={{
           name: 'add',
           library: 'MaterialIcons',
-          color: theme.onSurface,
+          color: theme.onPrimaryVariant,
           size: icon.size,
         }}
         style={{
           padding: 0,
-          backgroundColor: theme.primaryContainer
+          backgroundColor: theme.primaryVariant
         }}
         onPress={onAddPress}
       />

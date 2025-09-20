@@ -54,7 +54,7 @@ export default function SignIn() {
       <Image style={{ height: 288, alignSelf: 'stretch', backgroundColor: 'red' }}
         source={require('@/assets/images/react-logo.png')}
       />
-      <AppText type='headline-medum' style={{ textAlign: 'center' }}>Sign in to Calibr8Fit</AppText>
+      <AppText type='headline-medium' style={{ textAlign: 'center' }}>Sign in to Calibr8Fit</AppText>
       <View style={{ gap: 6, height: 256 }}>
         <TextField
           label='Username'

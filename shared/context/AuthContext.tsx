@@ -68,6 +68,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Check local storage for registration state
           if (!await authService.isRegistered())
             registrationComplete = true;
+        } else {
+          // If 401, clear tokens
+          await authService.logout();
+          setAuthenticated(false);
+          setRegistrationComplete(false);
+          setIsChecking(false);
+          return;
         }
       }
     }

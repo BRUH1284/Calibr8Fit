@@ -61,7 +61,9 @@ const useStyles = (theme: AppTheme) => React.useMemo(() => StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
-    backgroundColor: theme.surfaceContainer,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.outline
   },
   circleIndicator: {
     height: 8,
@@ -166,10 +168,12 @@ export default function Overview() {
     >
       <View style={{
         height: 144,
-        backgroundColor: theme.surfaceContainer,
+        backgroundColor: theme.surface,
         marginVertical: 8,
         borderRadius: 16,
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: theme.outline
       }} >
         <ProgressCarousel />
       </View>

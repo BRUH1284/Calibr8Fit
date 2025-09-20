@@ -70,9 +70,9 @@ const RationItem = memo(({ item, onDelete }: RationItemProps) => {
           name: "delete-outline",
           library: "MaterialIcons",
           size: 32,
-          color: theme.onSurface,
+          color: theme.onErrorVariant,
         }}
-        style={{ backgroundColor: theme.tertiaryContainer }}
+        style={{ backgroundColor: theme.errorVariant }}
         onPress={() => onDelete(item.id)}
       />
     </View>

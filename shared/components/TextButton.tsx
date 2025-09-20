@@ -29,7 +29,7 @@ export default function TextButton({
 
   const backgroundColor = {
     filled: theme.primary,
-    tonal: theme.secondaryContainer,
+    tonal: theme.primaryVariant,
     toggle: theme.surfaceContainer,
     text: 'transparent',
   }[variant] || theme.primary;
