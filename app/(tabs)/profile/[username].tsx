@@ -54,7 +54,12 @@ export default function UserProfileScreen() {
               selectedUser?.friendshipStatus === FriendshipStatus.Friends ? "Unfriend" :
                 selectedUser?.friendshipStatus === FriendshipStatus.PendingSent ? "Cancel Request" :
                   "Add Friend"}
-            style={{ borderRadius: 8, padding: 4, flex: 1 }}
+            style={{
+              borderRadius: 8,
+              padding: 4,
+              flex: 1,
+              backgroundColor: selectedUser?.friendshipStatus === FriendshipStatus.None ? theme.primary : theme.error
+            }}
             onPress={() => handleFriendInteraction()}
           />);
       case FriendshipStatus.PendingReceived:

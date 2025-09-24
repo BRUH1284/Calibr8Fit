@@ -166,10 +166,10 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
                     name: 'close',
                     size: 20,
                     library: 'MaterialIcons',
-                    color: theme.onSurface
+                    color: theme.onErrorVariant
                   }}
                   style={{
-                    backgroundColor: theme.tertiaryContainer
+                    backgroundColor: theme.errorVariant
                   }}
                   onPress={() => removeIngredient(item.food.id)}
                 />

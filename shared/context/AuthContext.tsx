@@ -3,6 +3,7 @@ import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
 import { createContext, useEffect, useState } from "react";
 import { authManager } from "../services/authManager";
 import { authService } from "../services/authService";
+import { pushService } from "../services/pushService";
 
 interface AuthContextProps {
   authenticated: boolean;
@@ -57,6 +58,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (profileSettings.firstName !== '')
           registrationComplete = true;
+
+        pushService.register();
       } catch (error) {
         // If fetching profile settings fails, assume not authenticated
         console.warn("Authentication check failed:", (error as any).status || error);
@@ -78,7 +81,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     }
-
     // Update context state
     setAuthenticated(authenticated);
     setRegistrationComplete(registrationComplete);
@@ -104,6 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return;
   }
 
+  // TODO: logout only while connected to internet
   const logout = async () => {
     console.warn("Logging out...");
     await authService.logout();

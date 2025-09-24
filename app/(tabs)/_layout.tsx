@@ -81,7 +81,7 @@ export default function TabLayout() {
                               <Tabs.Screen name="overview" />
                               <Tabs.Screen name="statistics" />
                               <Tabs.Screen name="messenger" />
-                              <Tabs.Screen name="myProfile" />
+                              <Tabs.Screen name="profile" />
                             </Tabs>
                           </DailyBurnProvider>
                         </WeightRecordProvider>
