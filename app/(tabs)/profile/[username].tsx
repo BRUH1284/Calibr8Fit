@@ -1,64 +1,102 @@
-import { useUserRepository } from "@/features/social/hooks/useUserRepository";
-import { FriendshipStatus } from "@/features/social/types/user";
+import { useFollowers, useFriends, useUser } from "@/features/social";
+import { FriendshipStatus, UserProfile } from "@/features/social/types/user";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
 import TextButton from "@/shared/components/TextButton";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, View } from "react-native";
 
 export default function UserProfileScreen() {
   const theme = useTheme();
-
   const { username } = useLocalSearchParams();
-  const { selectedUser } = useUserRepository();
-  const repo = useUserRepository();
 
-  const handleFriendInteraction = useCallback(() => {
-    switch (selectedUser?.friendshipStatus) {
+  const { getUserProfileByUsername } = useUser();
+
+  const {
+    removeFriend,
+    cancelFriendRequest,
+    sendFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+  } = useFriends();
+
+  const {
+    follow,
+    unfollow,
+  } = useFollowers();
+
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  const updateUserProfile = useCallback(async () => {
+    setUser(await getUserProfileByUsername(username as string));
+  }, [username, getUserProfileByUsername]);
+
+  useEffect(() => {
+    updateUserProfile();
+  }, [updateUserProfile]);
+
+  const handleFriendInteraction = useCallback(async () => {
+    switch (user?.friendshipStatus) {
       case FriendshipStatus.Friends:
-        repo.removeFriend(username as string);
+        await removeFriend(username as string);
         break;
       case FriendshipStatus.PendingSent:
-        repo.cancelFriendRequest(username as string);
+        await cancelFriendRequest(username as string);
         break;
       case FriendshipStatus.None:
-        repo.sendFriendRequest(username as string);
+        await sendFriendRequest(username as string);
         break;
       default:
         break;
     }
-  }, [selectedUser?.friendshipStatus]);
+    updateUserProfile();
+  }, [
+    user?.friendshipStatus,
+    username,
+    removeFriend,
+    cancelFriendRequest,
+    sendFriendRequest,
+    updateUserProfile
+  ]);
 
-  const handleAcceptFriendRequest = useCallback(() => {
-    repo.acceptFriendRequest(username as string);
-  }, [repo, username]);
+  const handleAcceptFriendRequest = useCallback(async () => {
+    await acceptFriendRequest(username as string);
+    updateUserProfile();
+  }, [username, acceptFriendRequest, updateUserProfile]);
 
-  const handleRejectFriendRequest = useCallback(() => {
-    repo.rejectFriendRequest(username as string);
-  }, [repo, username]);
+  const handleRejectFriendRequest = useCallback(async () => {
+    await rejectFriendRequest(username as string);
+    updateUserProfile();
+  }, [username, rejectFriendRequest, updateUserProfile]);
 
-  const handleFollow = useCallback(() => {
-    // Implement follow logic here
-  }, []);
+  const handleFollow = useCallback(async () => {
+    await follow(username as string);
+    updateUserProfile();
+  }, [username, follow, updateUserProfile]);
+
+  const handleUnfollow = useCallback(async () => {
+    await unfollow(username as string);
+    updateUserProfile();
+  }, [username, unfollow, updateUserProfile]);
 
   const friendButtons = useMemo(() => {
-    switch (selectedUser?.friendshipStatus) {
+    switch (user?.friendshipStatus) {
       case FriendshipStatus.Friends:
       case FriendshipStatus.PendingSent:
       case FriendshipStatus.None:
         return (
           <TextButton
             label={
-              selectedUser?.friendshipStatus === FriendshipStatus.Friends ? "Unfriend" :
-                selectedUser?.friendshipStatus === FriendshipStatus.PendingSent ? "Cancel Request" :
+              user?.friendshipStatus === FriendshipStatus.Friends ? "Unfriend" :
+                user?.friendshipStatus === FriendshipStatus.PendingSent ? "Cancel Request" :
                   "Add Friend"}
             style={{
               borderRadius: 8,
               padding: 4,
               flex: 1,
-              backgroundColor: selectedUser?.friendshipStatus === FriendshipStatus.None ? theme.primary : theme.error
+              backgroundColor: user?.friendshipStatus === FriendshipStatus.None ? theme.primary : theme.error
             }}
             onPress={() => handleFriendInteraction()}
           />);
@@ -83,11 +121,34 @@ export default function UserProfileScreen() {
         return null;
     }
   }, [
-    selectedUser?.friendshipStatus,
+    user?.friendshipStatus,
     handleFriendInteraction,
     handleAcceptFriendRequest,
     handleRejectFriendRequest,
-    theme]);
+    theme
+  ]);
+
+  const followButton = useMemo(() => {
+    if (user?.followedByMe) {
+      return (
+        <TextButton
+          label="Unfollow"
+          style={{ borderRadius: 8, padding: 4, flex: 1, backgroundColor: theme.error }}
+          onPress={() => handleUnfollow()} />
+      );
+    }
+    return (
+      <TextButton
+        label="Follow"
+        style={{ borderRadius: 8, padding: 4, flex: 1 }}
+        onPress={() => handleFollow()} />
+    );
+  }, [
+    user?.followedByMe,
+    handleFollow,
+    handleUnfollow,
+    theme
+  ]);
 
   return (
     <>
@@ -111,7 +172,7 @@ export default function UserProfileScreen() {
         />
         <AppText
           type="title-large-bold"
-        >{`@${selectedUser?.username}`}</AppText>
+        >{`@${user?.username}`}</AppText>
       </View>
       <FlatList
         style={{
@@ -124,19 +185,19 @@ export default function UserProfileScreen() {
             style={{ flexDirection: 'row', marginTop: 8 }}
           >
             <Image
-              source={selectedUser?.profilePictureUrl
-                ? { uri: selectedUser.profilePictureUrl }
+              source={user?.profilePictureUrl
+                ? { uri: user.profilePictureUrl }
                 : require('@/assets/images/avatar-placeholder.png')}
               style={{ width: 96, height: 96, borderRadius: 48 }} />
             <View style={{ marginLeft: 16, justifyContent: 'center', gap: 8 }}>
               <AppText
                 type="title-large"
-              >{`${selectedUser?.firstName} ${selectedUser?.lastName}`}</AppText>
+              >{`${user?.firstName} ${user?.lastName}`}</AppText>
               <View style={{ flexDirection: 'row', gap: 16 }}>
                 <View>
                   <AppText
                     type='body-medium-bold'
-                  >{selectedUser?.friendsCount}</AppText>
+                  >{user?.friendsCount}</AppText>
                   <AppText
                     type='body-medium'
                     style={{ textDecorationLine: 'underline' }}
@@ -145,7 +206,7 @@ export default function UserProfileScreen() {
                 <View>
                   <AppText
                     type='body-medium-bold'
-                  >{selectedUser?.followersCount}</AppText>
+                  >{user?.followersCount}</AppText>
                   <AppText
                     type='body-medium'
                     style={{ textDecorationLine: 'underline' }}
@@ -154,7 +215,7 @@ export default function UserProfileScreen() {
                 <View>
                   <AppText
                     type='body-medium-bold'
-                  >{selectedUser?.followingCount}</AppText>
+                  >{user?.followingCount}</AppText>
                   <AppText
                     type='body-medium'
                     style={{ textDecorationLine: 'underline' }}
@@ -164,13 +225,10 @@ export default function UserProfileScreen() {
             </View>
           </View>
           <View
-            style={{ flexDirection: 'row', gap: 16 }}
+            style={{ paddingTop: 8, flexDirection: 'row', gap: 16 }}
           >
             {friendButtons}
-            <TextButton
-              label="Follow"
-              style={{ borderRadius: 8, padding: 4, flex: 1 }}
-              onPress={() => handleFollow()} />
+            {followButton}
           </View>
         </>}
         data={undefined}

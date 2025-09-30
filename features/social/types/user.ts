@@ -11,6 +11,7 @@ export interface UserProfile extends UserSummary {
     followersCount: number;
     followingCount: number;
     friendshipStatus: FriendshipStatus;
+    followedByMe: boolean;
 }
 
 export interface FriendRequest {

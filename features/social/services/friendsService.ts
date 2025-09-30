@@ -1,28 +1,27 @@
 import { api } from "@/shared/services/api";
-import { FriendRequest, UserProfile, UserSummary } from "../types/user";
+import { FriendRequest, UserSummary } from "../types/user";
 
-const searchUsers = async (query: string): Promise<UserSummary[]> => {
+const getFriends = async (): Promise<UserSummary[]> => {
     const response = await api.request({
-        endpoint: `/users/search?query=${encodeURIComponent(query)}`,
+        endpoint: '/friendship/friends',
         method: 'GET',
     });
     return response.map((user: any) => ({
         ...user,
         username: user.userName,
-        // Map other fields as necessary
     })) as UserSummary[];
 };
 
-const getUserProfileByUsername = async (username: string): Promise<UserProfile> => {
+const getFriendRequests = async (): Promise<UserSummary[]> => {
     const response = await api.request({
-        endpoint: `/user-profile/${encodeURIComponent(username)}`,
+        endpoint: '/friendship/requests',
         method: 'GET',
     });
-    return {
-        ...response,
-        username: response.userName,
-    } as UserProfile;
-}
+    return response.map((request: any) => ({
+        ...request.requester,
+        username: request.requester.userName,
+    })) as UserSummary[];
+};
 
 const sendFriendRequest = async (username: string): Promise<FriendRequest> => {
     const response = await api.request({
@@ -34,39 +33,39 @@ const sendFriendRequest = async (username: string): Promise<FriendRequest> => {
         receiver: response.receiver,
         requestedAt: new Date(response.requestedAt),
     } as FriendRequest;
-}
+};
 
 const acceptFriendRequest = async (username: string): Promise<void> => {
     await api.request({
         endpoint: `/friendship/request/${encodeURIComponent(username)}/accept`,
         method: 'POST',
     });
-}
+};
 
 const cancelFriendRequest = async (username: string): Promise<void> => {
     await api.request({
         endpoint: `/friendship/request/${encodeURIComponent(username)}/cancel`,
         method: 'DELETE',
     });
-}
+};
 
-const rejectFriendRequest = async (userId: string): Promise<void> => {
+const rejectFriendRequest = async (username: string): Promise<void> => {
     await api.request({
-        endpoint: `/friendship/request/${encodeURIComponent(userId)}/reject`,
+        endpoint: `/friendship/request/${encodeURIComponent(username)}/reject`,
         method: 'DELETE',
     });
-}
+};
 
-const removeFriend = async (userId: string): Promise<void> => {
+const removeFriend = async (username: string): Promise<void> => {
     await api.request({
-        endpoint: `/friendship/${encodeURIComponent(userId)}`,
+        endpoint: `/friendship/${encodeURIComponent(username)}`,
         method: 'DELETE',
     });
-}
+};
 
-export const userRepositoryService = {
-    searchUsers,
-    getUserProfileByUsername,
+export const friendsService = {
+    getFriends,
+    getFriendRequests,
     sendFriendRequest,
     acceptFriendRequest,
     cancelFriendRequest,

@@ -4,7 +4,7 @@ import { useTheme } from "../hooks/useTheme";
 
 type Props = {
   type?: keyof typeof Typography;
-  color?: keyof ReturnType<typeof useTheme>;
+  color?: keyof Omit<ReturnType<typeof useTheme>, 'isDark'>;
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';

@@ -6,6 +6,7 @@ import TextButton from "@/shared/components/TextButton";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 
@@ -31,10 +32,20 @@ export default function MyProfile() {
         paddingTop: 8,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', gap: 16 }}>
         <AppText
           type="title-large-bold"
+          style={{ flex: 1 }}
         >{`@${profileSettings?.username}`}</AppText>
+        <IconButton
+          icon={{
+            name: 'search',
+            library: 'MaterialIcons',
+            size: 28,
+          }}
+          variant='icon'
+          onPress={() => router.push('/profile/userSearch')}
+        />
         <IconButton
           icon={{
             name: 'settings',

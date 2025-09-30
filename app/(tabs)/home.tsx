@@ -14,10 +14,8 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useRecommendations } from '@/features/profile/hooks/useRecommendations';
 import AppText from '@/shared/components/AppText';
 import IconAddProgressIndicator from '@/shared/components/IconAddProgressIndicator';
-import IconButton from '@/shared/components/IconButton';
 import Popup from '@/shared/components/Popup';
 import { useTheme } from '@/shared/hooks/useTheme';
-import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
@@ -110,15 +108,6 @@ export default function Home() {
           <AppText
             type='headline-medium'
           >{`Hi ${profileSettings?.firstName}`}</AppText>
-          <IconButton
-            icon={{
-              name: 'search',
-              library: 'MaterialIcons',
-              size: 24,
-            }}
-            variant='icon'
-            onPress={() => router.push('/profile/userSearch')}
-          />
         </View>
         <IconAddProgressIndicator
           progress={burnProgress}
