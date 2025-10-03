@@ -1,74 +1,84 @@
 import { api } from "@/shared/services/api";
 import { FriendRequest, UserSummary } from "../types/user";
 
-const getFriends = async (): Promise<UserSummary[]> => {
-    const response = await api.request({
-        endpoint: '/friendship/friends',
-        method: 'GET',
-    });
-    return response.map((user: any) => ({
-        ...user,
-        username: user.userName,
-    })) as UserSummary[];
+const searchUserFriends = async (
+  username: string,
+  query: string,
+  page: number,
+  pageSize: number,
+): Promise<UserSummary[]> => {
+  const response = await api.request({
+    endpoint: `/friendship/${encodeURIComponent(username)}/friends/search?query=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`,
+    method: "GET",
+  });
+  return response.map((dto: any) => ({
+    ...dto.friend,
+    username: dto.friend.userName,
+  })) as UserSummary[];
 };
 
-const getFriendRequests = async (): Promise<UserSummary[]> => {
-    const response = await api.request({
-        endpoint: '/friendship/requests',
-        method: 'GET',
-    });
-    return response.map((request: any) => ({
-        ...request.requester,
-        username: request.requester.userName,
-    })) as UserSummary[];
+const getPendingFriendRequests = async (): Promise<
+  { requester: UserSummary; requestedAt: Date }[]
+> => {
+  const response = await api.request({
+    endpoint: "/friendship/requests/pending",
+    method: "GET",
+  });
+  return response.map((request: any) => ({
+    requester: {
+      ...request.requester,
+      username: request.requester.userName,
+    },
+    requestedAt: new Date(request.requestedAt),
+  })) as { requester: UserSummary; requestedAt: Date }[];
 };
 
 const sendFriendRequest = async (username: string): Promise<FriendRequest> => {
-    const response = await api.request({
-        endpoint: `/friendship/request/${encodeURIComponent(username)}`,
-        method: 'POST',
-    });
-    return {
-        requester: response.requester,
-        receiver: response.receiver,
-        requestedAt: new Date(response.requestedAt),
-    } as FriendRequest;
+  const response = await api.request({
+    endpoint: `/friendship/request/${encodeURIComponent(username)}`,
+    method: "POST",
+  });
+  return {
+    requester: response.requester,
+    receiver: response.receiver,
+    requestedAt: new Date(response.requestedAt),
+  } as FriendRequest;
 };
 
 const acceptFriendRequest = async (username: string): Promise<void> => {
-    await api.request({
-        endpoint: `/friendship/request/${encodeURIComponent(username)}/accept`,
-        method: 'POST',
-    });
+  await api.request({
+    endpoint: `/friendship/request/${encodeURIComponent(username)}/accept`,
+    method: "POST",
+  });
 };
 
 const cancelFriendRequest = async (username: string): Promise<void> => {
-    await api.request({
-        endpoint: `/friendship/request/${encodeURIComponent(username)}/cancel`,
-        method: 'DELETE',
-    });
+  await api.request({
+    endpoint: `/friendship/request/${encodeURIComponent(username)}/cancel`,
+    method: "DELETE",
+  });
 };
 
 const rejectFriendRequest = async (username: string): Promise<void> => {
-    await api.request({
-        endpoint: `/friendship/request/${encodeURIComponent(username)}/reject`,
-        method: 'DELETE',
-    });
+  await api.request({
+    endpoint: `/friendship/request/${encodeURIComponent(username)}/reject`,
+    method: "DELETE",
+  });
 };
 
 const removeFriend = async (username: string): Promise<void> => {
-    await api.request({
-        endpoint: `/friendship/${encodeURIComponent(username)}`,
-        method: 'DELETE',
-    });
+  await api.request({
+    endpoint: `/friendship/${encodeURIComponent(username)}`,
+    method: "DELETE",
+  });
 };
 
 export const friendsService = {
-    getFriends,
-    getFriendRequests,
-    sendFriendRequest,
-    acceptFriendRequest,
-    cancelFriendRequest,
-    rejectFriendRequest,
-    removeFriend,
+  searchUserFriends,
+  getPendingFriendRequests,
+  sendFriendRequest,
+  acceptFriendRequest,
+  cancelFriendRequest,
+  rejectFriendRequest,
+  removeFriend,
 };

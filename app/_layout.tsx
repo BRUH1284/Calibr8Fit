@@ -1,11 +1,11 @@
 import { db } from "@/db/db";
-import migrations from '@/drizzle/migrations';
+import migrations from "@/drizzle/migrations";
 import AuthNavigationProvider from "@/shared/components/AuthNavigationProvider";
 import { AuthProvider } from "@/shared/context/AuthContext";
 import { ThemeProvider } from "@/shared/context/ThemeContext";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import * as FileSystem from 'expo-file-system';
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import * as FileSystem from "expo-file-system";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { KeyboardProvider } from "react-native-keyboard-controller";

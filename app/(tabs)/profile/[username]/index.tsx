@@ -1,4 +1,5 @@
 import { useFollowers, useFriends, useUser } from "@/features/social";
+import PressableCount from "@/features/social/components/PressableCount";
 import { FriendshipStatus, UserProfile } from "@/features/social/types/user";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
@@ -194,33 +195,21 @@ export default function UserProfileScreen() {
                 type="title-large"
               >{`${user?.firstName} ${user?.lastName}`}</AppText>
               <View style={{ flexDirection: 'row', gap: 16 }}>
-                <View>
-                  <AppText
-                    type='body-medium-bold'
-                  >{user?.friendsCount}</AppText>
-                  <AppText
-                    type='body-medium'
-                    style={{ textDecorationLine: 'underline' }}
-                  >Friends</AppText>
-                </View>
-                <View>
-                  <AppText
-                    type='body-medium-bold'
-                  >{user?.followersCount}</AppText>
-                  <AppText
-                    type='body-medium'
-                    style={{ textDecorationLine: 'underline' }}
-                  >Followers</AppText>
-                </View>
-                <View>
-                  <AppText
-                    type='body-medium-bold'
-                  >{user?.followingCount}</AppText>
-                  <AppText
-                    type='body-medium'
-                    style={{ textDecorationLine: 'underline' }}
-                  >Following</AppText>
-                </View>
+                <PressableCount
+                  count={user?.friendsCount || 0}
+                  label="Friends"
+                  onPress={() => router.push(`/profile/${username}/friends`)}
+                />
+                <PressableCount
+                  count={user?.followersCount || 0}
+                  label="Followers"
+                  onPress={() => router.push(`/profile/${username}/followers`)}
+                />
+                <PressableCount
+                  count={user?.followingCount || 0}
+                  label="Following"
+                  onPress={() => router.push(`/profile/${username}/following`)}
+                />
               </View>
             </View>
           </View>
