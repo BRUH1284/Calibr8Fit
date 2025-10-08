@@ -59,7 +59,7 @@ export default function MyProfile() {
                 size: 28,
               }}
               variant="icon"
-              onPress={() => {}}
+              onPress={() => { }}
             />
           </View>
           <View style={{ flexDirection: "row", marginTop: 8 }}>

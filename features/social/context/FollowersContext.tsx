@@ -1,7 +1,7 @@
 import { createContext } from "react";
+import { useUser } from "../hooks/useUser";
 import { followersService } from "../services/followersService";
 import { UserSummary } from "../types/user";
-import { useUser } from "../hooks";
 
 interface FollowersContextProps {
   // Search functionality
@@ -9,13 +9,13 @@ interface FollowersContextProps {
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => Promise<UserSummary[]>;
   searchFollowing: (
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => Promise<UserSummary[]>;
 
   // Follow actions
@@ -24,7 +24,7 @@ interface FollowersContextProps {
 }
 
 export const FollowersContext = createContext<FollowersContextProps | null>(
-  null,
+  null
 );
 
 export const FollowersProvider = ({
@@ -39,14 +39,14 @@ export const FollowersProvider = ({
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => {
     try {
       return await followersService.searchFollowers(
         username,
         query,
         page,
-        pageSize,
+        pageSize
       );
     } catch (error) {
       console.error("Followers search failed:", error);
@@ -58,14 +58,14 @@ export const FollowersProvider = ({
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => {
     try {
       return await followersService.searchFollowing(
         username,
         query,
         page,
-        pageSize,
+        pageSize
       );
     } catch (error) {
       console.error("Following search failed:", error);

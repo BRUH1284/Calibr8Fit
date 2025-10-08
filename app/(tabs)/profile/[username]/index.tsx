@@ -1,13 +1,16 @@
-import { useFollowers, useFriends, useUser } from "@/features/social";
+import { useFollowers, useFriends, usePosts, useUser } from "@/features/social";
+import PostCard from "@/features/social/components/PostCard";
 import PressableCount from "@/features/social/components/PressableCount";
 import { FriendshipStatus, UserProfile } from "@/features/social/types/user";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
+import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
 import TextButton from "@/shared/components/TextButton";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Image, View } from "react-native";
+import { View } from "react-native";
 
 export default function UserProfileScreen() {
   const theme = useTheme();
@@ -23,10 +26,7 @@ export default function UserProfileScreen() {
     rejectFriendRequest,
   } = useFriends();
 
-  const {
-    follow,
-    unfollow,
-  } = useFollowers();
+  const { follow, unfollow } = useFollowers();
 
   const [user, setUser] = useState<UserProfile | null>(null);
 
@@ -59,7 +59,7 @@ export default function UserProfileScreen() {
     removeFriend,
     cancelFriendRequest,
     sendFriendRequest,
-    updateUserProfile
+    updateUserProfile,
   ]);
 
   const handleAcceptFriendRequest = useCallback(async () => {
@@ -82,6 +82,15 @@ export default function UserProfileScreen() {
     updateUserProfile();
   }, [username, unfollow, updateUserProfile]);
 
+  // Posts fetching
+  const { getUserPosts } = usePosts();
+
+  const handleLoadPage = useCallback(
+    (page: number, pageSize: number) =>
+      getUserPosts(username as string, page, pageSize),
+    [getUserPosts, username]
+  );
+
   const friendButtons = useMemo(() => {
     switch (user?.friendshipStatus) {
       case FriendshipStatus.Friends:
@@ -90,30 +99,47 @@ export default function UserProfileScreen() {
         return (
           <TextButton
             label={
-              user?.friendshipStatus === FriendshipStatus.Friends ? "Unfriend" :
-                user?.friendshipStatus === FriendshipStatus.PendingSent ? "Cancel Request" :
-                  "Add Friend"}
+              user?.friendshipStatus === FriendshipStatus.Friends
+                ? "Unfriend"
+                : user?.friendshipStatus === FriendshipStatus.PendingSent
+                ? "Cancel Request"
+                : "Add Friend"
+            }
             style={{
               borderRadius: 8,
               padding: 4,
               flex: 1,
-              backgroundColor: user?.friendshipStatus === FriendshipStatus.None ? theme.primary : theme.error
+              backgroundColor:
+                user?.friendshipStatus === FriendshipStatus.None
+                  ? theme.primary
+                  : theme.error,
             }}
             onPress={() => handleFriendInteraction()}
-          />);
+          />
+        );
       case FriendshipStatus.PendingReceived:
         return (
           <>
             <TextButton
               label="Reject"
               labelStyle={{ color: theme.onError }}
-              style={{ borderRadius: 8, padding: 4, flex: 1, backgroundColor: theme.error }}
+              style={{
+                borderRadius: 8,
+                padding: 4,
+                flex: 1,
+                backgroundColor: theme.error,
+              }}
               onPress={() => handleRejectFriendRequest()}
             />
             <TextButton
               label="Accept"
               labelStyle={{ color: theme.onSuccess }}
-              style={{ borderRadius: 8, padding: 4, flex: 1, backgroundColor: theme.success }}
+              style={{
+                borderRadius: 8,
+                padding: 4,
+                flex: 1,
+                backgroundColor: theme.success,
+              }}
               onPress={() => handleAcceptFriendRequest()}
             />
           </>
@@ -126,7 +152,7 @@ export default function UserProfileScreen() {
     handleFriendInteraction,
     handleAcceptFriendRequest,
     handleRejectFriendRequest,
-    theme
+    theme,
   ]);
 
   const followButton = useMemo(() => {
@@ -134,109 +160,122 @@ export default function UserProfileScreen() {
       return (
         <TextButton
           label="Unfollow"
-          style={{ borderRadius: 8, padding: 4, flex: 1, backgroundColor: theme.error }}
-          onPress={() => handleUnfollow()} />
+          style={{
+            borderRadius: 8,
+            padding: 4,
+            flex: 1,
+            backgroundColor: theme.error,
+          }}
+          onPress={() => handleUnfollow()}
+        />
       );
     }
     return (
       <TextButton
         label="Follow"
         style={{ borderRadius: 8, padding: 4, flex: 1 }}
-        onPress={() => handleFollow()} />
+        onPress={() => handleFollow()}
+      />
     );
-  }, [
-    user?.followedByMe,
-    handleFollow,
-    handleUnfollow,
-    theme
-  ]);
+  }, [user?.followedByMe, handleFollow, handleUnfollow, theme]);
 
   return (
     <>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: "row",
+          alignItems: "center",
           padding: 8,
           paddingHorizontal: 16,
           gap: 16,
           backgroundColor: theme.surface,
-        }}>
+          zIndex: 1,
+        }}
+      >
         <IconButton
           icon={{
-            name: 'arrow-back',
-            library: 'MaterialIcons',
+            name: "arrow-back",
+            library: "MaterialIcons",
             size: 32,
           }}
           variant="icon"
           onPress={() => router.back()}
         />
-        <AppText
-          type="title-large-bold"
-        >{`@${user?.username}`}</AppText>
+        <AppText type="title-large-bold">{`@${user?.username}`}</AppText>
       </View>
-      <FlatList
+      <PaginatedFlatList
+        loadPage={handleLoadPage}
+        pageSize={5}
         style={{
           flex: 1,
           backgroundColor: theme.surface,
-          paddingHorizontal: 16,
+          overflow: "visible",
         }}
-        ListHeaderComponent={<>
-          <View
-            style={{ flexDirection: 'row', marginTop: 8 }}
-          >
-            <Image
-              source={user?.profilePictureUrl
-                ? { uri: user.profilePictureUrl }
-                : require('@/assets/images/avatar-placeholder.png')}
-              style={{ width: 96, height: 96, borderRadius: 48 }} />
-            <View style={{ marginLeft: 16, justifyContent: 'center', gap: 8 }}>
-              <AppText
-                type="title-large"
-              >{`${user?.firstName} ${user?.lastName}`}</AppText>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
-                <PressableCount
-                  count={user?.friendsCount || 0}
-                  label="Friends"
-                  onPress={() => router.push(`/profile/${username}/friends`)}
-                />
-                <PressableCount
-                  count={user?.followersCount || 0}
-                  label="Followers"
-                  onPress={() => router.push(`/profile/${username}/followers`)}
-                />
-                <PressableCount
-                  count={user?.followingCount || 0}
-                  label="Following"
-                  onPress={() => router.push(`/profile/${username}/following`)}
-                />
+        ListHeaderComponent={
+          <>
+            <View style={{ flexDirection: "row", marginTop: 8 }}>
+              <Image
+                source={
+                  user?.profilePictureUrl
+                    ? { uri: user.profilePictureUrl }
+                    : require("@/assets/images/avatar-placeholder.png")
+                }
+                style={{ width: 96, height: 96, borderRadius: 48 }}
+              />
+              <View
+                style={{ marginLeft: 16, justifyContent: "center", gap: 8 }}
+              >
+                <AppText type="title-large">{`${user?.firstName} ${user?.lastName}`}</AppText>
+                <View style={{ flexDirection: "row", gap: 16 }}>
+                  <PressableCount
+                    count={user?.friendsCount || 0}
+                    label="Friends"
+                    onPress={() => router.push(`/profile/${username}/friends`)}
+                  />
+                  <PressableCount
+                    count={user?.followersCount || 0}
+                    label="Followers"
+                    onPress={() =>
+                      router.push(`/profile/${username}/followers`)
+                    }
+                  />
+                  <PressableCount
+                    count={user?.followingCount || 0}
+                    label="Following"
+                    onPress={() =>
+                      router.push(`/profile/${username}/following`)
+                    }
+                  />
+                </View>
               </View>
             </View>
-          </View>
-          <View
-            style={{ paddingTop: 8, flexDirection: 'row', gap: 16 }}
-          >
-            {friendButtons}
-            {followButton}
-          </View>
-        </>}
-        data={undefined}
-        renderItem={undefined}
+            <View style={{ paddingTop: 8, flexDirection: "row", gap: 16 }}>
+              {friendButtons}
+              {followButton}
+            </View>
+          </>
+        }
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{
+          gap: 16,
+          padding: 16,
+        }}
+        renderItem={({ item }) => <PostCard post={item} />}
       />
       <IconButton
         icon={{
-          name: 'chat-bubble-outline',
-          library: 'MaterialIcons',
+          name: "chat-bubble-outline",
+          library: "MaterialIcons",
           size: 24,
           color: theme.onPrimaryVariant,
         }}
         style={{
-          position: 'absolute',
+          position: "absolute",
           height: 56,
           width: 56,
           borderRadius: 16,
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
           bottom: 16,
           right: 16,
           backgroundColor: theme.primaryVariant,
@@ -246,8 +285,8 @@ export default function UserProfileScreen() {
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
         }}
-        onPress={() => { }}
+        onPress={() => {}}
       />
     </>
   );
-} 
+}

@@ -107,18 +107,16 @@ const unlikePost = async (postId: string) => {
 
 const addComment = async (postId: string, content: string) => {
   const response = await api.request({
-    endpoint: `/post/${encodeURIComponent(postId)}/comments`,
+    endpoint: `/post/${encodeURIComponent(postId)}/comment`,
     method: "POST",
-    body: { content },
+    body: content,
   });
   return responseToComment(response) as PostComment;
 };
 
-const deleteComment = async (postId: string, commentId: string) => {
+const deleteComment = async (commentId: string) => {
   await api.request({
-    endpoint: `/post/${encodeURIComponent(
-      postId
-    )}/comments/${encodeURIComponent(commentId)}`,
+    endpoint: `/post/comment/${encodeURIComponent(commentId)}`,
     method: "DELETE",
   });
 };

@@ -25,7 +25,7 @@ interface PostsContextProps {
   likePost: (postId: string) => Promise<void>;
   unlikePost: (postId: string) => Promise<void>;
   addComment: (postId: string, content: string) => Promise<PostComment>;
-  deleteComment: (postId: string, commentId: string) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
 }
 
 export const PostsContext = createContext<PostsContextProps | null>(null);
@@ -123,14 +123,11 @@ export const PostsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const deleteComment = async (postId: string, commentId: string) => {
+  const deleteComment = async (commentId: string) => {
     try {
-      return await postsService.deleteComment(postId, commentId);
+      return await postsService.deleteComment(commentId);
     } catch (error) {
-      console.error(
-        `Failed to delete comment ${commentId} from post ${postId}:`,
-        error
-      );
+      console.error(`Failed to delete comment ${commentId}:`, error);
       throw error;
     }
   };

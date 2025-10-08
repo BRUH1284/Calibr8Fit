@@ -4,19 +4,20 @@ import { useTheme } from "../hooks/useTheme";
 
 type Props = {
   type?: keyof typeof Typography;
-  color?: keyof Omit<ReturnType<typeof useTheme>, 'isDark'>;
+  color?: keyof Omit<ReturnType<typeof useTheme>, "isDark">;
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
-  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  ellipsizeMode?: "head" | "middle" | "tail" | "clip";
   children: React.ReactNode;
 };
 
 export default function AppText({
-  type = 'headline-medium',
-  color = 'onSurface',
+  type = "headline-medium",
+  color = "onSurface",
   style,
   children,
-  ...props }: Props) {
+  ...props
+}: Props) {
   const theme = useTheme();
 
   return (
@@ -27,7 +28,7 @@ export default function AppText({
         {
           color: theme[color],
         },
-        style
+        style,
       ]}
     >
       {children}

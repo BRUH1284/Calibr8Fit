@@ -15,7 +15,7 @@ interface UserContextProps {
   searchUsers: (
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => Promise<UserSummary[]>;
 
   // User details
@@ -45,13 +45,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   // Update current user profile when needed
   const changeFriendsCount = (delta: number) => {
     setCurrentUser((prev) =>
-      prev ? { ...prev, friendsCount: prev.friendsCount + delta } : prev,
+      prev ? { ...prev, friendsCount: prev.friendsCount + delta } : prev
     );
   };
 
   const changeFollowingCount = (delta: number) => {
     setCurrentUser((prev) =>
-      prev ? { ...prev, followingCount: prev.followingCount + delta } : prev,
+      prev ? { ...prev, followingCount: prev.followingCount + delta } : prev
     );
   };
 
@@ -79,7 +79,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const getUserProfileByUsername = async (
-    username: string,
+    username: string
   ): Promise<UserProfile> => {
     try {
       return await userService.getUserProfileByUsername(username);

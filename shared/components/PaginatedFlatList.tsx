@@ -1,0 +1,102 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleProp,
+  View,
+  ViewStyle,
+} from "react-native";
+import { useTheme } from "../hooks/useTheme";
+import AppText from "./AppText";
+
+type LoadPage<TArgs = any, TItem = any> = (
+  page: number,
+  pageSize: number,
+  args?: TArgs
+) => Promise<TItem[]>;
+
+type Props<TArgs = any, TItem = any> = {
+  loadPage: LoadPage<TArgs, TItem>;
+  args?: TArgs;
+  pageSize?: number;
+
+  ListHeaderComponent?: React.ReactElement;
+  ListEmptyComponent?: React.ReactElement;
+  style?: StyleProp<ViewStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  ItemSeparatorComponent?: React.ComponentType<any>;
+  renderItem: ({ item }: { item: TItem }) => React.ReactElement;
+  keyExtractor: (item: TItem, index: number) => string;
+};
+
+export default function PaginatedFlatList<TArgs = any, TItem = any>({
+  loadPage,
+  args,
+  pageSize = 20,
+  ...props
+}: Props<TArgs, TItem>) {
+  const theme = useTheme();
+
+  const [items, setItems] = useState<TItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPage = useCallback(
+    async (page: number) => {
+      setLoading(true);
+
+      const data = await loadPage(page, pageSize, args);
+
+      setItems((prev) => [...prev, ...data]);
+      setHasMore(data.length === pageSize);
+
+      setLoading(false);
+    },
+    [args, loadPage, pageSize]
+  );
+
+  // Load next page
+  const onEndReached = useCallback(() => {
+    if (loading || !hasMore) return;
+    setPage(page + 1);
+    fetchPage(page + 1);
+  }, [loading, hasMore, page, fetchPage]);
+
+  // Refetch when args change
+  useEffect(() => {
+    setPage(0);
+    setItems([]);
+    fetchPage(0);
+  }, [args, fetchPage]);
+
+  const listFooter = useMemo(() => {
+    if (loading) {
+      return (
+        <View style={{ paddingVertical: 16 }}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+    if (!hasMore && items.length > 0) {
+      return (
+        <View style={{ paddingVertical: 16, alignItems: "center" }}>
+          <AppText type="body-medium" style={{ color: theme.onSurfaceVariant }}>
+            You have reached the end.
+          </AppText>
+        </View>
+      );
+    }
+    return null;
+  }, [loading, hasMore, items.length, theme.onSurfaceVariant]);
+
+  return (
+    <FlatList
+      data={items}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={listFooter}
+      {...props}
+    />
+  );
+}

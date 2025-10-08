@@ -6,15 +6,14 @@ import { useCallback } from "react";
 export default function UserSearch() {
   const { searchUsers } = useUser();
 
-  const handleUserPress = useCallback(async (username: string) => {
-    router.push(`/profile/${username}`);
-  }, [router]);
+  const handleUserPress = useCallback(
+    async (username: string) => {
+      router.push(`/profile/${username}`);
+    },
+    [router]
+  );
 
   return (
-    <UserSearchScreen
-      loadPage={searchUsers}
-      pageSize={10}
-      onUserPress={handleUserPress}
-    />
+    <UserSearchScreen loadPage={searchUsers} onUserPress={handleUserPress} />
   );
 }

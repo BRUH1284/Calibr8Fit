@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
+import { useUser } from "../hooks/useUser";
 import { friendsService } from "../services/friendsService";
 import { UserSummary } from "../types/user";
-import { useUser } from "../hooks";
 
 interface FriendsContextProps {
   // Friend requests
@@ -12,7 +12,7 @@ interface FriendsContextProps {
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => Promise<UserSummary[]>;
 
   // Friend actions
@@ -37,14 +37,14 @@ export const FriendsProvider = ({
     username: string,
     query: string,
     page: number,
-    pageSize: number,
+    pageSize: number
   ) => {
     try {
       return await friendsService.searchUserFriends(
         username,
         query,
         page,
-        pageSize,
+        pageSize
       );
     } catch (error) {
       console.error("Friends search failed:", error);
@@ -92,7 +92,7 @@ export const FriendsProvider = ({
 
   const removeUserFromPending = (username: string) => {
     setPendingFriendRequests((prev) =>
-      prev.filter((req) => req.requester.username !== username),
+      prev.filter((req) => req.requester.username !== username)
     );
   };
 
