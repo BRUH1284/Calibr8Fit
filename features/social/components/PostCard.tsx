@@ -5,7 +5,7 @@ import { compact } from "@/shared/utils/date";
 import { Image } from "expo-image";
 import { useCallback, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
-import { usePosts, useUser } from "../hooks";
+import { usePosts } from "../hooks";
 import { Post } from "../types/post";
 import ImageViewModal from "./ImageViewModal";
 import PostCommentsModal from "./PostCommentsModal";
@@ -145,15 +145,14 @@ export default function PostCard({
   }, [imageUrls, theme.dialogBackground, handleImagePress]);
 
   // Delete handling
-  const { currentUser } = useUser();
   const { deletePost } = usePosts();
 
   const deleteButton = useMemo(() => {
-    if (author.username !== currentUser?.username) return null;
+    if (!onDelete) return null;
 
     const handleDelete = async () => {
       await deletePost(id);
-      if (onDelete) onDelete(id); // TODO: trigger update
+      if (onDelete) onDelete(id);
     };
 
     return (
@@ -163,7 +162,7 @@ export default function PostCard({
         onPress={() => handleDelete()}
       />
     );
-  }, [author.username, currentUser?.username, deletePost, id, onDelete]);
+  }, [deletePost, id, onDelete]);
 
   return (
     <>

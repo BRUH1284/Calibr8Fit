@@ -16,16 +16,29 @@ export default function DailyBurnProgressList() {
   const { todayActivityCaloriesBurned, todayRecords } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
-  const minimalTargets = useMemo(() =>
-    targets.map(t => ({
-      id: t.id,
-      description: t.activity?.description || t.userActivity?.description || 'Unknown Activity',
-      duration: t.duration,
-      calories: todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!),
-      progress: Math.min(
-        todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!) /
-        caloriesBurnedCalculator((t.activity ?? t.userActivity!).metValue, t.duration / 60), 1),
-    })), [targets, todayActivityCaloriesBurned, todayRecords]);
+  const minimalTargets = useMemo(
+    () =>
+      targets.map((t) => ({
+        id: t.id,
+        description:
+          t.activity?.description ||
+          t.userActivity?.description ||
+          "Unknown Activity",
+        duration: t.duration,
+        calories: todayActivityCaloriesBurned(
+          t.activityId ?? t.userActivityId!
+        ),
+        progress: Math.min(
+          todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!) /
+            caloriesBurnedCalculator(
+              (t.activity ?? t.userActivity!).metValue,
+              t.duration / 60
+            ),
+          1
+        ),
+      })),
+    [targets, todayActivityCaloriesBurned, todayRecords]
+  );
 
   const progress = useMemo(() => {
     if (todayCaloriesTarget === 0) return 1;
@@ -34,30 +47,23 @@ export default function DailyBurnProgressList() {
 
   return (
     <View style={styles.container}>
-      <AppText
-        type='title-large'
-        style={{ paddingBottom: 8 }}
-      >Daily Burn</AppText>
-      <View style={styles.headerContainer} >
-        <AppText
-          type='title-medium'
-          style={{ flex: 1 }}
-        >Progress</AppText>
-        <AppText
-          type='title-small'
-        >{`${todayCaloriesBurned}/${todayCaloriesTarget} Kcal`}</AppText>
+      <AppText type="title-large" style={{ paddingBottom: 8 }}>
+        Daily Burn
+      </AppText>
+      <View style={styles.headerContainer}>
+        <AppText type="title-medium" style={{ flex: 1 }}>
+          Progress
+        </AppText>
+        <AppText type="title-small">{`${todayCaloriesBurned}/${todayCaloriesTarget} Kcal`}</AppText>
       </View>
       <ProgressIndicator
         color={theme.primary}
-        backgroundColor={theme.surfaceVariant}
+        backgroundColor={theme.surfaceContainer}
         progress={progress}
       />
       <View style={styles.list}>
         {minimalTargets.map((item) => (
-          <View
-            key={item.id}
-            style={styles.listItem}
-          >
+          <View key={item.id} style={styles.listItem}>
             <View style={{ flex: 1 }}>
               <AppText
                 type="title-medium"
@@ -102,23 +108,22 @@ export default function DailyBurnProgressList() {
               rings={[
                 {
                   color: theme.primary,
-                  backgroundColor: theme.surfaceVariant,
+                  backgroundColor: theme.surfaceContainer,
                   progress: item.progress,
-                }
+                },
               ]}
               icons={[
                 {
-                  name: item.progress === 1 ? 'check' : 'local-fire-department',
-                  library: 'MaterialIcons',
+                  name: item.progress === 1 ? "check" : "local-fire-department",
+                  library: "MaterialIcons",
                   color: theme.onSurface,
-                }
+                },
               ]}
             />
-
           </View>
         ))}
       </View>
-    </View >
+    </View>
   );
 }
 
@@ -131,9 +136,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   listItem: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
-    alignItems: 'center'
+    alignItems: "center",
   },
   column: {
     width: 48,
@@ -143,6 +148,6 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 8,
-    paddingTop: 8
+    paddingTop: 8,
   },
 });

@@ -17,11 +17,11 @@ import { Tabs } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const screenConfigs: Record<string, IconItem> = {
-  home: { name: 'home', library: 'MaterialIcons' },
-  overview: { name: 'calendar-month', library: 'MaterialCommunityIcons' },
-  statistics: { name: 'stats-chart', library: 'Ionicons' },
-  messenger: { name: 'message-outline', library: 'MaterialCommunityIcons' },
-  profile: { name: 'person', library: 'MaterialIcons' },
+  home: { name: "home", library: "MaterialIcons" },
+  overview: { name: "calendar-month", library: "MaterialCommunityIcons" },
+  statistics: { name: "stats-chart", library: "Ionicons" },
+  messenger: { name: "message-outline", library: "MaterialCommunityIcons" },
+  profile: { name: "person", library: "MaterialIcons" },
 };
 
 export default function TabLayout() {
@@ -41,9 +41,9 @@ export default function TabLayout() {
                         <WeightRecordProvider>
                           <DailyBurnProvider>
                             <SafeAreaView
-                              edges={['top']}
-                              style={{ backgroundColor: theme.surface }} >
-                            </SafeAreaView>
+                              edges={["top"]}
+                              style={{ backgroundColor: theme.surface }}
+                            ></SafeAreaView>
                             <Tabs
                               screenOptions={({ route }) => {
                                 const config = screenConfigs[route.name];
@@ -58,22 +58,24 @@ export default function TabLayout() {
                                     height: 64 + 24, // 64 for tab bar height + 24 for safe area
                                   },
                                   tabBarIconStyle: {
-                                    height: '100%',
-                                    alignContent: 'center',
-                                    justifyContent: 'center',
+                                    height: "100%",
+                                    alignContent: "center",
+                                    justifyContent: "center",
                                   },
-                                  tabBarButton: (props) =>
+                                  tabBarButton: (props) => (
                                     <PlatformPressable
                                       {...props}
-                                      android_ripple={{ color: 'transparent' }}
-                                    />,
-                                  tabBarIcon: (props) =>
+                                      android_ripple={{ color: "transparent" }}
+                                    />
+                                  ),
+                                  tabBarIcon: (props) => (
                                     <DynamicIcon
                                       name={config.name}
                                       size={32}
                                       library={config.library}
                                       color={props.color}
-                                    />,
+                                    />
+                                  ),
                                 };
                               }}
                             >

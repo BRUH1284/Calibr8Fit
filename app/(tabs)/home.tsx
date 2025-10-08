@@ -1,25 +1,29 @@
-import ActivitiesListPopupContent from '@/features/activity/components/ActivitiesListPopupContent';
-import ActivityRecordPopupContent from '@/features/activity/components/ActivityRecordPopupContent';
-import DailyBurnProgressList from '@/features/activity/components/DailyBurnProgressList';
-import { useActivity } from '@/features/activity/hooks/useActivity';
-import { useActivityRecord } from '@/features/activity/hooks/useActivityRecord';
-import { ActivityItem } from '@/features/activity/types/activityRecord';
-import WaterIntakeRecordPopupContent from '@/features/hydration/components/WaterIntakeRecordPopupContent';
-import { useWaterIntake } from '@/features/hydration/hooks/useWaterIntake';
-import FoodListPopupContent from '@/features/nutrition/components/FoodListPopupContent';
-import FoodRecordPopupContent from '@/features/nutrition/components/FoodRecordPopupContent';
-import { useConsumptionRecord } from '@/features/nutrition/hooks/useConsumptionRecord';
-import { useFood } from '@/features/nutrition/hooks/useFood';
-import { useProfile } from '@/features/profile/hooks/useProfile';
-import { useRecommendations } from '@/features/profile/hooks/useRecommendations';
-import AppText from '@/shared/components/AppText';
-import IconAddProgressIndicator from '@/shared/components/IconAddProgressIndicator';
-import Popup from '@/shared/components/Popup';
-import { useTheme } from '@/shared/hooks/useTheme';
-import { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import ActivitiesListPopupContent from "@/features/activity/components/ActivitiesListPopupContent";
+import ActivityRecordPopupContent from "@/features/activity/components/ActivityRecordPopupContent";
+import DailyBurnProgressList from "@/features/activity/components/DailyBurnProgressList";
+import { useActivity } from "@/features/activity/hooks/useActivity";
+import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
+import { ActivityItem } from "@/features/activity/types/activityRecord";
+import WaterIntakeRecordPopupContent from "@/features/hydration/components/WaterIntakeRecordPopupContent";
+import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
+import FoodListPopupContent from "@/features/nutrition/components/FoodListPopupContent";
+import FoodRecordPopupContent from "@/features/nutrition/components/FoodRecordPopupContent";
+import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionRecord";
+import { useFood } from "@/features/nutrition/hooks/useFood";
+import { useProfile } from "@/features/profile/hooks/useProfile";
+import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
+import { usePosts } from "@/features/social";
+import PostCard from "@/features/social/components/PostCard";
+import { PostsProvider } from "@/features/social/context/PostsContext";
+import AppText from "@/shared/components/AppText";
+import IconAddProgressIndicator from "@/shared/components/IconAddProgressIndicator";
+import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
+import Popup from "@/shared/components/Popup";
+import { useTheme } from "@/shared/hooks/useTheme";
+import { useCallback, useState } from "react";
+import { View } from "react-native";
 
-export default function Home() {
+function HomeContent() {
   const theme = useTheme();
 
   const [popupContent, setPopupContent] = useState<React.ReactNode>();
@@ -28,12 +32,14 @@ export default function Home() {
     setPopupContent(
       <FoodListPopupContent
         onClose={() => setPopupContent(undefined)}
-        onFoodSelect={(item) => setPopupContent(
-          <FoodRecordPopupContent
-            item={item}
-            onClose={() => setPopupContent(undefined)}
-          />
-        )}
+        onFoodSelect={(item) =>
+          setPopupContent(
+            <FoodRecordPopupContent
+              item={item}
+              onClose={() => setPopupContent(undefined)}
+            />
+          )
+        }
       />
     );
   }, []);
@@ -42,12 +48,14 @@ export default function Home() {
     setPopupContent(
       <ActivitiesListPopupContent
         onClose={() => setPopupContent(undefined)}
-        onActivitySelect={(item: ActivityItem) => setPopupContent(
-          <ActivityRecordPopupContent
-            activity={item}
-            onClose={() => setPopupContent(undefined)}
-          />
-        )}
+        onActivitySelect={(item: ActivityItem) =>
+          setPopupContent(
+            <ActivityRecordPopupContent
+              activity={item}
+              onClose={() => setPopupContent(undefined)}
+            />
+          )
+        }
       />
     );
   }, []);
@@ -64,86 +72,106 @@ export default function Home() {
   const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
   const { todayWaterIntakeInMl, syncWaterIntake } = useWaterIntake();
   const { syncFoods } = useFood();
-  const { todayCaloriesConsumed, syncConsumptionRecords } = useConsumptionRecord();
+  const { todayCaloriesConsumed, syncConsumptionRecords } =
+    useConsumptionRecord();
   const { todayCaloriesBurned, syncActivityRecords } = useActivityRecord();
   const { syncActivities } = useActivity();
 
-  const burnProgress = burnTarget ? Math.min(todayCaloriesBurned / burnTarget, 1) : 1;
-  const rationProgress = consumptionTarget ? Math.min(todayCaloriesConsumed / consumptionTarget, 1) : 0;
+  const burnProgress = burnTarget
+    ? Math.min(todayCaloriesBurned / burnTarget, 1)
+    : 1;
+  const rationProgress = consumptionTarget
+    ? Math.min(todayCaloriesConsumed / consumptionTarget, 1)
+    : 0;
   const waterProgress = todayWaterIntakeInMl / 1000 / waterIntake;
 
-  // Handle refresh
-  const [refreshing, setRefreshing] = useState(false);
+  // Feed handling
+  const { getMyFeed } = usePosts();
 
+  const handleLoadFeed = useCallback(
+    (page: number, pageSize: number) => getMyFeed(page, pageSize),
+    [getMyFeed]
+  );
+
+  // Handle refresh
   const handleRefresh = async () => {
-    setRefreshing(true);
     await syncWaterIntake();
     await syncActivities();
     await syncFoods();
     await syncConsumptionRecords();
     await syncActivityRecords();
-    setRefreshing(false);
   };
 
   return (
     <>
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh} />
-        }
+      <PaginatedFlatList
+        loadPage={handleLoadFeed}
         contentContainerStyle={{
-          flex: 1,
-          paddingHorizontal: 16,
-          backgroundColor: theme.surface,
+          padding: 16,
           gap: 8,
         }}
-      >
-
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between'
-        }}>
-          <AppText
-            type='headline-medium'
-          >{`Hi ${profileSettings?.firstName}`}</AppText>
-        </View>
-        <IconAddProgressIndicator
-          progress={burnProgress}
-          icon={{
-            name: 'local-fire-department',
-            library: 'MaterialIcons',
-            size: 24,
-          }}
-          onAddPress={openActivitiesPopup}
-        />
-        <IconAddProgressIndicator
-          progress={rationProgress}
-          icon={{
-            name: 'fastfood',
-            library: 'MaterialIcons',
-            size: 24,
-          }}
-          onAddPress={openFoodPopup}
-        />
-        <IconAddProgressIndicator
-          progress={waterProgress}
-          icon={{
-            name: 'water-drop',
-            library: 'MaterialIcons',
-            size: 24,
-          }}
-          onAddPress={openWaterIntakePopup}
-        />
-        <DailyBurnProgressList />
-
-      </ScrollView>
+        ListHeaderComponentStyle={{
+          gap: 8,
+          paddingBottom: 8,
+        }}
+        ListHeaderComponent={
+          <>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <AppText type="headline-medium">{`Hi ${profileSettings?.firstName}`}</AppText>
+            </View>
+            <IconAddProgressIndicator
+              progress={burnProgress}
+              icon={{
+                name: "local-fire-department",
+                library: "MaterialIcons",
+                size: 24,
+              }}
+              onAddPress={openActivitiesPopup}
+            />
+            <IconAddProgressIndicator
+              progress={rationProgress}
+              icon={{
+                name: "fastfood",
+                library: "MaterialIcons",
+                size: 24,
+              }}
+              onAddPress={openFoodPopup}
+            />
+            <IconAddProgressIndicator
+              progress={waterProgress}
+              icon={{
+                name: "water-drop",
+                library: "MaterialIcons",
+                size: 24,
+              }}
+              onAddPress={openWaterIntakePopup}
+            />
+            <DailyBurnProgressList />
+          </>
+        }
+        renderItem={({ item }) => <PostCard post={item} />}
+        keyExtractor={(item) => item.id}
+        onRefresh={handleRefresh}
+      />
       <Popup
         visible={!!popupContent}
         onClose={() => setPopupContent(undefined)}
-        children={popupContent}
-      />
+      >
+        {popupContent}
+      </Popup>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <PostsProvider>
+      <HomeContent />
+    </PostsProvider>
   );
 }
