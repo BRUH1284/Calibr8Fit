@@ -72,6 +72,8 @@ const createPost = async (content: string, images: PostImage[]) => {
   formData.append("Content", content);
   images.forEach((image) => formData.append("Images", image as any));
 
+  console.log("FormData:", formData);
+
   // Make the API request
   const response = await api.request({
     endpoint: "/post",

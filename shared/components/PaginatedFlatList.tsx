@@ -20,7 +20,9 @@ type Props<TArgs = any, TItem = any> = {
   args?: TArgs;
   pageSize?: number;
 
+  onRefresh?: () => Promise<void>;
   ListHeaderComponent?: React.ReactElement;
+  ListHeaderComponentStyle?: StyleProp<ViewStyle>;
   ListEmptyComponent?: React.ReactElement;
   style?: StyleProp<ViewStyle>;
   contentContainerStyle?: StyleProp<ViewStyle>;
@@ -70,6 +72,16 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
     fetchPage(0);
   }, [args, fetchPage]);
 
+  // Handle pull to refresh
+  const handleRefresh = useCallback(async () => {
+    setPage(0);
+    setItems([]);
+    await fetchPage(0);
+    setLoading(true);
+    await props.onRefresh?.();
+    setLoading(false);
+  }, [fetchPage, props]);
+
   const listFooter = useMemo(() => {
     if (loading) {
       return (
@@ -92,11 +104,14 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
 
   return (
     <FlatList
+      {...props}
+      style={{ backgroundColor: theme.surface }}
+      refreshing={loading}
+      onRefresh={handleRefresh}
       data={items}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.5}
       ListFooterComponent={listFooter}
-      {...props}
     />
   );
 }

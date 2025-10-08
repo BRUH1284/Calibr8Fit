@@ -1,39 +1,57 @@
-import { useFriends, useUser } from "@/features/social";
+import { useFriends, usePosts, useUser } from "@/features/social";
+import PostCard from "@/features/social/components/PostCard";
+import PostCreationCard from "@/features/social/components/PostCreationCard";
 import PressableCount from "@/features/social/components/PressableCount";
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
-import TextButton from "@/shared/components/TextButton";
+import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 
 export default function MyProfile() {
   const theme = useTheme();
 
   const { currentUser, fetchCurrentUserProfile } = useUser();
   const { pendingFriendRequests } = useFriends();
+  const { getMyPosts } = usePosts();
 
   const { logout } = useAuth();
 
-  const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
     await fetchCurrentUserProfile();
-    setRefreshing(false);
   }, [fetchCurrentUserProfile]);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  const handleAddedPost = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleDeletedPost = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleLoadPostsPage = useCallback(
+    (page: number, pageSize: number) => getMyPosts(page, pageSize),
+    [getMyPosts]
+  );
+
   return (
-    <FlatList
-      refreshing={refreshing}
+    <PaginatedFlatList
       onRefresh={handleRefresh}
-      contentContainerStyle={{ paddingBottom: 32 }}
-      ListHeaderComponentStyle={{
-        flex: 1,
+      args={refreshKey}
+      contentContainerStyle={{
         backgroundColor: theme.surface,
+        gap: 16,
         paddingHorizontal: 16,
+      }}
+      ListHeaderComponentStyle={{
+        backgroundColor: theme.surface,
         paddingTop: 8,
       }}
       ListHeaderComponent={
@@ -59,10 +77,12 @@ export default function MyProfile() {
                 size: 28,
               }}
               variant="icon"
-              onPress={() => { }}
+              onPress={() => {}}
             />
           </View>
-          <View style={{ flexDirection: "row", marginTop: 8 }}>
+          <View
+            style={{ flexDirection: "row", marginTop: 8, marginBottom: 16 }}
+          >
             <Image
               source={{ uri: currentUser?.profilePictureUrl }}
               placeholder={require("@/assets/images/avatar-placeholder.png")}
@@ -94,11 +114,14 @@ export default function MyProfile() {
               </View>
             </View>
           </View>
-          <TextButton label="logout" onPress={logout} />
+          <PostCreationCard onPostCreated={handleAddedPost} />
         </>
       }
-      data={undefined}
-      renderItem={undefined}
+      loadPage={handleLoadPostsPage}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <PostCard post={item} onDelete={handleDeletedPost} />
+      )}
     />
   );
 }

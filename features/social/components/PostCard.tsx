@@ -1,20 +1,32 @@
 import AppText from "@/shared/components/AppText";
 import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { compact } from "@/shared/utils/date";
 import { Image } from "expo-image";
 import { useCallback, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
-import { usePosts } from "../hooks";
+import { usePosts, useUser } from "../hooks";
 import { Post } from "../types/post";
 import ImageViewModal from "./ImageViewModal";
 import PostCommentsModal from "./PostCommentsModal";
 
 type Props = {
   post: Post;
+  onDelete?: (postId: string) => void;
 };
 
 export default function PostCard({
-  post: { id, imageUrls, content, likeCount, likedByMe, commentCount },
+  post: {
+    id,
+    imageUrls,
+    content,
+    likeCount,
+    likedByMe,
+    commentCount,
+    createdAt,
+    author,
+  },
+  onDelete,
 }: Props) {
   const theme = useTheme();
 
@@ -57,6 +69,8 @@ export default function PostCard({
   }, []);
 
   const Images = useMemo(() => {
+    if (imageUrls.length === 0) return null;
+
     const mainImage = imageUrls[0];
     const otherImages = imageUrls.slice(1, 5);
 
@@ -130,6 +144,27 @@ export default function PostCard({
     );
   }, [imageUrls, theme.dialogBackground, handleImagePress]);
 
+  // Delete handling
+  const { currentUser } = useUser();
+  const { deletePost } = usePosts();
+
+  const deleteButton = useMemo(() => {
+    if (author.username !== currentUser?.username) return null;
+
+    const handleDelete = async () => {
+      await deletePost(id);
+      if (onDelete) onDelete(id); // TODO: trigger update
+    };
+
+    return (
+      <IconButton
+        icon={{ name: "delete", library: "MaterialIcons", size: 16 }}
+        variant="icon"
+        onPress={() => handleDelete()}
+      />
+    );
+  }, [author.username, currentUser?.username, deletePost, id, onDelete]);
+
   return (
     <>
       <View
@@ -142,6 +177,23 @@ export default function PostCard({
           gap: 8,
         }}
       >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Image
+            source={{ uri: author.profilePictureUrl }}
+            placeholder={require("@/assets/images/avatar-placeholder.png")}
+            style={{ width: 32, height: 32, borderRadius: 16 }}
+          />
+          <AppText
+            type="title-medium"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ flex: 1 }}
+          >
+            {author.firstName} {author.lastName}
+          </AppText>
+          <AppText type="body-small">{compact(createdAt)}</AppText>
+          {deleteButton}
+        </View>
         <AppText type="body-medium">{content}</AppText>
         {Images}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
