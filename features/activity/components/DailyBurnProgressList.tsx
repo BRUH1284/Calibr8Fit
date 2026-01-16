@@ -13,7 +13,7 @@ export default function DailyBurnProgressList() {
   const theme = useTheme();
 
   const { targets, todayCaloriesTarget, todayCaloriesBurned } = useDailyBurn();
-  const { todayActivityCaloriesBurned, todayRecords } = useActivityRecord();
+  const { todayActivityCaloriesBurned } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
   const minimalTargets = useMemo(
@@ -37,7 +37,7 @@ export default function DailyBurnProgressList() {
           1
         ),
       })),
-    [targets, todayActivityCaloriesBurned, todayRecords]
+    [caloriesBurnedCalculator, targets, todayActivityCaloriesBurned]
   );
 
   const progress = useMemo(() => {

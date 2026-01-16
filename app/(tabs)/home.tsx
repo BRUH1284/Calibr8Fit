@@ -14,7 +14,6 @@ import { useProfile } from "@/features/profile/hooks/useProfile";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import { usePosts } from "@/features/social";
 import PostCard from "@/features/social/components/PostCard";
-import { PostsProvider } from "@/features/social/context/PostsContext";
 import AppText from "@/shared/components/AppText";
 import IconAddProgressIndicator from "@/shared/components/IconAddProgressIndicator";
 import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
@@ -23,7 +22,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback, useState } from "react";
 import { View } from "react-native";
 
-function HomeContent() {
+export default function Home() {
   const theme = useTheme();
 
   const [popupContent, setPopupContent] = useState<React.ReactNode>();
@@ -165,13 +164,5 @@ function HomeContent() {
         {popupContent}
       </Popup>
     </>
-  );
-}
-
-export default function Home() {
-  return (
-    <PostsProvider>
-      <HomeContent />
-    </PostsProvider>
   );
 }
