@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { useTheme } from "../hooks/useTheme";
@@ -6,13 +6,19 @@ import AppText from "./AppText";
 import IconButton from "./IconButton";
 
 type Props = {
+  yAxisLabelSuffix?: string;
+  referenceLine1Position?: number;
   loadRange: (
     start: Date,
     end: Date
   ) => Promise<{ date: Date; value: number }[]>;
 };
 
-export default function MonthLineChartCard({ loadRange }: Props) {
+export default function MonthLineChartCard({
+  yAxisLabelSuffix,
+  referenceLine1Position,
+  loadRange,
+}: Props) {
   const theme = useTheme();
 
   const yAxisLabelWidth = 56;
@@ -26,7 +32,15 @@ export default function MonthLineChartCard({ loadRange }: Props) {
 
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>({
     start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    end: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+    end: new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      1,
+      0,
+      0,
+      0,
+      -1
+    ),
   });
 
   const handlePrevMonth = useCallback(() => {
@@ -56,21 +70,25 @@ export default function MonthLineChartCard({ loadRange }: Props) {
       pointerLabel: string;
     }[]
   >([]);
+  const maxDataValue = useMemo(() => {
+    if (data.length === 0) return 0;
+    return Math.max(...data.map((d) => d.value));
+  }, [data]);
 
   const loadData = useCallback(
     async (start: Date, end: Date) => {
       const result = await loadRange(start, end);
       return result.map((r) => ({
         value: r.value,
-        label: "sd",
-        pointerLabel: "sd",
-        // label:
-        //   r.date.getDate() === 1
-        //     ? r.date.toLocaleString("default", { day: "numeric", month: "short" })
-        //     : undefined,
-        // pointerLabel: `${r.date.getDate()} ${r.date.toLocaleString("default", {
-        //   month: "short",
-        // })}`,
+        label:
+          (r.date.getDate() + 1) % 5 === 1
+            ? r.date.toLocaleString("default", {
+                day: "numeric",
+              })
+            : undefined,
+        pointerLabel: `${r.date.getDate()} ${r.date.toLocaleString("default", {
+          month: "short",
+        })}`,
       }));
     },
     [loadRange]
@@ -83,36 +101,6 @@ export default function MonthLineChartCard({ loadRange }: Props) {
     };
     fetchData();
   }, [loadData, dateRange]);
-
-  // const data = useMemo(async () => {
-  //   const result = await loadRange(dateRange.start, dateRange.end);
-  //   return result.map((r) => ({
-  //     value: r.value,
-  //     label: 1,
-  //     pointerLabel: 2,
-  //     // label:
-  //     //   r.date.getDate() === 1
-  //     //     ? r.date.toLocaleString("default", { day: "numeric", month: "short" })
-  //     //     : undefined,
-  //     // pointerLabel: `${r.date.getDate()} ${r.date.toLocaleString("default", {
-  //     //   month: "short",
-  //     // })}`,
-  //   }));
-  //   // Temporary random data for UI testing
-  //   // const result = new Array(30) as {
-  //   //   value: number;
-  //   //   label?: string;
-  //   //   pointerLabel: string;
-  //   // }[];
-  //   // for (let i = 0; i < 30; i++) {
-  //   //   result[i] = {
-  //   //     value: Math.random() * 5000,
-  //   //     label: i % 8 === 0 ? `${i + 1} Nov` : undefined,
-  //   //     pointerLabel: `${i + 1} Nov`,
-  //   //   };
-  //   // }
-  //   // return result;
-  // }, [dateRange]);
 
   return (
     <View
@@ -173,23 +161,30 @@ export default function MonthLineChartCard({ loadRange }: Props) {
           textAlign: "right",
         }}
         initialSpacing={0}
+        adjustToWidth
         spacing={chartSpacing}
         data={data}
         startFillColor={theme.blue}
         startOpacity={1}
         endFillColor={theme.surface}
         endOpacity={0}
-        xAxisLabelTextStyle={{
-          width: 50,
-          color: theme.onSurfaceVariant,
-        }}
-        yAxisLabelSuffix=" ml"
+        xAxisLabelTextStyle={{ width: 20, marginLeft: 5 }}
+        yAxisLabelSuffix={yAxisLabelSuffix}
         thickness={2}
         color={theme.blue}
         hideOrigin
         xAxisColor={theme.onSurfaceVariant}
         yAxisColor={theme.onSurfaceVariant}
-        hideRules
+        rulesColor={theme.surfaceContainer}
+        rulesType="solid"
+        showReferenceLine1={!!referenceLine1Position}
+        maxValue={
+          maxDataValue < (referenceLine1Position ?? 0)
+            ? referenceLine1Position
+            : maxDataValue
+        }
+        referenceLine1Position={referenceLine1Position}
+        referenceLine1Config={{ color: theme.onSurfaceVariant }}
         pointerConfig={{
           pointerStripColor: theme.onSurfaceVariant,
           pointerStripUptoDataPoint: true,

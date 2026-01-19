@@ -53,32 +53,42 @@ const loadDailySumInRange = async (
   start: Date,
   end: Date
 ): Promise<{ date: Date; value: number }[]> => {
-  const startTs = start.setHours(0, 0, 0, 0);
-  const endTs = end.setHours(24, 0, 0, 0);
-
   try {
-    const result = await db
+    const rows = await db
       .select({
-        date: sql<number>`strftime('%s', DATE(${waterIntakeRecords.time}, 'unixepoch', 'localtime'))`,
+        date: sql<number>`strftime('%s', datetime(${waterIntakeRecords.time} / 1000, 'unixepoch', 'localtime', 'start of day', 'utc'))`,
         total: sql<number>`SUM(${waterIntakeRecords.amountInMl})`,
       })
       .from(waterIntakeRecords)
       .where(
         and(
           eq(waterIntakeRecords.deleted, false),
-          gte(waterIntakeRecords.time, startTs),
-          lt(waterIntakeRecords.time, endTs)
+          gte(waterIntakeRecords.time, start.getTime()),
+          lt(waterIntakeRecords.time, end.getTime())
         )
       )
       .groupBy(sql`1`)
       .orderBy(sql`1`);
 
-    console.log("Daily total in range:", result);
+    const totalsByDay = new Map<number, number>();
 
-    return result.map((r) => ({
-      date: new Date(r.date as number),
-      value: r.total as number,
-    }));
+    rows.forEach((r) => {
+      totalsByDay.set(Number(r.date), Number(r.total));
+    });
+
+    for (let dt = new Date(start); dt < end; dt.setDate(dt.getDate() + 1)) {
+      const dayTs = Math.floor(dt.getTime() / 1000);
+      if (!totalsByDay.has(dayTs)) {
+        totalsByDay.set(dayTs, 0);
+      }
+    }
+
+    return Array.from(totalsByDay.entries())
+      .map(([dateTs, value]) => ({
+        date: new Date(dateTs * 1000),
+        value,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
   } catch (error) {
     console.error("Error loading daily sum in range:", error);
     throw error;

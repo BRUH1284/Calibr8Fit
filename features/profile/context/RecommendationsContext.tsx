@@ -11,37 +11,47 @@ export interface RecommendationsContextProps {
   getWaterIntake: () => number;
   getBurnTarget: () => number;
   getConsumptionTarget: () => number;
-  waterIntake: number;
+  waterIntakeTarget: number;
   rmr: number;
   burnTarget: number;
   consumptionTarget: number;
 }
 
-export const RecommendationsContext = createContext<RecommendationsContextProps | null>(null);
+export const RecommendationsContext =
+  createContext<RecommendationsContextProps | null>(null);
 
-export const RecommendationsProvider = ({ children }: { children: React.ReactNode }) => {
+export const RecommendationsProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { profileSettings } = useProfile();
-  const [waterIntake, setWaterIntake] = useState<number>(0);
+  const [waterIntakeTarget, setWaterIntakeTarget] = useState<number>(0);
   const [rmr, setRmr] = useState<number>(0);
   const [burnTarget, setBurnTarget] = useState<number>(0);
   const [consumptionTarget, setConsumptionTarget] = useState<number>(0);
 
   useEffect(() => {
-    setWaterIntake(getWaterIntake());
+    setWaterIntakeTarget(getWaterIntake());
     setRmr(getRMR());
     setBurnTarget(getBurnTarget());
     setConsumptionTarget(getConsumptionTarget());
   }, [profileSettings]);
 
-  const caloriesBurnedCalculator = useCallback((met: number, minutes: number): number => {
-    return recommendationsService.activityEstimateCaloriesBurned(
-      met,
-      minutes,
-      profileSettings?.weight || 0,
-    );
-  }, [profileSettings?.weight]);
+  const caloriesBurnedCalculator = useCallback(
+    (met: number, minutes: number): number => {
+      return recommendationsService.activityEstimateCaloriesBurned(
+        met,
+        minutes,
+        profileSettings?.weight || 0
+      );
+    },
+    [profileSettings?.weight]
+  );
 
-  const age = new Date().getFullYear() - new Date(profileSettings?.dateOfBirth ?? new Date()).getFullYear();
+  const age =
+    new Date().getFullYear() -
+    new Date(profileSettings?.dateOfBirth ?? new Date()).getFullYear();
 
   const getRMR = (): number => {
     return recommendationsService.rmrCalculator(
@@ -49,7 +59,7 @@ export const RecommendationsProvider = ({ children }: { children: React.ReactNod
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
       profileSettings?.weight || 0,
       profileSettings?.height || 0,
-      age,
+      age
     );
   };
 
@@ -58,16 +68,16 @@ export const RecommendationsProvider = ({ children }: { children: React.ReactNod
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
       profileSettings?.weight || 0,
-      profileSettings?.climate || Climate.Temperate,
+      profileSettings?.climate || Climate.Temperate
     );
   };
 
   const getBurnTarget = (): number => {
     return recommendationsService.burningCalculator(
       profileSettings?.weight || 0,
-      profileSettings?.targetWeight || 0,
+      profileSettings?.targetWeight || 0
     );
-  }
+  };
 
   const getConsumptionTarget = (): number => {
     return recommendationsService.consumptionCalculator(
@@ -76,23 +86,25 @@ export const RecommendationsProvider = ({ children }: { children: React.ReactNod
       profileSettings?.weight || 0,
       profileSettings?.targetWeight || 0,
       profileSettings?.height || 0,
-      age,
+      age
     );
-  }
+  };
 
   return (
-    <RecommendationsContext.Provider value={{
-      caloriesBurnedCalculator,
-      getRMR,
-      getWaterIntake,
-      getBurnTarget,
-      getConsumptionTarget,
-      burnTarget,
-      consumptionTarget,
-      waterIntake,
-      rmr
-    }}>
+    <RecommendationsContext.Provider
+      value={{
+        caloriesBurnedCalculator,
+        getRMR,
+        getWaterIntake,
+        getBurnTarget,
+        getConsumptionTarget,
+        burnTarget,
+        consumptionTarget,
+        waterIntakeTarget: waterIntakeTarget,
+        rmr,
+      }}
+    >
       {children}
     </RecommendationsContext.Provider>
   );
-}
+};

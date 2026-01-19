@@ -31,22 +31,22 @@ export default function SignUp() {
     try {
       await register(username, password);
     } catch (error: any) {
-      const cause = error?.cause;
+      const payload = error?.payload;
 
-      if (Array.isArray(cause)) {
+      if (Array.isArray(payload)) {
         setUsernameError(
-          cause.find((e: { description: string }) =>
+          payload.find((e: { description: string }) =>
             e.description.toLowerCase().includes("username")
           )?.description || ""
         );
         setPasswordError(
-          cause.find((e: { description: string }) =>
+          payload.find((e: { description: string }) =>
             e.description.toLowerCase().includes("password")
           )?.description || ""
         );
       } else {
-        setUsernameError(cause?.UserName || "");
-        setPasswordError(cause?.Password || "");
+        setUsernameError(payload?.UserName || "");
+        setPasswordError(payload?.Password || "");
       }
     }
   };

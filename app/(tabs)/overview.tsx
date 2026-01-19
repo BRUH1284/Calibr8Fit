@@ -24,54 +24,70 @@ import { AppTheme } from "@/styles/themes";
 import React, { useCallback, useState } from "react";
 import { NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import Animated, { interpolateColor, SharedValue, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  interpolateColor,
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const PAGE_COUNT = 3;
 
 const PageIndicator = ({
   progress,
   activeColor,
-  inactiveColor
+  inactiveColor,
 }: {
-  progress: SharedValue<number>,
-  activeColor: string,
-  inactiveColor: string
+  progress: SharedValue<number>;
+  activeColor: string;
+  inactiveColor: string;
 }) => {
   const style = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
       [inactiveColor, activeColor]
-    )
+    ),
   }));
 
-  return <Animated.View style={[{
-    height: 8,
-    width: 8,
-    borderRadius: 4,
-  }, style]} />;
-}
+  return (
+    <Animated.View
+      style={[
+        {
+          height: 8,
+          width: 8,
+          borderRadius: 4,
+        },
+        style,
+      ]}
+    />
+  );
+};
 
 const usePagerProgress = (pageCount: number) =>
   Array.from({ length: pageCount }, (_, i) => useSharedValue(i === 0 ? 1 : 0));
 
-const useStyles = (theme: AppTheme) => React.useMemo(() => StyleSheet.create({
-  cardPage: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    backgroundColor: theme.surface,
-    borderWidth: 1,
-    borderColor: theme.outline
-  },
-  circleIndicator: {
-    height: 8,
-    width: 8,
-    borderRadius: 4,
-  },
-}), [theme]);
-
+const useStyles = (theme: AppTheme) =>
+  React.useMemo(
+    () =>
+      StyleSheet.create({
+        cardPage: {
+          flex: 1,
+          borderRadius: 16,
+          padding: 16,
+          marginHorizontal: 16,
+          backgroundColor: theme.surface,
+          borderWidth: 1,
+          borderColor: theme.outline,
+        },
+        circleIndicator: {
+          height: 8,
+          width: 8,
+          borderRadius: 4,
+        },
+      }),
+    [theme]
+  );
 
 export default function Overview() {
   const theme = useTheme();
@@ -80,32 +96,43 @@ export default function Overview() {
   const [popupContent, setPopupContent] = useState<React.ReactNode>();
 
   const { profileSettings } = useProfile();
-  const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
+  const { waterIntakeTarget, burnTarget, consumptionTarget } =
+    useRecommendations();
   const { todayWaterIntakeInMl } = useWaterIntake();
   const { weight } = useWeightRecord();
   const { todayCaloriesConsumed } = useConsumptionRecord();
   const { todayCaloriesBurned } = useActivityRecord();
 
   const progressArray = usePagerProgress(PAGE_COUNT);
-  const HandlePageScroll = useCallback((e: NativeSyntheticEvent<Readonly<{
-    position: number;
-    offset: number;
-  }>>) => {
-    const { offset, position } = e.nativeEvent;
-    for (let i = 0; i < PAGE_COUNT; i++)
-      progressArray[i].value = i === position ? 1 - offset : i === position + 1 ? offset : 0;
-  }, [progressArray]);
+  const HandlePageScroll = useCallback(
+    (
+      e: NativeSyntheticEvent<
+        Readonly<{
+          position: number;
+          offset: number;
+        }>
+      >
+    ) => {
+      const { offset, position } = e.nativeEvent;
+      for (let i = 0; i < PAGE_COUNT; i++)
+        progressArray[i].value =
+          i === position ? 1 - offset : i === position + 1 ? offset : 0;
+    },
+    [progressArray]
+  );
 
   const openFoodPopup = useCallback(() => {
     setPopupContent(
       <FoodListPopupContent
         onClose={() => setPopupContent(undefined)}
-        onFoodSelect={(item) => setPopupContent(
-          <FoodRecordPopupContent
-            item={item}
-            onClose={() => setPopupContent(undefined)}
-          />
-        )}
+        onFoodSelect={(item) =>
+          setPopupContent(
+            <FoodRecordPopupContent
+              item={item}
+              onClose={() => setPopupContent(undefined)}
+            />
+          )
+        }
       />
     );
   }, []);
@@ -114,12 +141,14 @@ export default function Overview() {
     setPopupContent(
       <ActivitiesListPopupContent
         onClose={() => setPopupContent(undefined)}
-        onActivitySelect={(item: ActivityItem) => setPopupContent(
-          <ActivityRecordPopupContent
-            activity={item}
-            onClose={() => setPopupContent(undefined)}
-          />
-        )}
+        onActivitySelect={(item: ActivityItem) =>
+          setPopupContent(
+            <ActivityRecordPopupContent
+              activity={item}
+              onClose={() => setPopupContent(undefined)}
+            />
+          )
+        }
       />
     );
   }, []);
@@ -134,11 +163,9 @@ export default function Overview() {
 
   const openWeightRecordPopup = useCallback(() => {
     setPopupContent(
-      <WeightRecordPopup
-        onClose={() => setPopupContent(undefined)}
-      />)
-  }
-    , []);
+      <WeightRecordPopup onClose={() => setPopupContent(undefined)} />
+    );
+  }, []);
 
   const { targets } = useDailyBurn();
 
@@ -146,13 +173,17 @@ export default function Overview() {
     setPopupContent(
       <ActivitiesListPopupContent
         onClose={() => setPopupContent(undefined)}
-        bannedIdList={new Set(targets.map(t => t.activityId ?? t.userActivityId!))}
-        onActivitySelect={(item: ActivityItem) => setPopupContent(
-          <DailyBurnPopupContent
-            activity={item}
-            onClose={() => setPopupContent(undefined)}
-          />
-        )}
+        bannedIdList={
+          new Set(targets.map((t) => t.activityId ?? t.userActivityId!))
+        }
+        onActivitySelect={(item: ActivityItem) =>
+          setPopupContent(
+            <DailyBurnPopupContent
+              activity={item}
+              onClose={() => setPopupContent(undefined)}
+            />
+          )
+        }
       />
     );
   }, [targets]);
@@ -163,31 +194,35 @@ export default function Overview() {
         flex: 1,
         gap: 8,
         paddingHorizontal: 16,
-        backgroundColor: theme.surface
+        backgroundColor: theme.surface,
       }}
     >
-      <View style={{
-        height: 144,
-        backgroundColor: theme.surface,
-        marginVertical: 8,
-        borderRadius: 16,
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: theme.outline
-      }} >
+      <View
+        style={{
+          height: 144,
+          backgroundColor: theme.surface,
+          marginVertical: 8,
+          borderRadius: 16,
+          justifyContent: "center",
+          borderWidth: 1,
+          borderColor: theme.outline,
+        }}
+      >
         <ProgressCarousel />
       </View>
-      <View style={{
-        flexDirection: 'row',
-        gap: 8,
-      }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+        }}
+      >
         <IconTile
           style={{ flex: 1 }}
           text={`${todayCaloriesConsumed} kcal`}
           supportingText={`${consumptionTarget} kcal`}
           icon={{
-            name: 'fastfood',
-            library: 'MaterialIcons'
+            name: "fastfood",
+            library: "MaterialIcons",
           }}
           onPress={openFoodPopup}
         />
@@ -196,23 +231,25 @@ export default function Overview() {
           text={`${todayCaloriesBurned} kcal`}
           supportingText={`${burnTarget} kcal`}
           icon={{
-            name: 'local-fire-department',
-            library: 'MaterialIcons'
+            name: "local-fire-department",
+            library: "MaterialIcons",
           }}
           onPress={openActivitiesPopup}
         />
       </View>
-      <View style={{
-        flexDirection: 'row',
-        gap: 8,
-      }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+        }}
+      >
         <IconTile
           style={{ flex: 1 }}
           text={`${(todayWaterIntakeInMl / 1000).toFixed(2)} l`}
-          supportingText={`${waterIntake} l`}
+          supportingText={`${waterIntakeTarget} l`}
           icon={{
-            name: 'water-drop',
-            library: 'MaterialIcons'
+            name: "water-drop",
+            library: "MaterialIcons",
           }}
           onPress={openWaterIntakePopup}
         />
@@ -221,8 +258,8 @@ export default function Overview() {
           text={`${weight} kg`}
           supportingText={`${profileSettings?.targetWeight} kg`}
           icon={{
-            name: 'monitor-weight',
-            library: 'MaterialIcons'
+            name: "monitor-weight",
+            library: "MaterialIcons",
           }}
           onPress={openWeightRecordPopup}
         />
@@ -232,33 +269,32 @@ export default function Overview() {
           flex: 1,
           paddingTop: 8,
           marginHorizontal: -16,
-        }}>
+        }}
+      >
         <PagerView
           style={{ flex: 1 }}
-          onPageScroll={(e) => { HandlePageScroll(e) }}
+          onPageScroll={(e) => {
+            HandlePageScroll(e);
+          }}
         >
           <View key="1" style={styles.cardPage}>
-            <ActivitiesListCard
-              onAddActivityPress={openActivitiesPopup}
-            />
+            <ActivitiesListCard onAddActivityPress={openActivitiesPopup} />
           </View>
           <View key="2" style={styles.cardPage}>
-            <RationListCard
-              onAddPress={openFoodPopup}
-            />
+            <RationListCard onAddPress={openFoodPopup} />
           </View>
           <View key="3" style={styles.cardPage}>
-            <DailyBurnListCard
-              onAddTargetPress={openDailyBurnPopup}
-            />
+            <DailyBurnListCard onAddTargetPress={openDailyBurnPopup} />
           </View>
         </PagerView>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          gap: 8,
-          padding: 4,
-        }} >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+            padding: 4,
+          }}
+        >
           {progressArray.map((progress, index) => (
             <PageIndicator
               key={index}

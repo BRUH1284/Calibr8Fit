@@ -68,7 +68,11 @@ export default function Home() {
   }, []);
 
   const { profileSettings } = useProfile();
-  const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
+  const {
+    waterIntakeTarget: waterIntake,
+    burnTarget,
+    consumptionTarget,
+  } = useRecommendations();
   const { todayWaterIntakeInMl, syncWaterIntake } = useWaterIntake();
   const { syncFoods } = useFood();
   const { todayCaloriesConsumed, syncConsumptionRecords } =

@@ -65,7 +65,7 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
     const parsedBody = await getResponseBody(response);
 
     // Handle 401 with optional refresh
-    if (response.status === 401) {
+    if (response.status === 401 && token) {
       if (
         requestConfig.endpoint !== "/auth/refresh-token" &&
         (await refreshToken())
@@ -76,7 +76,6 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
     }
 
     if (!response.ok) {
-      // Build a robust message from many possible server shapes
       const msg =
         (parsedBody &&
           typeof parsedBody === "object" &&
@@ -89,23 +88,19 @@ const request = async (requestConfig: RequestConfig): Promise<any> => {
 
       const err: any = new Error(msg);
       err.status = response.status;
-      err.payload = parsedBody;
-      // include model state / errors if present
       if (parsedBody && typeof parsedBody === "object" && parsedBody.errors) {
-        err.payloadErrors = parsedBody.errors;
+        err.payload = parsedBody.errors;
+      } else {
+        err.payload = parsedBody;
       }
       throw err;
     }
 
     return parsedBody;
   } catch (error: any) {
-    // Defensive logging — never dereference deep chains
-    console.log("API error:", error?.message ?? error);
-    console.log(
-      "Error details:",
-      error?.payload ?? error?.payloadErrors ?? null
-    );
-    console.log("Status:", error?.status ?? null);
+    console.log("API error:", error.message ?? error);
+    console.log("Error details:", error.payload);
+    console.log("Status:", error.status ?? null);
     throw error;
   }
 };

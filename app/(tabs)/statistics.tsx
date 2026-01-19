@@ -1,27 +1,49 @@
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
+import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import MonthLineChartCard from "@/shared/components/MonthLineChartCard";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { View } from "react-native";
+
+type RangePoint = {
+  date: Date;
+  value: number;
+};
 
 export default function Statistics() {
   const theme = useTheme();
 
+  const { waterIntakeTarget, burnTarget, consumptionTarget } =
+    useRecommendations();
+
   const { getDailyTotalInRange } = useWaterIntake();
 
-  const data = useMemo(() => {
-    const result = new Array(30) as {
-      value: number;
-      label?: string;
-    }[];
-    for (let i = 0; i < 30; i++) {
-      result[i] = {
-        value: Math.random() * 100,
-        label: i % 5 === 0 ? `${i + 1} Nov` : undefined,
-      };
-    }
-    return result;
-  }, []);
+  // local random data generator
+  const loadRandomRange = useCallback(
+    async (start: Date, end: Date): Promise<RangePoint[]> => {
+      const result: RangePoint[] = [];
+
+      const current = new Date(start);
+      current.setHours(0, 0, 0, 0);
+
+      console.log("Generating random data from", current, "to", end);
+
+      const last = new Date(end);
+      last.setHours(0, 0, 0, 0);
+
+      while (current <= last) {
+        result.push({
+          date: new Date(current),
+          value: Math.floor(Math.random() * 3000),
+        });
+
+        current.setDate(current.getDate() + 1);
+      }
+
+      return result;
+    },
+    []
+  );
 
   return (
     <View
@@ -31,7 +53,13 @@ export default function Statistics() {
         paddingHorizontal: 16,
       }}
     >
-      <MonthLineChartCard loadRange={getDailyTotalInRange} />
+      {/* swap between real and mock data here */}
+      <MonthLineChartCard
+        yAxisLabelSuffix=" ml"
+        referenceLine1Position={waterIntakeTarget * 1000}
+        loadRange={getDailyTotalInRange}
+      />
+      {/* <MonthLineChartCard loadRange={getDailyTotalInRange} /> */}
     </View>
   );
 }

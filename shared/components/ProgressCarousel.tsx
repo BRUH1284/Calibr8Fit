@@ -21,11 +21,18 @@ interface SummaryItem {
 export default function ProgressCarousel() {
   const theme = useTheme();
 
-  const { waterIntake, burnTarget, consumptionTarget } = useRecommendations();
+  const {
+    waterIntakeTarget: waterIntake,
+    burnTarget,
+    consumptionTarget,
+  } = useRecommendations();
 
-  const { todayWaterIntakeInMl, loadInRange: loadInRangeWater } = useWaterIntake();
-  const { todayCaloriesBurned, loadInRange: loadInRangeActivity } = useActivityRecord();
-  const { todayCaloriesConsumed, loadInRange: loadInRangeConsumption } = useConsumptionRecord();
+  const { todayWaterIntakeInMl, loadInRange: loadInRangeWater } =
+    useWaterIntake();
+  const { todayCaloriesBurned, loadInRange: loadInRangeActivity } =
+    useActivityRecord();
+  const { todayCaloriesConsumed, loadInRange: loadInRangeConsumption } =
+    useConsumptionRecord();
 
   const [monthSummary, setMonthSummary] = useState<SummaryItem[]>();
 
@@ -43,12 +50,16 @@ export default function ProgressCarousel() {
   }, [containerWidth]);
 
   const getMonthSummary = async () => {
-    const startOfRange = new Date().getTime() - TOTAL_DAYS * 24 * 60 * 60 * 1000;
+    const startOfRange =
+      new Date().getTime() - TOTAL_DAYS * 24 * 60 * 60 * 1000;
     const endOfRange = new Date().getTime();
 
     const waterRecords = await loadInRangeWater(startOfRange, endOfRange);
     const activityRecords = await loadInRangeActivity(startOfRange, endOfRange);
-    const consumptionRecords = await loadInRangeConsumption(startOfRange, endOfRange);
+    const consumptionRecords = await loadInRangeConsumption(
+      startOfRange,
+      endOfRange
+    );
 
     let result = new Array<SummaryItem>();
 
@@ -57,22 +68,45 @@ export default function ProgressCarousel() {
       const start = new Date(startOfDay).setHours(0, 0, 0, 0);
       const end = start + 24 * 60 * 60 * 1000;
 
-      const dayWaterRecords = waterRecords.filter(record => record.time >= start && record.time < end);
-      const dayWaterTotal = dayWaterRecords.reduce((sum, record) => sum + record.amountInMl, 0);
-      const dayActivityRecords = activityRecords.filter(record => record.time >= start && record.time < end);
-      const dayActivityTotal = dayActivityRecords.reduce((sum, record) => sum + record.caloriesBurned, 0);
-      const dayConsumptionRecords = consumptionRecords.filter(record => record.time >= start && record.time < end);
-      const dayConsumptionTotal = dayConsumptionRecords.reduce((sum, record) => sum + calcCaloricValue(record), 0);
+      const dayWaterRecords = waterRecords.filter(
+        (record) => record.time >= start && record.time < end
+      );
+      const dayWaterTotal = dayWaterRecords.reduce(
+        (sum, record) => sum + record.amountInMl,
+        0
+      );
+      const dayActivityRecords = activityRecords.filter(
+        (record) => record.time >= start && record.time < end
+      );
+      const dayActivityTotal = dayActivityRecords.reduce(
+        (sum, record) => sum + record.caloriesBurned,
+        0
+      );
+      const dayConsumptionRecords = consumptionRecords.filter(
+        (record) => record.time >= start && record.time < end
+      );
+      const dayConsumptionTotal = dayConsumptionRecords.reduce(
+        (sum, record) => sum + calcCaloricValue(record),
+        0
+      );
 
       const waterProgress = dayWaterTotal / 1000 / waterIntake;
-      const burnProgress = burnTarget ? Math.min(dayActivityTotal / burnTarget, 1) : 1;
-      const rationProgress = consumptionTarget ? Math.min(dayConsumptionTotal / consumptionTarget, 1) : 0;
+      const burnProgress = burnTarget
+        ? Math.min(dayActivityTotal / burnTarget, 1)
+        : 1;
+      const rationProgress = consumptionTarget
+        ? Math.min(dayConsumptionTotal / consumptionTarget, 1)
+        : 0;
 
       result.push({
         waterProgress: waterProgress,
         burnProgress: burnProgress,
         rationProgress: rationProgress,
-        date: new Date(start).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'numeric' })
+        date: new Date(start).toLocaleDateString([], {
+          weekday: "short",
+          day: "numeric",
+          month: "numeric",
+        }),
       });
     }
 
@@ -83,12 +117,15 @@ export default function ProgressCarousel() {
       waterProgress: 0,
       burnProgress: 0,
       rationProgress: 0,
-      date: new Date(tomorrowDate).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'numeric' })
+      date: new Date(tomorrowDate).toLocaleDateString([], {
+        weekday: "short",
+        day: "numeric",
+        month: "numeric",
+      }),
     });
 
     return result;
   };
-
 
   useEffect(() => {
     getMonthSummary().then(setMonthSummary);
@@ -96,10 +133,11 @@ export default function ProgressCarousel() {
 
   const renderItem = (item: SummaryItem) => {
     return (
-      <View style={{
-        width: ITEM_SIZE,
-        alignItems: 'center',
-      }}
+      <View
+        style={{
+          width: ITEM_SIZE,
+          alignItems: "center",
+        }}
       >
         <CircularProgress
           size={ITEM_SIZE - 24}
@@ -123,25 +161,28 @@ export default function ProgressCarousel() {
           ]}
           icons={[
             {
-              name: 'local-fire-department',
-              library: 'MaterialIcons',
-              color: item.burnProgress >= 1 ? theme.orange : theme.surfaceContainer,
+              name: "local-fire-department",
+              library: "MaterialIcons",
+              color:
+                item.burnProgress >= 1 ? theme.orange : theme.surfaceContainer,
             },
             {
-              name: 'fastfood',
-              library: 'MaterialIcons',
-              color: item.rationProgress >= 1 ? theme.yellow : theme.surfaceContainer,
+              name: "fastfood",
+              library: "MaterialIcons",
+              color:
+                item.rationProgress >= 1
+                  ? theme.yellow
+                  : theme.surfaceContainer,
             },
             {
-              name: 'water-drop',
-              library: 'MaterialIcons',
-              color: item.waterProgress >= 1 ? theme.blue : theme.surfaceContainer,
-            }
+              name: "water-drop",
+              library: "MaterialIcons",
+              color:
+                item.waterProgress >= 1 ? theme.blue : theme.surfaceContainer,
+            },
           ]}
         />
-        <AppText
-          type='label-small'
-        >{item.date}</AppText>
+        <AppText type="label-small">{item.date}</AppText>
       </View>
     );
   };
