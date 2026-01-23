@@ -14,12 +14,12 @@ interface WaterIntakeContextProps {
   loadInRange: (start: number, end: number) => Promise<WaterIntakeRecord[]>;
   getDailyTotalInRange: (
     start: Date,
-    end: Date
+    end: Date,
   ) => Promise<{ date: Date; value: number }[]>;
 }
 
 export const WaterIntakeContext = createContext<WaterIntakeContextProps | null>(
-  null
+  null,
 );
 
 export const WaterIntakeProvider = ({
@@ -46,8 +46,8 @@ export const WaterIntakeProvider = ({
     setTodayWaterIntakeInMl(
       todayWaterIntakeRecords.reduce(
         (total, record) => total + record.amountInMl,
-        0
-      )
+        0,
+      ),
     );
   }, [todayWaterIntakeRecords]);
 
@@ -68,11 +68,8 @@ export const WaterIntakeProvider = ({
     return records;
   };
 
-  const getDailyTotalInRange = async (start: Date, end: Date) => {
-    return await waterIntakeService.loadDailySumInRange(start, end);
-  };
-
-  const loadInRange = waterIntakeService.loadInRange;
+  const getDailyTotalInRange = waterIntakeService.loadDailySumInNumberRange;
+  const loadInRange = waterIntakeService.loadInTimeNumberRange;
 
   return (
     <WaterIntakeContext.Provider

@@ -42,7 +42,7 @@ export default function Statistics() {
 
       return result;
     },
-    []
+    [],
   );
 
   return (
@@ -58,6 +58,16 @@ export default function Statistics() {
         yAxisLabelSuffix=" ml"
         referenceLine1Position={waterIntakeTarget * 1000}
         loadRange={getDailyTotalInRange}
+      />
+      <MonthLineChartCard
+        yAxisLabelSuffix=" kcal"
+        referenceLine1Position={burnTarget}
+        loadRange={loadRandomRange}
+      />
+      <MonthLineChartCard
+        yAxisLabelSuffix=" kcal"
+        referenceLine1Position={consumptionTarget}
+        loadRange={loadRandomRange}
       />
       {/* <MonthLineChartCard loadRange={getDailyTotalInRange} /> */}
     </View>

@@ -10,7 +10,7 @@ type Props = {
   referenceLine1Position?: number;
   loadRange: (
     start: Date,
-    end: Date
+    end: Date,
   ) => Promise<{ date: Date; value: number }[]>;
 };
 
@@ -26,7 +26,7 @@ export default function MonthLineChartCard({
 
   const handleLayout = useCallback((e: LayoutChangeEvent) => {
     const { width } = e.nativeEvent.layout;
-    const spacing = (width - yAxisLabelWidth - 33) / 30;
+    const spacing = width - yAxisLabelWidth - 33;
     setChartSpacing(spacing);
   }, []);
 
@@ -39,7 +39,7 @@ export default function MonthLineChartCard({
       0,
       0,
       0,
-      -1
+      -1,
     ),
   });
 
@@ -91,7 +91,7 @@ export default function MonthLineChartCard({
         })}`,
       }));
     },
-    [loadRange]
+    [loadRange],
   );
 
   useEffect(() => {
@@ -162,7 +162,7 @@ export default function MonthLineChartCard({
         }}
         initialSpacing={0}
         adjustToWidth
-        spacing={chartSpacing}
+        spacing={data.length === 0 ? 0 : chartSpacing / data.length}
         data={data}
         startFillColor={theme.blue}
         startOpacity={1}
