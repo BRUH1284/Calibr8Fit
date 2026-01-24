@@ -2,7 +2,7 @@ import { db } from "@/db/db";
 import { and, ColumnBaseConfig, gte, lt, sql, SQL, Table } from "drizzle-orm";
 import { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
-const DAY_SECONDS = 24 * 60 * 60;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function createTimeSeriesQueryService<
   TTable extends Table & {
@@ -43,20 +43,22 @@ export function createTimeSeriesQueryService<
     fillDateGaps: boolean = true,
     extraWhere?: SQL<unknown>,
   ): Promise<{ date: Date; value: number }[]> => {
-    start =
-      typeof start === "number" ? start : Math.floor(start.getTime() / 1000);
-    end = typeof end === "number" ? end : Math.floor(end.getTime() / 1000);
+    start = typeof start === "number" ? start : Math.floor(start.getTime());
+    end = typeof end === "number" ? end : Math.floor(end.getTime());
+
+    const LOCAL_OFFSET = new Date().getTimezoneOffset() * -60_000;
 
     const where = and(
       persistentFilter ?? and(),
       extraWhere ?? and(),
-      gte(table.time, start * 1000),
-      lt(table.time, end * 1000),
+      gte(table.time, start),
+      lt(table.time, end),
     );
 
     const rows = await db
       .select({
-        date: sql<number>`strftime('%s', datetime(${table.time} / 1000, 'unixepoch', 'localtime', 'start of day', 'utc'))`,
+        date: sql<number>`((${table.time} + ${LOCAL_OFFSET})
+        - ((${table.time} + ${LOCAL_OFFSET}) % ${DAY_MS}) - ${LOCAL_OFFSET})`,
         total: sql<number>`SUM(${sumColumn})`,
       })
       .from(table)
@@ -67,14 +69,14 @@ export function createTimeSeriesQueryService<
     if (fillDateGaps) {
       rows.forEach((r) => totalsByDay.set(r.date, r.total));
 
-      for (let dt = start; dt < end; dt += DAY_SECONDS)
+      for (let dt = start; dt < end; dt += DAY_MS)
         if (!totalsByDay.has(dt)) totalsByDay.set(dt, 0);
     }
 
     return Array.from(totalsByDay.entries())
       .sort((a, b) => a[0] - b[0])
       .map(([date, value]) => ({
-        date: new Date(date * 1000),
+        date: new Date(date),
         value,
       }));
   };
