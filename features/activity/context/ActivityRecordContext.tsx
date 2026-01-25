@@ -14,9 +14,16 @@ interface ActivityRecordContextProps {
   deleteActivityRecord: (id: string) => Promise<void>;
   syncActivityRecords: () => Promise<void>;
   loadActivityRecords: () => Promise<ActivityRecord[]>;
-  loadTodayActivityRecords: () => Promise<ActivityRecord[]>;
-  loadInRange: (start: number, end: number) => Promise<ActivityRecord[]>;
+  loadToday: () => Promise<ActivityRecord[]>;
+  loadInTimeNumberRange: (
+    start: number,
+    end: number,
+  ) => Promise<ActivityRecord[]>;
   todayActivityCaloriesBurned: (activityId: string) => number;
+  loadDailyTotalInNumberRange: (
+    start: Date,
+    end: Date,
+  ) => Promise<{ date: Date; value: number }[]>;
 }
 
 export const ActivityRecordContext =
@@ -52,7 +59,7 @@ export const ActivityRecordProvider = ({
       } as ActivityRecord,
     ]);
     await activityRecordService.add(record);
-    loadTodayActivityRecords();
+    loadToday();
   };
 
   const deleteActivityRecord = async (id: string) => {
@@ -60,12 +67,12 @@ export const ActivityRecordProvider = ({
       prevRecords.filter((record) => record.id !== id),
     );
     await activityRecordService.softDelete(id);
-    loadTodayActivityRecords();
+    loadToday();
   };
 
   const syncActivityRecords = async () => {
     await activityRecordService.sync();
-    loadTodayActivityRecords();
+    loadToday();
   };
 
   const loadActivityRecords = async () => {
@@ -73,7 +80,7 @@ export const ActivityRecordProvider = ({
     return loadedRecords;
   };
 
-  const loadTodayActivityRecords = async () => {
+  const loadToday = async () => {
     const loadedRecords = await activityRecordService.loadToday();
     setTodayRecords(loadedRecords);
     return loadedRecords;
@@ -91,14 +98,14 @@ export const ActivityRecordProvider = ({
   return (
     <ActivityRecordContext.Provider
       value={{
+        ...activityRecordService,
         todayRecords,
         todayCaloriesBurned,
         addActivityRecord,
         deleteActivityRecord,
         syncActivityRecords,
         loadActivityRecords,
-        loadTodayActivityRecords,
-        loadInRange: activityRecordService.loadInTimeNumberRange,
+        loadToday,
         todayActivityCaloriesBurned,
       }}
     >

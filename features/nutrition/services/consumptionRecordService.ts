@@ -1,74 +1,10 @@
 import { db } from "@/db/db";
-import { consumptionRecords, foods, userFoods, userMeals } from "@/db/schema";
+import { consumptionRecords, foods } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { createTimeSeriesQueryService } from "@/shared/services/createTimeSeriesQueryService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
-import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { ConsumptionRecord } from "../types/consumptionRecord";
-
-const nullToUndefined = <T>(v: T | null | undefined): T | undefined => {
-  return v ?? undefined;
-};
-
-const loadInRange = async (
-  start: number,
-  end: number,
-): Promise<ConsumptionRecord[]> => {
-  const predicates = [
-    eq(consumptionRecords.deleted, false),
-    gte(consumptionRecords.time, start),
-    lt(consumptionRecords.time, end),
-  ];
-
-  const records = await db.query.consumptionRecords.findMany({
-    where: and(...predicates),
-    with: {
-      food: true,
-      userFood: true,
-      userMeal: {
-        with: {
-          ingredients: {
-            with: {
-              food: true,
-              userFood: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return records;
-};
-
-const loadToday = async (): Promise<ConsumptionRecord[]> => {
-  const start = new Date().setHours(0, 0, 0, 0);
-  const end = start + 24 * 60 * 60 * 1000;
-
-  return loadInRange(start, end);
-};
-
-const timeSeriesQueryService = createTimeSeriesQueryService<
-  typeof consumptionRecords,
-  ConsumptionRecord
->(
-  consumptionRecords,
-  consumptionRecords.quantity,
-  eq(consumptionRecords.deleted, false),
-  {
-    id: consumptionRecords.id,
-    foodId: consumptionRecords.foodId,
-    userFoodId: consumptionRecords.userFoodId,
-    userMealId: consumptionRecords.userMealId,
-    quantity: consumptionRecords.quantity,
-    time: consumptionRecords.time,
-    modifiedAt: consumptionRecords.modifiedAt,
-    deleted: consumptionRecords.deleted,
-    food: foods,
-    userFood: userFoods,
-    userMeal: userMeals,
-  },
-);
 
 const syncService = createSyncService<
   typeof consumptionRecords,
@@ -140,11 +76,33 @@ const syncService = createSyncService<
   },
 });
 
+const timeSeriesQueryService = createTimeSeriesQueryService(
+  db.query.consumptionRecords,
+  "quantity",
+  {
+    food: true,
+    userFood: true,
+    userMeal: {
+      with: {
+        ingredients: {
+          with: {
+            food: true,
+            userFood: true,
+          },
+        },
+      },
+    },
+  },
+  eq(consumptionRecords.deleted, false),
+);
+
 export const consumptionRecordService = {
   ...syncService,
-  loadToday,
-  loadInRange,
+  ...timeSeriesQueryService,
+  loadInTimeNumberRange: (start: number, end: number) =>
+    timeSeriesQueryService.loadInTimeNumberRange(start, end) as Promise<
+      ConsumptionRecord[]
+    >,
+  loadToday: () =>
+    timeSeriesQueryService.loadToday() as Promise<ConsumptionRecord[]>,
 };
-function nu(foodId: any) {
-  throw new Error("Function not implemented.");
-}

@@ -6,13 +6,16 @@ interface WaterIntakeContextProps {
   todayWaterIntakeInMl: number;
   syncWaterIntake: () => Promise<void>;
   loadWaterIntake: () => Promise<WaterIntakeRecord[]>;
-  loadTodayWaterIntakeRecords: () => Promise<WaterIntakeRecord[]>;
+  loadToday: () => Promise<WaterIntakeRecord[]>;
   addWaterIntakeRecord: (record: {
     time: number;
     amountInMl: number;
   }) => Promise<void>;
-  loadInRange: (start: number, end: number) => Promise<WaterIntakeRecord[]>;
-  getDailyTotalInRange: (
+  loadInTimeNumberRange: (
+    start: number,
+    end: number,
+  ) => Promise<WaterIntakeRecord[]>;
+  loadDailyTotalInNumberRange: (
     start: Date,
     end: Date,
   ) => Promise<{ date: Date; value: number }[]>;
@@ -34,7 +37,7 @@ export const WaterIntakeProvider = ({
 
   const syncWaterIntake = useCallback(async () => {
     await waterIntakeService.sync();
-    loadTodayWaterIntakeRecords();
+    loadToday();
   }, []);
 
   // Sync water intake records when the component mounts
@@ -57,30 +60,26 @@ export const WaterIntakeProvider = ({
   }) => {
     console.log("Adding water intake record:", record);
     await waterIntakeService.add(record);
-    loadTodayWaterIntakeRecords();
+    loadToday();
   };
 
   const loadWaterIntake = waterIntakeService.load;
 
-  const loadTodayWaterIntakeRecords = async () => {
+  const loadToday = async () => {
     const records = await waterIntakeService.loadToday();
     setTodayWaterIntakeRecords(records);
     return records;
   };
 
-  const getDailyTotalInRange = waterIntakeService.loadDailySumInNumberRange;
-  const loadInRange = waterIntakeService.loadInTimeNumberRange;
-
   return (
     <WaterIntakeContext.Provider
       value={{
+        ...waterIntakeService,
         todayWaterIntakeInMl,
         syncWaterIntake,
         loadWaterIntake,
-        loadTodayWaterIntakeRecords,
         addWaterIntakeRecord,
-        loadInRange,
-        getDailyTotalInRange,
+        loadToday: loadToday,
       }}
     >
       {children}

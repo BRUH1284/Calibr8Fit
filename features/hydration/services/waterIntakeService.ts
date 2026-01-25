@@ -1,3 +1,4 @@
+import { db } from "@/db/db";
 import { waterIntakeRecords } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
 import { createTimeSeriesQueryService } from "@/shared/services/createTimeSeriesQueryService";
@@ -43,16 +44,20 @@ const syncService = createSyncService<
   },
 });
 
-const timeSeriesQueryService = createTimeSeriesQueryService<
-  typeof waterIntakeRecords,
-  WaterIntakeRecord
->(
-  waterIntakeRecords,
-  waterIntakeRecords.amountInMl,
+const timeSeriesQueryService = createTimeSeriesQueryService(
+  db.query.waterIntakeRecords,
+  "amountInMl",
+  undefined,
   eq(waterIntakeRecords.deleted, false),
 );
 
 export const waterIntakeService = {
   ...syncService,
   ...timeSeriesQueryService,
+  loadInTimeNumberRange: (start: number, end: number) =>
+    timeSeriesQueryService.loadInTimeNumberRange(start, end) as Promise<
+      WaterIntakeRecord[]
+    >,
+  loadToday: () =>
+    timeSeriesQueryService.loadToday() as Promise<WaterIntakeRecord[]>,
 };

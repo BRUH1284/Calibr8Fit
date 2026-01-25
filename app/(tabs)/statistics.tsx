@@ -1,9 +1,11 @@
+import { useActivityRecord } from "@/features/activity/hooks/useActivityRecord";
 import { useWaterIntake } from "@/features/hydration/hooks/useWaterIntake";
+import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionRecord";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import MonthLineChartCard from "@/shared/components/MonthLineChartCard";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback } from "react";
-import { View } from "react-native";
+import { ScrollView } from "react-native";
 
 type RangePoint = {
   date: Date;
@@ -16,7 +18,11 @@ export default function Statistics() {
   const { waterIntakeTarget, burnTarget, consumptionTarget } =
     useRecommendations();
 
-  const { getDailyTotalInRange } = useWaterIntake();
+  const { loadDailyTotalInNumberRange: waterTotalInRange } = useWaterIntake();
+  const { loadDailyTotalInNumberRange: activityTotalInRange } =
+    useActivityRecord();
+  const { loadDailyTotalInNumberRange: consumptionTotalInRange } =
+    useConsumptionRecord();
 
   // local random data generator
   const loadRandomRange = useCallback(
@@ -46,30 +52,28 @@ export default function Statistics() {
   );
 
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
         backgroundColor: theme.surface,
         paddingHorizontal: 16,
       }}
     >
-      {/* swap between real and mock data here */}
       <MonthLineChartCard
         yAxisLabelSuffix=" ml"
         referenceLine1Position={waterIntakeTarget * 1000}
-        loadRange={getDailyTotalInRange}
+        loadRange={waterTotalInRange}
       />
       <MonthLineChartCard
         yAxisLabelSuffix=" kcal"
         referenceLine1Position={burnTarget}
-        loadRange={loadRandomRange}
+        loadRange={activityTotalInRange}
       />
       <MonthLineChartCard
         yAxisLabelSuffix=" kcal"
         referenceLine1Position={consumptionTarget}
-        loadRange={loadRandomRange}
+        loadRange={consumptionTotalInRange}
       />
-      {/* <MonthLineChartCard loadRange={getDailyTotalInRange} /> */}
-    </View>
+    </ScrollView>
   );
 }

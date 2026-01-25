@@ -1,95 +1,96 @@
-import { db } from "@/db/db";
-import { and, ColumnBaseConfig, gte, lt, sql, SQL, Table } from "drizzle-orm";
-import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
+import { and, gte, lt, SQL, TableRelationalConfig } from "drizzle-orm";
+import { RelationalQueryBuilder } from "drizzle-orm/sqlite-core/query-builders/query";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function createTimeSeriesQueryService<
-  TTable extends Table & {
-    time: SQLiteColumn<ColumnBaseConfig<"number", "SQLiteInteger">>;
-  },
-  Entity,
+  Entity extends TableRelationalConfig,
+  TValueKey extends keyof Entity["columns"],
 >(
-  table: TTable,
-  valueExpr: SQL<number> | SQLiteColumn<ColumnBaseConfig<"number", any>>,
+  qb: RelationalQueryBuilder<any, any, any, Entity>,
+  valueKey: TValueKey,
+  extraWith?: any,
   persistentFilter?: SQL<unknown>,
-  baseSelect?: any,
-  extraJoins?: <T extends SQLiteSelect>(query: T) => any,
 ) {
   const loadInTimeNumberRange = async (
     start: number,
     end: number,
-    extraWhere?: SQL<unknown>,
-  ): Promise<Entity[]> => {
-    const where = and(
-      persistentFilter ?? and(),
-      extraWhere ?? and(),
-      gte(table.time, start),
-      lt(table.time, end),
-    );
-
-    let query = db.select(baseSelect).from(table).where(where);
-
-    if (extraJoins) query = extraJoins(query.$dynamic());
-
-    return (await query) as unknown as Entity[];
+  ): Promise<unknown[]> => {
+    return (await qb.findMany({
+      with: extraWith,
+      where: (t: any, { and, gte, lt }: any) =>
+        and(persistentFilter ?? and(), gte(t.time, start), lt(t.time, end)),
+    })) as unknown as Entity[];
   };
 
-  const loadToday = async (extraWhere?: SQL<unknown>) =>
+  const loadToday = async (): Promise<unknown[]> =>
     loadInTimeNumberRange(
       new Date().setHours(0, 0, 0, 0),
       new Date().setHours(24, 0, 0, 0),
-      extraWhere,
     );
 
-  const loadDailySumInNumberRange = async (
+  const loadDailyTotalInNumberRange = async (
     start: number | Date,
     end: number | Date,
     fillDateGaps: boolean = true,
-    extraWhere?: SQL<unknown>,
   ): Promise<{ date: Date; value: number }[]> => {
     start = typeof start === "number" ? start : Math.floor(start.getTime());
     end = typeof end === "number" ? end : Math.floor(end.getTime());
 
     const LOCAL_OFFSET = new Date().getTimezoneOffset() * -60_000;
 
-    const where = and(
-      persistentFilter ?? and(),
-      extraWhere ?? and(),
-      gte(table.time, start),
-      lt(table.time, end),
-    );
-
-    let query = db
-      .select({
-        ...baseSelect,
-        date: sql<number>`((${table.time} + ${LOCAL_OFFSET})
-        - ((${table.time} + ${LOCAL_OFFSET}) % ${DAY_MS}) - ${LOCAL_OFFSET})`,
-        total: sql<number>`SUM(${valueExpr})`,
-      })
-      .from(table)
-      .where(where)
-      .groupBy(sql`1`);
-
-    if (extraJoins) query = extraJoins(query.$dynamic());
-
-    const rows = (await query) as Array<{ date: number; total: number }>;
+    const rows = await qb.findMany({
+      with: extraWith,
+      where: (table: any) =>
+        and(
+          persistentFilter ?? and(),
+          gte(table.time, start),
+          lt(table.time, end),
+        ),
+      columns: {
+        time: true,
+        [valueKey]: true,
+      },
+    });
 
     const totalsByDay = new Map<number, number>();
-    if (fillDateGaps) {
-      rows.forEach((r) => totalsByDay.set(r.date, r.total));
 
-      for (let dt = start; dt < end; dt += DAY_MS)
+    for (const r of rows) {
+      const day =
+        Math.floor((((r as any).time as number) + LOCAL_OFFSET) / DAY_MS) *
+          DAY_MS -
+        LOCAL_OFFSET;
+
+      const raw = (r as any)[valueKey];
+      const value = typeof raw === "number" ? raw : Number(raw ?? 0);
+
+      totalsByDay.set(day, (totalsByDay.get(day) ?? 0) + value);
+    }
+
+    if (fillDateGaps) {
+      for (let dt = start; dt < end; dt += DAY_MS) {
         if (!totalsByDay.has(dt)) totalsByDay.set(dt, 0);
+      }
     }
 
     return Array.from(totalsByDay.entries())
       .sort((a, b) => a[0] - b[0])
-      .map(([date, value]) => ({
-        date: new Date(date),
-        value,
-      }));
+      .map(([date, value]) => ({ date: new Date(date), value }));
   };
 
-  return { loadInTimeNumberRange, loadToday, loadDailySumInNumberRange };
+  const loadTodayTotal = async (): Promise<number> =>
+    (
+      await loadDailyTotalInNumberRange(
+        new Date().setHours(0, 0, 0, 0),
+        new Date().setHours(24, 0, 0, 0),
+        true,
+      )
+    )[0].value;
+
+  return {
+    loadInTimeNumberRange,
+    loadToday,
+    loadDailyTotalInNumberRange,
+    loadTodayTotal,
+  };
 }

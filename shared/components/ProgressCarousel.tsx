@@ -27,12 +27,14 @@ export default function ProgressCarousel() {
     consumptionTarget,
   } = useRecommendations();
 
-  const { todayWaterIntakeInMl, loadInRange: loadInRangeWater } =
+  const { todayWaterIntakeInMl, loadInTimeNumberRange: loadInRangeWater } =
     useWaterIntake();
-  const { todayCaloriesBurned, loadInRange: loadInRangeActivity } =
+  const { todayCaloriesBurned, loadInTimeNumberRange: loadInRangeActivity } =
     useActivityRecord();
-  const { todayCaloriesConsumed, loadInRange: loadInRangeConsumption } =
-    useConsumptionRecord();
+  const {
+    todayCaloriesConsumed,
+    loadInTimeNumberRange: loadInRangeConsumption,
+  } = useConsumptionRecord();
 
   const [monthSummary, setMonthSummary] = useState<SummaryItem[]>();
 
