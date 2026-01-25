@@ -1,11 +1,12 @@
 import { db } from "@/db/db";
 import { activities, activityRecords, userActivities } from "@/db/schema";
 import { createSyncService } from "@/shared/services/createSyncService";
+import { createTimeSeriesQueryService } from "@/shared/services/createTimeSeriesQueryService";
 import { SyncEntityType } from "@/shared/services/syncTimeService";
 import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { ActivityRecord } from "../types/activityRecord";
 
-const loadInRange = async (
+const loadInTimeNumberRange = async (
   start: number,
   end: number,
 ): Promise<ActivityRecord[]> => {
@@ -53,8 +54,51 @@ const loadToday = async (): Promise<ActivityRecord[]> => {
   const start = new Date().setHours(0, 0, 0, 0);
   const end = start + 24 * 60 * 60 * 1000;
 
-  return loadInRange(start, end);
+  return loadInTimeNumberRange(start, end);
 };
+
+const timeSeriesQueryService = createTimeSeriesQueryService<
+  typeof activityRecords,
+  // Entity type this query returns:
+  ActivityRecord
+>(
+  activityRecords,
+  activityRecords.caloriesBurned,
+  eq(activityRecords.deleted, false), // persistentFilter
+  // baseSelect
+  {
+    id: activityRecords.id,
+    activityId: activityRecords.activityId,
+    userActivityId: activityRecords.userActivityId,
+    duration: activityRecords.duration,
+    caloriesBurned: activityRecords.caloriesBurned,
+    time: activityRecords.time,
+    modifiedAt: activityRecords.modifiedAt,
+    deleted: activityRecords.deleted,
+    activity: {
+      id: activities.id,
+      majorHeading: activities.majorHeading,
+      metValue: activities.metValue,
+      description: activities.description,
+    },
+    userActivity: {
+      id: userActivities.id,
+      majorHeading: userActivities.majorHeading,
+      metValue: userActivities.metValue,
+      description: userActivities.description,
+      modifiedAt: userActivities.modifiedAt,
+      deleted: userActivities.deleted,
+    },
+  },
+  // extraJoins
+  (q) =>
+    q
+      .leftJoin(activities, eq(activityRecords.activityId, activities.id))
+      .leftJoin(
+        userActivities,
+        eq(activityRecords.userActivityId, userActivities.id),
+      ),
+);
 
 export const activityRecordService = {
   ...createSyncService<
@@ -123,6 +167,7 @@ export const activityRecordService = {
       deleted: sql.raw(`excluded.${activityRecords.deleted.name}`),
     },
   }),
-  loadToday,
-  loadInRange,
+  ...timeSeriesQueryService,
+  //loadToday,
+  //loadInTimeNumberRange: loadInTimeNumberRange, // TODO: use service and get data in statistics screen
 };

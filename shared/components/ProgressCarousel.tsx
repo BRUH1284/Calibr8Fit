@@ -58,7 +58,7 @@ export default function ProgressCarousel() {
     const activityRecords = await loadInRangeActivity(startOfRange, endOfRange);
     const consumptionRecords = await loadInRangeConsumption(
       startOfRange,
-      endOfRange
+      endOfRange,
     );
 
     let result = new Array<SummaryItem>();
@@ -69,25 +69,25 @@ export default function ProgressCarousel() {
       const end = start + 24 * 60 * 60 * 1000;
 
       const dayWaterRecords = waterRecords.filter(
-        (record) => record.time >= start && record.time < end
+        (record) => record.time >= start && record.time < end,
       );
       const dayWaterTotal = dayWaterRecords.reduce(
         (sum, record) => sum + record.amountInMl,
-        0
+        0,
       );
       const dayActivityRecords = activityRecords.filter(
-        (record) => record.time >= start && record.time < end
+        (record) => record.time >= start && record.time < end,
       );
       const dayActivityTotal = dayActivityRecords.reduce(
         (sum, record) => sum + record.caloriesBurned,
-        0
+        0,
       );
       const dayConsumptionRecords = consumptionRecords.filter(
-        (record) => record.time >= start && record.time < end
+        (record) => record.time >= start && record.time < end,
       );
       const dayConsumptionTotal = dayConsumptionRecords.reduce(
         (sum, record) => sum + calcCaloricValue(record),
-        0
+        0,
       );
 
       const waterProgress = dayWaterTotal / 1000 / waterIntake;
@@ -203,7 +203,7 @@ export default function ProgressCarousel() {
           snapToAlignment="start"
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: false }
+            { useNativeDriver: false },
           )}
           scrollEventThrottle={16}
           renderItem={(i) => renderItem(i.item)}

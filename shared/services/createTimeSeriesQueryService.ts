@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import { and, ColumnBaseConfig, gte, lt, sql, SQL, Table } from "drizzle-orm";
-import { SQLiteColumn } from "drizzle-orm/sqlite-core";
+import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -11,8 +11,10 @@ export function createTimeSeriesQueryService<
   Entity,
 >(
   table: TTable,
-  sumColumn: SQLiteColumn<ColumnBaseConfig<"number", "SQLiteReal">>,
+  valueExpr: SQL<number> | SQLiteColumn<ColumnBaseConfig<"number", any>>,
   persistentFilter?: SQL<unknown>,
+  baseSelect?: any,
+  extraJoins?: <T extends SQLiteSelect>(query: T) => any,
 ) {
   const loadInTimeNumberRange = async (
     start: number,
@@ -26,8 +28,11 @@ export function createTimeSeriesQueryService<
       lt(table.time, end),
     );
 
-    // Load data from the database
-    return (await db.select().from(table).where(where)) as unknown as Entity[];
+    let query = db.select(baseSelect).from(table).where(where);
+
+    if (extraJoins) query = extraJoins(query.$dynamic());
+
+    return (await query) as unknown as Entity[];
   };
 
   const loadToday = async (extraWhere?: SQL<unknown>) =>
@@ -55,15 +60,20 @@ export function createTimeSeriesQueryService<
       lt(table.time, end),
     );
 
-    const rows = await db
+    let query = db
       .select({
+        ...baseSelect,
         date: sql<number>`((${table.time} + ${LOCAL_OFFSET})
         - ((${table.time} + ${LOCAL_OFFSET}) % ${DAY_MS}) - ${LOCAL_OFFSET})`,
-        total: sql<number>`SUM(${sumColumn})`,
+        total: sql<number>`SUM(${valueExpr})`,
       })
       .from(table)
       .where(where)
       .groupBy(sql`1`);
+
+    if (extraJoins) query = extraJoins(query.$dynamic());
+
+    const rows = (await query) as Array<{ date: number; total: number }>;
 
     const totalsByDay = new Map<number, number>();
     if (fillDateGaps) {
