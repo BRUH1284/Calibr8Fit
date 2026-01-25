@@ -6,6 +6,8 @@ import AppText from "./AppText";
 import IconButton from "./IconButton";
 
 type Props = {
+  headline?: string;
+  color?: string;
   yAxisLabelSuffix?: string;
   referenceLine1Position?: number;
   loadRange: (
@@ -15,6 +17,8 @@ type Props = {
 };
 
 export default function MonthLineChartCard({
+  headline,
+  color,
   yAxisLabelSuffix,
   referenceLine1Position,
   loadRange,
@@ -112,7 +116,7 @@ export default function MonthLineChartCard({
       }}
       onLayout={handleLayout}
     >
-      <AppText type="headline-small">Water intake</AppText>
+      <AppText type="headline-small">{headline}</AppText>
       <View
         style={{
           flexDirection: "row",
@@ -164,14 +168,14 @@ export default function MonthLineChartCard({
         adjustToWidth
         spacing={data.length === 0 ? 0 : chartSpacing / data.length}
         data={data}
-        startFillColor={theme.blue}
+        startFillColor={color}
         startOpacity={1}
         endFillColor={theme.surface}
         endOpacity={0}
         xAxisLabelTextStyle={{ width: 20, marginLeft: 5 }}
         yAxisLabelSuffix={yAxisLabelSuffix}
         thickness={2}
-        color={theme.blue}
+        color={color}
         hideOrigin
         xAxisColor={theme.onSurfaceVariant}
         yAxisColor={theme.onSurfaceVariant}

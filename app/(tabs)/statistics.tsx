@@ -60,19 +60,25 @@ export default function Statistics() {
       }}
     >
       <MonthLineChartCard
+        headline="Water intake"
+        color={theme.blue}
         yAxisLabelSuffix=" ml"
         referenceLine1Position={waterIntakeTarget * 1000}
         loadRange={waterTotalInRange}
       />
       <MonthLineChartCard
-        yAxisLabelSuffix=" kcal"
-        referenceLine1Position={burnTarget}
-        loadRange={activityTotalInRange}
-      />
-      <MonthLineChartCard
+        headline="Calories consumed"
+        color={theme.yellow}
         yAxisLabelSuffix=" kcal"
         referenceLine1Position={consumptionTarget}
         loadRange={consumptionTotalInRange}
+      />
+      <MonthLineChartCard
+        headline="Calories burned"
+        color={theme.orange}
+        yAxisLabelSuffix=" kcal"
+        referenceLine1Position={burnTarget}
+        loadRange={activityTotalInRange}
       />
     </ScrollView>
   );

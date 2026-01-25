@@ -112,20 +112,16 @@ function CircularProgressBase({
           : { renderToHardwareTextureAndroid: true as const }),
       },
     ],
-    [iconContainerSize]
+    [iconContainerSize],
   );
 
   return (
     <View style={[styles.root, { width: size, height: size }]}>
       <Svg width={size} height={size} pointerEvents="none">
         {computedRings.map((g, index) => (
-          <G
-            key={index}
-            rotation="-90"
-            origin={`${size / 2}, ${size / 2}`}
-          >
+          <G key={index} rotation="-90" origin={`${size / 2}, ${size / 2}`}>
             <Circle
-              stroke={g.bg || theme.surfaceVariant}
+              stroke={g.bg || theme.onSurfaceVariant}
               fill={fill}
               cx={size / 2}
               cy={size / 2}
@@ -193,7 +189,7 @@ const CircularProgress = React.memo(
     prev.fill === next.fill &&
     ringsEqual(prev.rings, next.rings) &&
     prev.iconSize === next.iconSize &&
-    prev.icons === next.icons
+    prev.icons === next.icons,
 );
 
 export default CircularProgress;
