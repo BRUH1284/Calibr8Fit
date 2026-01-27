@@ -38,7 +38,7 @@ export default function MyProfile() {
 
   const handleLoadPostsPage = useCallback(
     (page: number, pageSize: number) => getMyPosts(page, pageSize),
-    [getMyPosts]
+    [getMyPosts],
   );
 
   return (
@@ -77,7 +77,7 @@ export default function MyProfile() {
                 size: 28,
               }}
               variant="icon"
-              onPress={() => {}}
+              onPress={() => logout()}
             />
           </View>
           <View

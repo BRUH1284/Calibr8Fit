@@ -31,16 +31,16 @@ export default function TabLayout() {
   return (
     <ProfileProvider>
       <SocialProvider>
-        <RecommendationsProvider>
-          <ActivityProvider>
-            <UserActivityProvider>
-              <ActivityRecordProvider>
-                <FoodProvider>
-                  <UserFoodProvider>
-                    <MealProvider>
-                      <ConsumptionRecordProvider>
-                        <WaterIntakeProvider>
-                          <WeightRecordProvider>
+        <WeightRecordProvider>
+          <RecommendationsProvider>
+            <ActivityProvider>
+              <UserActivityProvider>
+                <ActivityRecordProvider>
+                  <FoodProvider>
+                    <UserFoodProvider>
+                      <MealProvider>
+                        <ConsumptionRecordProvider>
+                          <WaterIntakeProvider>
                             <DailyBurnProvider>
                               <SafeAreaView
                                 edges={["top"]}
@@ -90,16 +90,16 @@ export default function TabLayout() {
                                 <Tabs.Screen name="profile" />
                               </Tabs>
                             </DailyBurnProvider>
-                          </WeightRecordProvider>
-                        </WaterIntakeProvider>
-                      </ConsumptionRecordProvider>
-                    </MealProvider>
-                  </UserFoodProvider>
-                </FoodProvider>
-              </ActivityRecordProvider>
-            </UserActivityProvider>
-          </ActivityProvider>
-        </RecommendationsProvider>
+                          </WaterIntakeProvider>
+                        </ConsumptionRecordProvider>
+                      </MealProvider>
+                    </UserFoodProvider>
+                  </FoodProvider>
+                </ActivityRecordProvider>
+              </UserActivityProvider>
+            </ActivityProvider>
+          </RecommendationsProvider>
+        </WeightRecordProvider>
       </SocialProvider>
     </ProfileProvider>
   );

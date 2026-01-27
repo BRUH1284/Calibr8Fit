@@ -1,5 +1,6 @@
 import { profileService } from "@/features/profile/services/profileService";
 import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
+import { weightRecordService } from "@/features/weight/services/weightRecordService";
 import { createContext, useEffect, useState } from "react";
 import { authManager } from "../services/authManager";
 import { authService } from "../services/authService";
@@ -12,7 +13,10 @@ interface AuthContextProps {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setUserInfo: (profileSettings: ProfileSettings) => Promise<void>;
+  setUserInfo: (
+    profileSettings: ProfileSettings,
+    weight: number,
+  ) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextProps | null>(null);
@@ -56,21 +60,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // If we can fetch profile settings, user is authenticated
         authenticated = true;
 
-        if (profileSettings.firstName !== '')
-          registrationComplete = true;
+        if (profileSettings.firstName !== "") registrationComplete = true;
 
         pushService.register();
       } catch (error) {
         // If fetching profile settings fails, assume not authenticated
-        console.warn("Authentication check failed:", (error as any).status || error);
+        console.warn(
+          "Authentication check failed:",
+          (error as any).status || error,
+        );
 
         // If not 401, check local storage for auth state
         if ((error as any).status !== 401) {
           // assume user is authenticated if tokens exist
           authenticated = true;
           // Check local storage for registration state
-          if (!await authService.isRegistered())
-            registrationComplete = true;
+          if (!(await authService.isRegistered())) registrationComplete = true;
         } else {
           // If 401, clear tokens
           await authService.logout();
@@ -92,19 +97,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await authService.login(username, password);
     checkAuth();
     return;
-  }
+  };
 
   const register = async (username: string, password: string) => {
     await authService.register(username, password);
     checkAuth();
     return;
-  }
+  };
 
-  const setUserInfo = async (profileSettings: ProfileSettings) => {
+  const setUserInfo = async (
+    profileSettings: ProfileSettings,
+    weight: number,
+  ) => {
     await profileService.setSettings(profileSettings);
+    // Set initial weight record
+    await weightRecordService.add({ weight, time: Date.now() });
     checkAuth();
     return;
-  }
+  };
 
   // TODO: logout only while connected to internet
   const logout = async () => {
@@ -112,19 +122,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await authService.logout();
     checkAuth();
     return;
-  }
+  };
 
   return (
-    <AuthContext.Provider value={{
-      authenticated,
-      isChecking,
-      registrationComplete,
-      login,
-      register,
-      logout,
-      setUserInfo
-    }}>
+    <AuthContext.Provider
+      value={{
+        authenticated,
+        isChecking,
+        registrationComplete,
+        login,
+        register,
+        logout,
+        setUserInfo,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
+};

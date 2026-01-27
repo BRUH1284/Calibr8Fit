@@ -8,7 +8,6 @@ export interface ProfileSettings {
   bio: string;
   friendsVisible: boolean;
   dateOfBirth: Date;
-  weight: number;
   targetWeight: number;
   height: number;
   gender: Gender;

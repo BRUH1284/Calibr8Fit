@@ -1,3 +1,4 @@
+import { useWeightRecord } from "@/features/weight/hooks/useWeightRecord";
 import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
@@ -26,6 +27,7 @@ export const RecommendationsProvider = ({
   children: React.ReactNode;
 }) => {
   const { profileSettings } = useProfile();
+  const { weight } = useWeightRecord();
   const [waterIntakeTarget, setWaterIntakeTarget] = useState<number>(0);
   const [rmr, setRmr] = useState<number>(0);
   const [burnTarget, setBurnTarget] = useState<number>(0);
@@ -43,10 +45,10 @@ export const RecommendationsProvider = ({
       return recommendationsService.activityEstimateCaloriesBurned(
         met,
         minutes,
-        profileSettings?.weight || 0
+        weight,
       );
     },
-    [profileSettings?.weight]
+    [weight],
   );
 
   const age =
@@ -57,9 +59,9 @@ export const RecommendationsProvider = ({
     return recommendationsService.rmrCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
-      profileSettings?.weight || 0,
+      weight,
       profileSettings?.height || 0,
-      age
+      age,
     );
   };
 
@@ -67,15 +69,15 @@ export const RecommendationsProvider = ({
     return recommendationsService.waterCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
-      profileSettings?.weight || 0,
-      profileSettings?.climate || Climate.Temperate
+      weight,
+      profileSettings?.climate || Climate.Temperate,
     );
   };
 
   const getBurnTarget = (): number => {
     return recommendationsService.burningCalculator(
-      profileSettings?.weight || 0,
-      profileSettings?.targetWeight || 0
+      weight,
+      profileSettings?.targetWeight || 0,
     );
   };
 
@@ -83,10 +85,10 @@ export const RecommendationsProvider = ({
     return recommendationsService.consumptionCalculator(
       profileSettings?.gender || Gender.Male,
       profileSettings?.activityLevel || ActivityLevel.Sedentary,
-      profileSettings?.weight || 0,
+      weight,
       profileSettings?.targetWeight || 0,
       profileSettings?.height || 0,
-      age
+      age,
     );
   };
 

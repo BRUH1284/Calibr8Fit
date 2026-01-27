@@ -37,7 +37,7 @@ export default function UserInfo() {
   const heightRef = useRef<TextInput>(null);
 
   const [activityLevel, setActivityLevel] = useState<ActivityLevel | undefined>(
-    undefined
+    undefined,
   );
 
   const [climate, setClimate] = useState<Climate | undefined>(undefined);
@@ -62,19 +62,21 @@ export default function UserInfo() {
     if (!isCurrentPageValid) return;
 
     if (currentPage === 4) {
-      setUserInfo({
-        firstName,
-        lastName,
-        bio: "",
-        friendsVisible: true,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
-        weight: parseFloat(currentWeight),
-        targetWeight: parseFloat(targetWeight),
-        height: parseFloat(height),
-        gender: Gender.Male,
-        activityLevel: ActivityLevel.Sedentary,
-        climate: Climate.Tropical,
-      });
+      setUserInfo(
+        {
+          firstName,
+          lastName,
+          bio: "",
+          friendsVisible: true,
+          dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
+          targetWeight: parseFloat(targetWeight),
+          height: parseFloat(height),
+          gender: Gender.Male,
+          activityLevel: ActivityLevel.Sedentary,
+          climate: Climate.Tropical,
+        },
+        parseFloat(currentWeight),
+      );
     } else {
       refPagerView.current?.setPage(currentPage + 1);
     }
