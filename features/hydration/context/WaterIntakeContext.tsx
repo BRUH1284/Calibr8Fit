@@ -79,7 +79,7 @@ export const WaterIntakeProvider = ({
         syncWaterIntake,
         loadWaterIntake,
         addWaterIntakeRecord,
-        loadToday: loadToday,
+        loadToday,
       }}
     >
       {children}
