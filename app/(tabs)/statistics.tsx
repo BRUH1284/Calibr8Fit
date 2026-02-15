@@ -8,7 +8,7 @@ import MonthLineChartCard from "@/shared/components/MonthLineChartCard";
 import MonthSelector from "@/shared/components/MonthSelector";
 import { useTheme } from "@/shared/hooks/useTheme";
 import React, { useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 
 export default function Statistics() {
   const theme = useTheme();
@@ -68,55 +68,78 @@ export default function Statistics() {
     }
   };
 
+  // Fetch data on mount
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
-    <ScrollView
+    <View
       style={{
         flex: 1,
         backgroundColor: theme.surface,
       }}
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        gap: 16,
-      }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={fetchData} />
-      }
     >
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: theme.surface,
+        }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingVertical: 16,
+          gap: 16,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchData} />
+        }
+      >
+        <MonthLineChartCard
+          headline="Water intake"
+          color={theme.blue}
+          yAxisLabelSuffix=" ml"
+          referenceLine1Position={waterIntakeTarget * 1000}
+          data={waterIntageData}
+        />
+        <MonthLineChartCard
+          headline="Calories consumed"
+          color={theme.yellow}
+          yAxisLabelSuffix=" kcal"
+          referenceLine1Position={consumptionTarget}
+          data={consumptionData}
+        />
+        <MonthLineChartCard
+          headline="Calories burned"
+          color={theme.orange}
+          yAxisLabelSuffix=" kcal"
+          referenceLine1Position={burnTarget}
+          data={activityData}
+        />
+        <MonthLineChartCard
+          headline="Weight"
+          color={theme.errorVariant}
+          yAxisLabelSuffix=" kg"
+          referenceLine1Position={profileSettings?.targetWeight ?? 0}
+          data={weightData}
+        />
+        <View style={{ height: 48 }} />
+      </ScrollView>
       <MonthSelector
+        style={{
+          backgroundColor: theme.primaryVariant,
+          position: "absolute",
+          alignSelf: "center",
+          bottom: 16,
+          padding: 8,
+          borderRadius: 32,
+          minWidth: 224,
+        }}
+        textColor="onPrimaryVariant"
         onMonthChange={(start, end) => {
           setDateRange({ start, end });
           fetchData({ start, end });
         }}
       />
-      <MonthLineChartCard
-        headline="Water intake"
-        color={theme.blue}
-        yAxisLabelSuffix=" ml"
-        referenceLine1Position={waterIntakeTarget * 1000}
-        data={waterIntageData}
-      />
-      <MonthLineChartCard
-        headline="Calories consumed"
-        color={theme.yellow}
-        yAxisLabelSuffix=" kcal"
-        referenceLine1Position={consumptionTarget}
-        data={consumptionData}
-      />
-      <MonthLineChartCard
-        headline="Calories burned"
-        color={theme.orange}
-        yAxisLabelSuffix=" kcal"
-        referenceLine1Position={burnTarget}
-        data={activityData}
-      />
-      <MonthLineChartCard
-        headline="Weight"
-        color={theme.errorVariant}
-        yAxisLabelSuffix=" kg"
-        referenceLine1Position={profileSettings?.targetWeight ?? 0}
-        data={weightData}
-      />
-    </ScrollView>
+    </View>
   );
 }

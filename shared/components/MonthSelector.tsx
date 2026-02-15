@@ -1,16 +1,22 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import IconButton from "./IconButton";
 
 type Props = {
+  style?: StyleProp<ViewStyle>;
+  textColor?: keyof Omit<ReturnType<typeof useTheme>, "isDark">;
   onMonthChange: (startMonth: Date, endMonth: Date) => void;
 };
 
-export default function MonthSelector({ onMonthChange }: Props) {
-  const theme = useTheme();
+export default function MonthSelector({
+  style,
+  textColor,
+  onMonthChange,
+}: Props) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const theme = useTheme();
 
   const handlePrevMonth = () => {
     const prevMonth = new Date(
@@ -52,13 +58,15 @@ export default function MonthSelector({ onMonthChange }: Props) {
 
   return (
     <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 64,
-        gap: 8,
-      }}
+      style={[
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+        },
+        style,
+      ]}
     >
       <IconButton
         variant="icon"
@@ -66,10 +74,14 @@ export default function MonthSelector({ onMonthChange }: Props) {
           name: "chevron-left",
           library: "MaterialIcons",
           size: 32,
+          color: theme[textColor ?? "onSurface"],
         }}
         onPress={handlePrevMonth}
       />
-      <AppText type="title-medium">
+      <AppText
+        type="title-medium"
+        style={{ color: theme[textColor ?? "onSurface"] }}
+      >
         {currentMonth.toLocaleString("default", {
           month: "long",
           year: "numeric",
@@ -81,6 +93,7 @@ export default function MonthSelector({ onMonthChange }: Props) {
           name: "chevron-right",
           library: "MaterialIcons",
           size: 32,
+          color: theme[textColor ?? "onSurface"],
         }}
         onPress={handleNextMonth}
       />
