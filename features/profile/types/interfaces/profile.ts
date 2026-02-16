@@ -14,4 +14,8 @@ export interface ProfileSettings {
   activityLevel: ActivityLevel;
   climate: Climate;
   profilePictureUrl?: string;
+  forcedConsumptionTarget?: number;
+  forcedBurnTarget?: number;
+  forcedHydrationTarget?: number;
+  modifiedAt: number;
 }

@@ -30,7 +30,7 @@ export const Typography = StyleSheet.create({
   "title-large": {
     fontSize: 22,
     lineHeight: 28,
-    fontWeight: "500",
+    fontWeight: "400",
   },
   "title-large-bold": {
     fontSize: 22,

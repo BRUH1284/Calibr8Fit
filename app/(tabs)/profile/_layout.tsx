@@ -6,12 +6,10 @@ export default function ProfileStack() {
     <Stack>
       <Stack.Screen name="myProfile" options={{ headerShown: false }} />
       <Stack.Screen name="myFriends" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="friendRequests"
-        options={{ title: "Friend Requests" }}
-      />
+      <Stack.Screen name="friendRequests" options={{ headerShown: false }} />
       <Stack.Screen name="userSearch" options={{ headerShown: false }} />
       <Stack.Screen name="[username]" options={{ headerShown: false }} />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
     </Stack>
   );
 }

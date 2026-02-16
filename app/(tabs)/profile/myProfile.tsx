@@ -77,7 +77,8 @@ export default function MyProfile() {
                 size: 28,
               }}
               variant="icon"
-              onPress={() => logout()}
+              //onPress={() => logout()}
+              onPress={() => router.push("/profile/settings")}
             />
           </View>
           <View

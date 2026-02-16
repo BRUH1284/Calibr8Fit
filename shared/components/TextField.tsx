@@ -59,7 +59,7 @@ const TextField = forwardRef<TextInput, Props>(
       numberStep = 5,
       style,
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
 
@@ -71,11 +71,20 @@ const TextField = forwardRef<TextInput, Props>(
 
     const handleChangeValue = useCallback(
       (value: string) => {
-        if (value === "" || value.endsWith("-")) {
-          setDisplayedValue(value ? "-" : "");
+        if (value === "") {
+          setDisplayedValue("");
+          setValueState(0);
+          onChangeText?.("");
+          return;
+        }
+
+        if (value === "-" || value.endsWith("-")) {
+          setDisplayedValue("-");
           setValueState(0);
           return;
-        } else if (value.endsWith(".")) {
+        }
+
+        if (value.endsWith(".")) {
           setDisplayedValue(value);
           return;
         }
@@ -88,14 +97,18 @@ const TextField = forwardRef<TextInput, Props>(
         onChangeText?.(parsed.toString());
         setDisplayedValue(parsed.toString());
       },
-      [maxValue, minValue, onChangeText]
+      [maxValue, minValue, onChangeText],
     );
 
     useEffect(() => {
-      if (type === "number" && value !== valueState.toString()) {
-        handleChangeValue(value);
+      if (type === "number" && value !== "" && value !== displayedValue) {
+        const numValue = parseFloat(value) || 0;
+        if (numValue !== valueState) {
+          setValueState(numValue);
+          setDisplayedValue(value);
+        }
       }
-    }, [handleChangeValue, type, value, valueState]);
+    }, [type, value, valueState, displayedValue]);
 
     return (
       <View
@@ -237,7 +250,7 @@ const TextField = forwardRef<TextInput, Props>(
         )}
       </View>
     );
-  }
+  },
 );
 
 TextField.displayName = "TextField";
