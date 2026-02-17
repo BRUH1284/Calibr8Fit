@@ -106,10 +106,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setUserInfo = async (
-    profileSettings: ProfileSettings,
+    profileSettings: Omit<
+      ProfileSettings,
+      | "modifiedAt"
+      | "forcedBurnTarget"
+      | "forcedHydrationTarget"
+      | "forcedConsumptionTarget"
+    >,
     weight: number,
   ) => {
-    await profileService.setSettings(profileSettings);
+    const settings = {
+      ...profileSettings,
+      forcedBurnTarget: 0,
+      forcedHydrationTarget: 0,
+      forcedConsumptionTarget: 0,
+    } as ProfileSettings;
+    await profileService.setSettings(settings);
     // Set initial weight record
     await weightRecordService.add({ weight, time: Date.now() });
     checkAuth();

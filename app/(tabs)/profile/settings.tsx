@@ -1,12 +1,20 @@
+import { useProfile } from "@/features/profile/hooks/useProfile";
+import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
 import AppText from "@/shared/components/AppText";
 import Header from "@/shared/components/Header";
 import SettingsItem from "@/shared/components/SettingsItem";
+import TextButton from "@/shared/components/TextButton";
+import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { ActivityLevel } from "@/shared/types/enums/activityLevel";
+import { Climate } from "@/shared/types/enums/climate";
+import { Gender } from "@/shared/types/enums/gender";
 import { useCallback, useState } from "react";
-import { Appearance, useColorScheme, View } from "react-native";
+import { Appearance, ScrollView, useColorScheme, View } from "react-native";
 
 export default function ProfileSettingsScreen() {
   const theme = useTheme();
+  const { logout } = useAuth();
 
   // Dark mode state management
   const colorScheme = useColorScheme();
@@ -17,15 +25,26 @@ export default function ProfileSettingsScreen() {
     setIsDarkMode(newColorScheme === "dark");
   }, [colorScheme]);
 
-  const [rationTarget, setRationTarget] = useState<number | null>(null);
-  const [burnTarget, setBurnTarget] = useState<number | null>(null);
-  const [hydrationTarget, setHydrationTarget] = useState<number | null>(null);
+  // Profile settings state management
+  const { profileSettings, updateProfileSettings } = useProfile();
+  const handleProfileSettingsChange = useCallback(
+    (newSettings: ProfileSettings) => {
+      updateProfileSettings(newSettings);
+    },
+    [updateProfileSettings],
+  );
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const handleNotificationsChange = useCallback((value: boolean) => {
+    // TODO: Implement
+    setNotificationsEnabled(value);
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.surface }}>
       <Header title="Settings" />
-      <View
+      <ScrollView
         style={{
           flex: 1,
           padding: 16,
@@ -47,7 +66,134 @@ export default function ProfileSettingsScreen() {
           icon={{ name: "notifications", library: "MaterialIcons", size: 24 }}
           label="Notifications"
           value={notificationsEnabled}
-          onValueChange={setNotificationsEnabled}
+          onValueChange={handleNotificationsChange}
+        />
+
+        <AppText type="title-large" style={{ marginTop: 16 }}>
+          Profile Information
+        </AppText>
+
+        <SettingsItem
+          type="text"
+          icon={{ name: "person", library: "MaterialIcons", size: 24 }}
+          label="First Name"
+          value={profileSettings!.firstName}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              firstName: value,
+            })
+          }
+        />
+
+        <SettingsItem
+          type="text"
+          icon={{ name: "person-outline", library: "MaterialIcons", size: 24 }}
+          label="Last Name"
+          value={profileSettings!.lastName}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              lastName: value,
+            })
+          }
+        />
+
+        <SettingsItem
+          type="date"
+          icon={{ name: "cake", library: "MaterialIcons", size: 24 }}
+          label="Date of Birth"
+          value={profileSettings!.dateOfBirth}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              dateOfBirth: value,
+            })
+          }
+        />
+
+        <AppText type="title-large" style={{ marginTop: 16 }}>
+          Body and Lifestyle
+        </AppText>
+
+        <SettingsItem<Gender>
+          type="select"
+          icon={{ name: "wc", library: "MaterialIcons", size: 24 }}
+          label="Gender"
+          value={profileSettings!.gender}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({ ...profileSettings!, gender: value })
+          }
+          options={[
+            { label: "Male", value: Gender.Male },
+            { label: "Female", value: Gender.Female },
+          ]}
+        />
+
+        <SettingsItem
+          type="number"
+          icon={{ name: "height", library: "MaterialIcons", size: 24 }}
+          label="Height"
+          value={profileSettings!.height}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({ ...profileSettings!, height: value })
+          }
+          unit="cm"
+          integer={true}
+          minValue={0}
+          maxValue={300}
+        />
+
+        <SettingsItem
+          type="number"
+          icon={{ name: "monitor-weight", library: "MaterialIcons", size: 24 }}
+          label="Target Weight"
+          value={profileSettings!.targetWeight}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              targetWeight: value,
+            })
+          }
+          unit="kg"
+          integer={false}
+          minValue={0}
+          maxValue={500}
+        />
+
+        <SettingsItem<ActivityLevel>
+          type="select"
+          icon={{ name: "directions-run", library: "MaterialIcons", size: 24 }}
+          label="Activity Level"
+          value={profileSettings!.activityLevel}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              activityLevel: value,
+            })
+          }
+          options={[
+            { label: "Sedentary", value: ActivityLevel.Sedentary },
+            { label: "Light", value: ActivityLevel.Light },
+            { label: "Moderately Active", value: ActivityLevel.Moderately },
+            { label: "High", value: ActivityLevel.High },
+            { label: "Extreme", value: ActivityLevel.Extreme },
+          ]}
+        />
+
+        <SettingsItem<Climate>
+          type="select"
+          icon={{ name: "wb-sunny", library: "MaterialIcons", size: 24 }}
+          label="Climate"
+          value={profileSettings!.climate}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({ ...profileSettings!, climate: value })
+          }
+          options={[
+            { label: "Tropical", value: Climate.Tropical },
+            { label: "Temperate", value: Climate.Temperate },
+            { label: "Cold", value: Climate.Cold },
+          ]}
         />
 
         <AppText type="title-large" style={{ marginTop: 16 }}>
@@ -57,9 +203,14 @@ export default function ProfileSettingsScreen() {
         <SettingsItem
           type="number"
           icon={{ name: "fastfood", library: "MaterialIcons", size: 24 }}
-          label="Ration calories target"
-          value={rationTarget}
-          onValueChange={setRationTarget}
+          label="Consumption Target"
+          value={profileSettings!.forcedConsumptionTarget}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              forcedConsumptionTarget: value,
+            })
+          }
           unit="kcal"
           integer={true}
           minValue={0}
@@ -73,9 +224,14 @@ export default function ProfileSettingsScreen() {
             library: "MaterialIcons",
             size: 24,
           }}
-          label="Burn calories target"
-          value={burnTarget}
-          onValueChange={setBurnTarget}
+          label="Burn Target"
+          value={profileSettings!.forcedBurnTarget ?? null}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              forcedBurnTarget: value,
+            })
+          }
           unit="kcal"
           integer={true}
           minValue={0}
@@ -85,15 +241,29 @@ export default function ProfileSettingsScreen() {
         <SettingsItem
           type="number"
           icon={{ name: "water-drop", library: "MaterialIcons", size: 24 }}
-          label="Hydration target"
-          value={hydrationTarget}
-          onValueChange={setHydrationTarget}
+          label="Hydration Target"
+          value={profileSettings!.forcedHydrationTarget ?? null}
+          onValueChange={(value) =>
+            handleProfileSettingsChange({
+              ...profileSettings!,
+              forcedHydrationTarget: value,
+            })
+          }
           unit="ml"
           integer={true}
           minValue={0}
           maxValue={10000}
         />
-      </View>
+
+        <TextButton
+          label="Logout"
+          style={{ marginVertical: 16, backgroundColor: theme.error }}
+          labelStyle={{ color: theme.onError }}
+          onPress={() => {
+            logout();
+          }}
+        ></TextButton>
+      </ScrollView>
     </View>
   );
 }

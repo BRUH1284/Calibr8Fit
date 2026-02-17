@@ -3,10 +3,9 @@ import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
 
 export interface ProfileSettings {
+  userName: string;
   firstName: string;
   lastName: string;
-  bio: string;
-  friendsVisible: boolean;
   dateOfBirth: Date;
   targetWeight: number;
   height: number;
@@ -14,8 +13,8 @@ export interface ProfileSettings {
   activityLevel: ActivityLevel;
   climate: Climate;
   profilePictureUrl?: string;
-  forcedConsumptionTarget?: number;
-  forcedBurnTarget?: number;
-  forcedHydrationTarget?: number;
+  forcedConsumptionTarget: number;
+  forcedBurnTarget: number;
+  forcedHydrationTarget: number;
   modifiedAt: number;
 }

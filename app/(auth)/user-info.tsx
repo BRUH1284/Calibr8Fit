@@ -1,3 +1,4 @@
+import { ProfileSettings } from "@/features/profile/types/interfaces/profile";
 import AppText from "@/shared/components/AppText";
 import FrameDisplay from "@/shared/components/FrameDisplay";
 import TextButton from "@/shared/components/TextButton";
@@ -66,15 +67,13 @@ export default function UserInfo() {
         {
           firstName,
           lastName,
-          bio: "",
-          friendsVisible: true,
           dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : new Date(),
           targetWeight: parseFloat(targetWeight),
           height: parseFloat(height),
           gender: Gender.Male,
           activityLevel: ActivityLevel.Sedentary,
           climate: Climate.Tropical,
-        },
+        } as ProfileSettings,
         parseFloat(currentWeight),
       );
     } else {
