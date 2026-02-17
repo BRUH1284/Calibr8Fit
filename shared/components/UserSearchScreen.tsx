@@ -5,7 +5,7 @@ import { Typography } from "@/styles/typography";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { useDebouncedCallback } from "../hooks/useDebouncedCallback";
 import AppText from "./AppText";
 import PaginatedFlatList from "./PaginatedFlatList";
@@ -13,7 +13,7 @@ import PaginatedFlatList from "./PaginatedFlatList";
 type LoadPage = (
   query: string,
   page: number,
-  pageSize: number
+  pageSize: number,
 ) => Promise<UserSummary[]>;
 
 type Props = {
@@ -31,7 +31,7 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
     (text: string) => {
       setQuery(text);
     },
-    350
+    350,
   );
 
   const handleTextChange = useCallback(
@@ -39,17 +39,17 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
       setInput(text);
       onDebouncedQueryChange(text);
     },
-    [onDebouncedQueryChange]
+    [onDebouncedQueryChange],
   );
 
   const handleLoadPage = useCallback(
     (page: number, pageSize: number) => loadPage(query, page, pageSize),
-    [loadPage, query]
+    [loadPage, query],
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.surface }}>
-      <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 16 }}>
+    <View style={[styles.container, { backgroundColor: theme.surface }]}>
+      <View style={styles.searchRow}>
         <IconButton
           icon={{
             name: "arrow-back",
@@ -64,7 +64,7 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
           placeholderTextColor={theme.onSurfaceVariant}
           value={input}
           onChangeText={handleTextChange}
-          style={[Typography["title-medium"], { flex: 1 }]}
+          style={[Typography["title-medium"], styles.searchInput]}
         />
         {input !== "" && (
           <IconButton
@@ -87,23 +87,18 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
         pageSize={15}
         keyExtractor={(item) => item.username}
         renderItem={({ item }) => (
-          <View style={{ flexDirection: "row" }}>
+          <View style={styles.row}>
             <TouchableOpacity
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={() => onUserPress?.(item.username)}
             >
-              <View style={{ flexDirection: "row" }}>
+              <View style={styles.row}>
                 <Image
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    marginRight: 8,
-                  }}
+                  style={styles.avatar}
                   source={item.profilePictureUrl}
                   placeholder={require("@/assets/images/avatar-placeholder.png")}
                 />
-                <View style={{ flex: 1, justifyContent: "center" }}>
+                <View style={styles.userInfo}>
                   <AppText type="title-large">{`${item.firstName} ${item.lastName}`}</AppText>
                   <AppText type="title-medium">{`@${item.username}`}</AppText>
                 </View>
@@ -123,3 +118,33 @@ export default function UserSearchScreen({ loadPage, onUserPress }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  searchRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+  },
+  searchInput: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: "row",
+  },
+  flex1: {
+    flex: 1,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 8,
+  },
+  userInfo: {
+    flex: 1,
+    justifyContent: "center",
+  },
+});

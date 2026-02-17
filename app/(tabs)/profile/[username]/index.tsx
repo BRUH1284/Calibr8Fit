@@ -10,7 +10,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function UserProfileScreen() {
   const theme = useTheme();
@@ -88,7 +88,7 @@ export default function UserProfileScreen() {
   const handleLoadPage = useCallback(
     (page: number, pageSize: number) =>
       getUserPosts(username as string, page, pageSize),
-    [getUserPosts, username]
+    [getUserPosts, username],
   );
 
   const friendButtons = useMemo(() => {
@@ -102,18 +102,18 @@ export default function UserProfileScreen() {
               user?.friendshipStatus === FriendshipStatus.Friends
                 ? "Unfriend"
                 : user?.friendshipStatus === FriendshipStatus.PendingSent
-                ? "Cancel Request"
-                : "Add Friend"
+                  ? "Cancel Request"
+                  : "Add Friend"
             }
-            style={{
-              borderRadius: 8,
-              padding: 4,
-              flex: 1,
-              backgroundColor:
-                user?.friendshipStatus === FriendshipStatus.None
-                  ? theme.primary
-                  : theme.error,
-            }}
+            style={[
+              styles.friendButton,
+              {
+                backgroundColor:
+                  user?.friendshipStatus === FriendshipStatus.None
+                    ? theme.primary
+                    : theme.error,
+              },
+            ]}
             onPress={() => handleFriendInteraction()}
           />
         );
@@ -123,23 +123,13 @@ export default function UserProfileScreen() {
             <TextButton
               label="Reject"
               labelStyle={{ color: theme.onError }}
-              style={{
-                borderRadius: 8,
-                padding: 4,
-                flex: 1,
-                backgroundColor: theme.error,
-              }}
+              style={[styles.friendButton, { backgroundColor: theme.error }]}
               onPress={() => handleRejectFriendRequest()}
             />
             <TextButton
               label="Accept"
               labelStyle={{ color: theme.onSuccess }}
-              style={{
-                borderRadius: 8,
-                padding: 4,
-                flex: 1,
-                backgroundColor: theme.success,
-              }}
+              style={[styles.friendButton, { backgroundColor: theme.success }]}
               onPress={() => handleAcceptFriendRequest()}
             />
           </>
@@ -160,12 +150,7 @@ export default function UserProfileScreen() {
       return (
         <TextButton
           label="Unfollow"
-          style={{
-            borderRadius: 8,
-            padding: 4,
-            flex: 1,
-            backgroundColor: theme.error,
-          }}
+          style={[styles.friendButton, { backgroundColor: theme.error }]}
           onPress={() => handleUnfollow()}
         />
       );
@@ -173,7 +158,7 @@ export default function UserProfileScreen() {
     return (
       <TextButton
         label="Follow"
-        style={{ borderRadius: 8, padding: 4, flex: 1 }}
+        style={styles.friendButton}
         onPress={() => handleFollow()}
       />
     );
@@ -181,17 +166,7 @@ export default function UserProfileScreen() {
 
   return (
     <>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 8,
-          paddingHorizontal: 16,
-          gap: 16,
-          backgroundColor: theme.surface,
-          zIndex: 1,
-        }}
-      >
+      <View style={[styles.headerBar, { backgroundColor: theme.surface }]}>
         <IconButton
           icon={{
             name: "arrow-back",
@@ -206,27 +181,21 @@ export default function UserProfileScreen() {
       <PaginatedFlatList
         loadPage={handleLoadPage}
         pageSize={5}
-        style={{
-          flex: 1,
-          backgroundColor: theme.surface,
-          overflow: "visible",
-        }}
+        style={[styles.list, { backgroundColor: theme.surface }]}
         ListHeaderComponent={
           <>
-            <View style={{ flexDirection: "row", marginTop: 8 }}>
+            <View style={styles.profileRow}>
               <Image
                 source={
                   user?.profilePictureUrl
                     ? { uri: user.profilePictureUrl }
                     : require("@/assets/images/avatar-placeholder.png")
                 }
-                style={{ width: 96, height: 96, borderRadius: 48 }}
+                style={styles.avatar}
               />
-              <View
-                style={{ marginLeft: 16, justifyContent: "center", gap: 8 }}
-              >
+              <View style={styles.profileInfo}>
                 <AppText type="title-large">{`${user?.firstName} ${user?.lastName}`}</AppText>
-                <View style={{ flexDirection: "row", gap: 16 }}>
+                <View style={styles.countsRow}>
                   <PressableCount
                     count={user?.friendsCount || 0}
                     label="Friends"
@@ -249,17 +218,14 @@ export default function UserProfileScreen() {
                 </View>
               </View>
             </View>
-            <View style={{ paddingTop: 8, flexDirection: "row", gap: 16 }}>
+            <View style={styles.actionRow}>
               {friendButtons}
               {followButton}
             </View>
           </>
         }
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          gap: 16,
-          padding: 16,
-        }}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => <PostCard post={item} />}
       />
       <IconButton
@@ -269,24 +235,71 @@ export default function UserProfileScreen() {
           size: 24,
           color: theme.onPrimaryVariant,
         }}
-        style={{
-          position: "absolute",
-          height: 56,
-          width: 56,
-          borderRadius: 16,
-          justifyContent: "center",
-          alignItems: "center",
-          bottom: 16,
-          right: 16,
-          backgroundColor: theme.primaryVariant,
-          elevation: 4,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-        }}
+        style={[styles.fab, { backgroundColor: theme.primaryVariant }]}
         onPress={() => {}}
       />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  headerBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    paddingHorizontal: 16,
+    gap: 16,
+    zIndex: 1,
+  },
+  list: {
+    flex: 1,
+    overflow: "visible",
+  },
+  listContent: {
+    gap: 16,
+    padding: 16,
+  },
+  profileRow: {
+    flexDirection: "row",
+    marginTop: 8,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
+  profileInfo: {
+    marginLeft: 16,
+    justifyContent: "center",
+    gap: 8,
+  },
+  countsRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  actionRow: {
+    paddingTop: 8,
+    flexDirection: "row",
+    gap: 16,
+  },
+  friendButton: {
+    borderRadius: 8,
+    padding: 4,
+    flex: 1,
+  },
+  fab: {
+    position: "absolute",
+    height: 56,
+    width: 56,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    bottom: 16,
+    right: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+});

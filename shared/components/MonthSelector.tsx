@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleProp, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import IconButton from "./IconButton";
@@ -57,17 +57,7 @@ export default function MonthSelector({
   };
 
   return (
-    <View
-      style={[
-        {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-        },
-        style,
-      ]}
-    >
+    <View style={[styles.container, style]}>
       <IconButton
         variant="icon"
         icon={{
@@ -100,3 +90,12 @@ export default function MonthSelector({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+});

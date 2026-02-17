@@ -1,6 +1,6 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, Switch, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import DynamicIcon, { IconItem } from "./DynamicIcon";
@@ -133,21 +133,14 @@ export default function SettingsItem<T = string>(props: Props<T>) {
   }, [props]);
 
   const content = (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        padding: 8,
-      }}
-    >
+    <View style={styles.contentRow}>
       <DynamicIcon
         name={props.icon.name}
         library={props.icon.library}
         size={props.icon.size || 24}
         color={props.icon.color}
       />
-      <AppText type="title-medium" style={{ flex: 1 }}>
+      <AppText type="title-medium" style={styles.flex1}>
         {props.label}
       </AppText>
       {props.type === "boolean" && (
@@ -159,24 +152,12 @@ export default function SettingsItem<T = string>(props: Props<T>) {
         />
       )}
       {props.type === "text" && (
-        <AppText
-          type="title-medium"
-          style={{
-            color: theme.onSurfaceVariant,
-            textDecorationLine: "underline",
-          }}
-        >
+        <AppText type="title-medium" style={styles.underlinedValue}>
           {props.value || "Not set"}
         </AppText>
       )}
       {props.type === "date" && (
-        <AppText
-          type="title-medium"
-          style={{
-            color: theme.onSurfaceVariant,
-            textDecorationLine: "underline",
-          }}
-        >
+        <AppText type="title-medium" style={styles.underlinedValue}>
           {new Date(props.value).toLocaleDateString(undefined, {
             year: "numeric",
             month: "long",
@@ -185,25 +166,13 @@ export default function SettingsItem<T = string>(props: Props<T>) {
         </AppText>
       )}
       {props.type === "number" && (
-        <AppText
-          type="title-medium"
-          style={{
-            color: theme.onSurfaceVariant,
-            textDecorationLine: "underline",
-          }}
-        >
+        <AppText type="title-medium" style={styles.underlinedValue}>
           {props.value ?? 0}
           {props.unit && ` ${props.unit}`}
         </AppText>
       )}
       {props.type === "select" && (
-        <AppText
-          type="title-medium"
-          style={{
-            color: theme.onSurfaceVariant,
-            textDecorationLine: "underline",
-          }}
-        >
+        <AppText type="title-medium" style={styles.underlinedValue}>
           {props.options.find((opt) => opt.value === props.value)?.label ||
             String(props.value)}
         </AppText>
@@ -216,7 +185,7 @@ export default function SettingsItem<T = string>(props: Props<T>) {
       <>
         <Pressable onPress={handlePress}>{content}</Pressable>
         <Popup visible={showPopup} onClose={handleCancel}>
-          <AppText type="title-large" style={{ textAlign: "center" }}>
+          <AppText type="title-large" style={styles.textCenter}>
             {props.label}
           </AppText>
           <TextField
@@ -228,17 +197,17 @@ export default function SettingsItem<T = string>(props: Props<T>) {
             numberOfLines={10}
             multiline={props.multiline}
           />
-          <View style={{ flexDirection: "row", gap: 8 }}>
+          <View style={styles.buttonRow}>
             <TextButton
               label="Cancel"
               variant="tonal"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleCancel}
             />
             <TextButton
               label="Save"
               variant="filled"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleSave}
             />
           </View>
@@ -276,7 +245,7 @@ export default function SettingsItem<T = string>(props: Props<T>) {
       <>
         <Pressable onPress={handlePress}>{content}</Pressable>
         <Popup visible={showPopup} onClose={handleCancel}>
-          <AppText type="title-large" style={{ textAlign: "center" }}>
+          <AppText type="title-large" style={styles.textCenter}>
             {props.label}
           </AppText>
           <TextField
@@ -305,17 +274,17 @@ export default function SettingsItem<T = string>(props: Props<T>) {
                   : 100
             }
           />
-          <View style={{ flexDirection: "row", gap: 8 }}>
+          <View style={styles.buttonRow}>
             <TextButton
               label="Cancel"
               variant="tonal"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleCancel}
             />
             <TextButton
               label="Save"
               variant="filled"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleSave}
             />
           </View>
@@ -329,53 +298,35 @@ export default function SettingsItem<T = string>(props: Props<T>) {
       <>
         <Pressable onPress={handlePress}>{content}</Pressable>
         <Popup visible={showPopup} onClose={handleCancel}>
-          <AppText type="title-large" style={{ textAlign: "center" }}>
+          <AppText type="title-large" style={styles.textCenter}>
             {props.label}
           </AppText>
           <ScrollView
-            style={{ maxHeight: 300 }}
+            style={styles.scrollView}
             showsVerticalScrollIndicator={true}
           >
-            <View style={{ gap: 8, paddingVertical: 8 }}>
+            <View style={styles.optionsContainer}>
               {props.options.map((option) => (
                 <Pressable
                   key={String(option.value)}
                   onPress={() => setTempSelectValue(option.value)}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: 8,
-                  }}
+                  style={styles.optionRow}
                 >
                   <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: 10,
-                      borderWidth: 2,
-                      borderColor: theme.primary,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                    style={[styles.radioOuter, { borderColor: theme.primary }]}
                   >
                     {tempSelectValue === option.value && (
                       <View
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: 6,
-                          backgroundColor: theme.primary,
-                        }}
+                        style={[
+                          styles.radioInner,
+                          { backgroundColor: theme.primary },
+                        ]}
                       />
                     )}
                   </View>
                   <AppText
                     type="title-medium"
-                    style={{
-                      flex: 1,
-                      color: theme.onSurface,
-                    }}
+                    style={[styles.flex1, { color: theme.onSurface }]}
                   >
                     {option.label}
                   </AppText>
@@ -383,17 +334,17 @@ export default function SettingsItem<T = string>(props: Props<T>) {
               ))}
             </View>
           </ScrollView>
-          <View style={{ flexDirection: "row", gap: 8 }}>
+          <View style={styles.buttonRow}>
             <TextButton
               label="Cancel"
               variant="tonal"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleCancel}
             />
             <TextButton
               label="Save"
               variant="filled"
-              style={{ flex: 1 }}
+              style={styles.flex1}
               onPress={handleSave}
             />
           </View>
@@ -404,3 +355,52 @@ export default function SettingsItem<T = string>(props: Props<T>) {
 
   return content;
 }
+
+const styles = StyleSheet.create({
+  contentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 8,
+  },
+  flex1: {
+    flex: 1,
+  },
+  underlinedValue: {
+    color: undefined,
+    textDecorationLine: "underline",
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  scrollView: {
+    maxHeight: 300,
+  },
+  optionsContainer: {
+    gap: 8,
+    paddingVertical: 8,
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 8,
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+});

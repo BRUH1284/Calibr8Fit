@@ -2,6 +2,7 @@ import IconButton from "@/shared/components/IconButton";
 import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useState } from "react";
+import { StyleSheet } from "react-native";
 import { useWaterIntake } from "../hooks/useWaterIntake";
 
 type Props = {
@@ -25,26 +26,23 @@ export default function WaterIntakeRecordPopupContent({ onClose }: Props) {
   }, [waterIntakeInMl]);
 
   return (
-    <PopupContentBase
-      header='Add Water Intake Record'
-      onBackPress={onClose}
-    >
+    <PopupContentBase header="Add Water Intake Record" onBackPress={onClose}>
       <>
         <TextField
-          type='number'
+          type="number"
           numberControls={true}
-          label={'Mililiters'}
+          label={"Mililiters"}
           value={waterIntakeInMl.toString()}
           onChangeText={(value) => setWaterIntakeInMl(parseInt(value))}
-          suffix='ml'
+          suffix="ml"
           minValue={0}
           numberStep={100}
         />
         <IconButton
           onPress={handleAddWaterIntakeRecord}
-          style={{ alignSelf: 'flex-end' }}
+          style={styles.selfEnd}
           icon={{
-            name: 'check',
+            name: "check",
             size: 32,
             library: "MaterialIcons",
           }}
@@ -53,3 +51,9 @@ export default function WaterIntakeRecordPopupContent({ onClose }: Props) {
     </PopupContentBase>
   );
 }
+
+const styles = StyleSheet.create({
+  selfEnd: {
+    alignSelf: "flex-end",
+  },
+});

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { LayoutChangeEvent, View } from "react-native";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
@@ -74,15 +74,13 @@ export default function MonthLineChartCard({
 
   return (
     <View
-      style={{
-        padding: 16,
-        overflowX: "hidden",
-        gap: 16,
-        backgroundColor: theme.surface,
-        borderWidth: 1,
-        borderColor: theme.outline,
-        borderRadius: 16,
-      }}
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.surface,
+          borderColor: theme.outline,
+        },
+      ]}
       onLayout={handleLayout}
     >
       <AppText type="headline-small">{headline}</AppText>
@@ -137,17 +135,13 @@ export default function MonthLineChartCard({
           pointerLabelComponent: (item: (typeof displayData)[number][]) => {
             return (
               <View
-                style={{
-                  flex: 1,
-                  height: 32,
-                  width: 64,
-                  borderRadius: 8,
-                  backgroundColor: theme.surface,
-                  borderColor: theme.outline,
-                  borderWidth: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                style={[
+                  styles.pointerLabel,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.outline,
+                  },
+                ]}
               >
                 <AppText
                   type="label-medium"
@@ -169,3 +163,22 @@ export default function MonthLineChartCard({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    overflow: "hidden",
+    gap: 16,
+    borderWidth: 1,
+    borderRadius: 16,
+  },
+  pointerLabel: {
+    flex: 1,
+    height: 32,
+    width: 64,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

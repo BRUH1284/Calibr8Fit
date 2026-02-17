@@ -14,16 +14,29 @@ type Props = {
 export default function DailyBurnListCard({ onAddTargetPress }: Props) {
   const theme = useTheme();
 
-  const { targets, todayCaloriesBurned, deleteDailyBurnTarget, syncDailyBurnTargets } = useDailyBurn();
+  const {
+    targets,
+    todayCaloriesBurned,
+    deleteDailyBurnTarget,
+    syncDailyBurnTargets,
+  } = useDailyBurn();
   const { todayActivityCaloriesBurned, todayRecords } = useActivityRecord();
 
-  const minimalTargets = useMemo(() =>
-    targets.map(t => ({
-      id: t.id,
-      description: t.activity?.description || t.userActivity?.description || 'Unknown Activity',
-      duration: t.duration,
-      calories: todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!),
-    })), [targets, todayActivityCaloriesBurned, todayRecords]);
+  const minimalTargets = useMemo(
+    () =>
+      targets.map((t) => ({
+        id: t.id,
+        description:
+          t.activity?.description ||
+          t.userActivity?.description ||
+          "Unknown Activity",
+        duration: t.duration,
+        calories: todayActivityCaloriesBurned(
+          t.activityId ?? t.userActivityId!,
+        ),
+      })),
+    [targets, todayActivityCaloriesBurned, todayRecords],
+  );
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -37,28 +50,24 @@ export default function DailyBurnListCard({ onAddTargetPress }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText
-          type='title-large'
-          style={{ flex: 1 }}
-        >Daily Burn</AppText>
-        <AppText
-          type='label-large'
-        >{`${todayCaloriesBurned} kcal`}</AppText>
+        <AppText type="title-large" style={styles.flex1}>
+          Daily Burn
+        </AppText>
+        <AppText type="label-large">{`${todayCaloriesBurned} kcal`}</AppText>
         <IconButton
           icon={{
-            name: 'add',
+            name: "add",
             size: 36,
-            library: 'MaterialIcons',
+            library: "MaterialIcons",
             color: theme.onSurface,
           }}
           onPress={onAddTargetPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
+          style={[styles.addButton, { backgroundColor: theme.primaryVariant }]}
+        />
       </View>
       <FlatList
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         initialNumToRender={8}
         windowSize={5}
@@ -68,10 +77,8 @@ export default function DailyBurnListCard({ onAddTargetPress }: Props) {
         renderItem={({ item }) => (
           <ActivityItem item={item} onDelete={deleteDailyBurnTarget} />
         )}
-
-      >
-      </FlatList>
-    </View >
+      ></FlatList>
+    </View>
   );
 }
 
@@ -88,5 +95,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 8,
     gap: 16,
+  },
+  flex1: {
+    flex: 1,
+  },
+  addButton: {
+    marginLeft: 16,
   },
 });

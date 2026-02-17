@@ -82,16 +82,9 @@ export default function UserInfo() {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        paddingBottom: 32,
-        gap: 32,
-        backgroundColor: theme.surface,
-      }}
-    >
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.surface }]}>
       <Image
-        style={{ height: "20%", alignSelf: "stretch", backgroundColor: "red" }}
+        style={styles.logo}
         source={require("@/assets/images/react-logo.png")}
       />
       <PagerView
@@ -102,28 +95,20 @@ export default function UserInfo() {
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
       >
         <View key="1" style={[styles.container, { gap: 4 }]}>
-          <View style={{ gap: 4 }}>
-            <AppText
-              type="headline-medium"
-              style={{
-                textAlign: "center",
-              }}
-            >
-              Let’s build your profile.
+          <View style={styles.gap4}>
+            <AppText type="headline-medium" style={styles.textCenter}>
+              Let's build your profile.
             </AppText>
             <AppText
               type="body-large"
-              style={{
-                textAlign: "center",
-                color: theme.onSurfaceVariant,
-              }}
+              style={[styles.textCenter, { color: theme.onSurfaceVariant }]}
             >
               Used for account setup and tailored fitness recommendations.
             </AppText>
           </View>
           <KeyboardAwareScrollView
-            style={{ flex: 1, paddingTop: 12 }}
-            contentContainerStyle={{ gap: 16 }}
+            style={styles.scrollContent}
+            contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
             bottomOffset={32}
           >
@@ -168,21 +153,13 @@ export default function UserInfo() {
           </KeyboardAwareScrollView>
         </View>
         <View key="2" style={styles.container}>
-          <View style={{ gap: 4 }}>
-            <AppText
-              type="headline-medium"
-              style={{
-                textAlign: "center",
-              }}
-            >
+          <View style={styles.gap4}>
+            <AppText type="headline-medium" style={styles.textCenter}>
               What is your gender?
             </AppText>
             <AppText
               type="body-large"
-              style={{
-                textAlign: "center",
-                color: theme.onSurfaceVariant,
-              }}
+              style={[styles.textCenter, { color: theme.onSurfaceVariant }]}
             >
               We use this to personalize your goals, hydration, and health
               insights.
@@ -204,29 +181,21 @@ export default function UserInfo() {
           />
         </View>
         <View key="3" style={styles.container}>
-          <View style={{ gap: 4 }}>
-            <AppText
-              type="headline-medium"
-              style={{
-                textAlign: "center",
-              }}
-            >
+          <View style={styles.gap4}>
+            <AppText type="headline-medium" style={styles.textCenter}>
               What are your body stats?
             </AppText>
             <AppText
               type="body-large"
-              style={{
-                textAlign: "center",
-                color: theme.onSurfaceVariant,
-              }}
+              style={[styles.textCenter, { color: theme.onSurfaceVariant }]}
             >
               Your current and target stats help us calculate calories burned
               and set goals.
             </AppText>
           </View>
           <KeyboardAwareScrollView
-            style={{ flex: 1, paddingTop: 12 }}
-            contentContainerStyle={{ gap: 16 }}
+            style={styles.scrollContent}
+            contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
             bottomOffset={32}
           >
@@ -269,28 +238,20 @@ export default function UserInfo() {
           </KeyboardAwareScrollView>
         </View>
         <View key="4" style={styles.container}>
-          <View style={{ gap: 4 }}>
-            <AppText
-              type="headline-medium"
-              style={{
-                textAlign: "center",
-              }}
-            >
-              What’s your usual activity level?
+          <View style={styles.gap4}>
+            <AppText type="headline-medium" style={styles.textCenter}>
+              What's your usual activity level?
             </AppText>
             <AppText
               type="body-large"
-              style={{
-                textAlign: "center",
-                color: theme.onSurfaceVariant,
-              }}
+              style={[styles.textCenter, { color: theme.onSurfaceVariant }]}
             >
               This helps us estimate your calorie burn and hydration needs.
             </AppText>
           </View>
           <ScrollView
             style={{ flex: 1 }}
-            contentContainerStyle={{ gap: 16 }}
+            contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
           >
             <TextButton
@@ -341,21 +302,13 @@ export default function UserInfo() {
           </ScrollView>
         </View>
         <View key="5" style={styles.container}>
-          <View style={{ gap: 4 }}>
-            <AppText
-              type="headline-medium"
-              style={{
-                textAlign: "center",
-              }}
-            >
-              What’s the weather like where you are?
+          <View style={styles.gap4}>
+            <AppText type="headline-medium" style={styles.textCenter}>
+              What's the weather like where you are?
             </AppText>
             <AppText
               type="body-large"
-              style={{
-                textAlign: "center",
-                color: theme.onSurfaceVariant,
-              }}
+              style={[styles.textCenter, { color: theme.onSurfaceVariant }]}
             >
               Climate affects how much water your body needs — we’ll factor that
               in.
@@ -363,7 +316,7 @@ export default function UserInfo() {
           </View>
           <ScrollView
             style={{ flex: 1 }}
-            contentContainerStyle={{ gap: 16 }}
+            contentContainerStyle={styles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
           >
             <TextButton
@@ -402,10 +355,33 @@ export default function UserInfo() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    paddingBottom: 32,
+    gap: 32,
+  },
+  logo: {
+    height: "20%",
+    alignSelf: "stretch",
+    backgroundColor: "red",
+  },
   container: {
     flex: 1,
     gap: 16,
     marginHorizontal: 32,
+  },
+  gap4: {
+    gap: 4,
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  scrollContent: {
+    flex: 1,
+    paddingTop: 12,
+  },
+  scrollContentContainer: {
+    gap: 16,
   },
   button: {
     marginHorizontal: 32,

@@ -20,7 +20,7 @@ import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
 import Popup from "@/shared/components/Popup";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useCallback, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function Home() {
   const theme = useTheme();
@@ -36,10 +36,10 @@ export default function Home() {
             <FoodRecordPopupContent
               item={item}
               onClose={() => setPopupContent(undefined)}
-            />
+            />,
           )
         }
-      />
+      />,
     );
   }, []);
 
@@ -52,10 +52,10 @@ export default function Home() {
             <ActivityRecordPopupContent
               activity={item}
               onClose={() => setPopupContent(undefined)}
-            />
+            />,
           )
         }
-      />
+      />,
     );
   }, []);
 
@@ -63,7 +63,7 @@ export default function Home() {
     setPopupContent(
       <WaterIntakeRecordPopupContent
         onClose={() => setPopupContent(undefined)}
-      />
+      />,
     );
   }, []);
 
@@ -93,7 +93,7 @@ export default function Home() {
 
   const handleLoadFeed = useCallback(
     (page: number, pageSize: number) => getMyFeed(page, pageSize),
-    [getMyFeed]
+    [getMyFeed],
   );
 
   // Handle refresh
@@ -109,22 +109,11 @@ export default function Home() {
     <>
       <PaginatedFlatList
         loadPage={handleLoadFeed}
-        contentContainerStyle={{
-          padding: 16,
-          gap: 8,
-        }}
-        ListHeaderComponentStyle={{
-          gap: 8,
-          paddingBottom: 8,
-        }}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponentStyle={styles.listHeader}
         ListHeaderComponent={
           <>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
+            <View style={styles.headerRow}>
               <AppText type="headline-medium">{`Hi ${profileSettings?.firstName}`}</AppText>
             </View>
             <IconAddProgressIndicator
@@ -170,3 +159,18 @@ export default function Home() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    padding: 16,
+    gap: 8,
+  },
+  listHeader: {
+    gap: 8,
+    paddingBottom: 8,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+});

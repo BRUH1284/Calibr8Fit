@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   StyleProp,
+  StyleSheet,
   View,
   ViewStyle,
 } from "react-native";
@@ -12,7 +13,7 @@ import AppText from "./AppText";
 type LoadPage<TArgs = any, TItem = any> = (
   page: number,
   pageSize: number,
-  args?: TArgs
+  args?: TArgs,
 ) => Promise<TItem[]>;
 
 type Props<TArgs = any, TItem = any> = {
@@ -55,7 +56,7 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
 
       setLoading(false);
     },
-    [args, loadPage, pageSize]
+    [args, loadPage, pageSize],
   );
 
   // Load next page
@@ -85,14 +86,14 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
   const listFooter = useMemo(() => {
     if (loading) {
       return (
-        <View style={{ paddingVertical: 16 }}>
+        <View style={styles.footerContainer}>
           <ActivityIndicator />
         </View>
       );
     }
     if (!hasMore && items.length > 0) {
       return (
-        <View style={{ paddingVertical: 16, alignItems: "center" }}>
+        <View style={styles.footerEnd}>
           <AppText type="body-medium" style={{ color: theme.onSurfaceVariant }}>
             You have reached the end.
           </AppText>
@@ -115,3 +116,13 @@ export default function PaginatedFlatList<TArgs = any, TItem = any>({
     />
   );
 }
+
+const styles = StyleSheet.create({
+  footerContainer: {
+    paddingVertical: 16,
+  },
+  footerEnd: {
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+});

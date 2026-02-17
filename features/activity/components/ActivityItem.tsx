@@ -20,20 +20,13 @@ const ActivityItem = memo(({ item, onDelete }: ActivityItemProps) => {
   const theme = useTheme();
   return (
     <View style={styles.listItem}>
-      <View style={{ flex: 1 }}>
-        <AppText
-          type="title-medium"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+      <View style={styles.flex1}>
+        <AppText type="title-medium" numberOfLines={1} ellipsizeMode="tail">
           {item.description}
         </AppText>
 
         {item.time && (
-          <AppText
-            style={{ color: theme.onSurfaceVariant }}
-            type='label-small'
-          >
+          <AppText style={{ color: theme.onSurfaceVariant }} type="label-small">
             {item.time}
           </AppText>
         )}
@@ -91,6 +84,9 @@ const styles = StyleSheet.create({
   },
   centerText: {
     textAlign: "center",
+  },
+  flex1: {
+    flex: 1,
   },
 });
 

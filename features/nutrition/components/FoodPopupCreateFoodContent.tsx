@@ -1,11 +1,12 @@
 import IconButton from "@/shared/components/IconButton";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useState } from "react";
+import { StyleSheet } from "react-native";
 import { useUserFood } from "../hooks/useUserFood";
 
 type Props = {
   onDone: () => void;
-}
+};
 
 const defaultFood = {
   name: "",
@@ -53,7 +54,7 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
   const handleCreateFood = useCallback(() => {
     addUserFood({
       ...defaultFood,
-      ...createdFood
+      ...createdFood,
     });
 
     // Reset the created food state
@@ -65,31 +66,35 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
   return (
     <>
       <TextField
-        label={'Name'}
+        label={"Name"}
         value={createdFood.name}
-        onChangeText={(name) => setCreatedFood(({
-          ...createdFood,
-          name: name
-        }))}
+        onChangeText={(name) =>
+          setCreatedFood({
+            ...createdFood,
+            name: name,
+          })
+        }
         multiline={true}
         numberOfLines={8}
       />
       <TextField
-        type='number'
-        label={'Caloric Value'}
+        type="number"
+        label={"Caloric Value"}
         value={createdFood.caloricValue?.toString()}
-        onChangeText={(value) => setCreatedFood({
-          ...createdFood,
-          caloricValue: parseFloat(value)
-        })}
+        onChangeText={(value) =>
+          setCreatedFood({
+            ...createdFood,
+            caloricValue: parseFloat(value),
+          })
+        }
         suffix={`kcal`}
         minValue={0}
       />
       <IconButton
         onPress={handleCreateFood}
-        style={{ alignSelf: 'flex-end' }}
+        style={styles.selfEnd}
         icon={{
-          name: 'check',
+          name: "check",
           size: 32,
           library: "MaterialIcons",
         }}
@@ -97,3 +102,9 @@ export default function FoodPopupCreateFoodContent({ onDone }: Props) {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  selfEnd: {
+    alignSelf: "flex-end",
+  },
+});

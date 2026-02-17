@@ -1,4 +1,10 @@
-import { StyleProp, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import DynamicIcon, { IconItem } from "./DynamicIcon";
@@ -10,7 +16,7 @@ type Props = {
   onPress?: () => void;
   backgroundColor?: string;
   style?: StyleProp<ViewStyle>;
-}
+};
 
 export default function IconTile({
   text,
@@ -24,16 +30,14 @@ export default function IconTile({
 
   return (
     <TouchableOpacity
-      style={[{
-        flexGrow: 1,
-        padding: 16,
-        borderRadius: 16,
-        backgroundColor: backgroundColor || theme.surface,
-        alignItems: 'center',
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: theme.outline
-      }, style]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: backgroundColor || theme.surface,
+          borderColor: theme.outline,
+        },
+        style,
+      ]}
       onPress={onPress}
     >
       <DynamicIcon
@@ -42,21 +46,36 @@ export default function IconTile({
         size={icon.size || 32}
         color={icon.color || theme.onSurface}
       />
-      <View style={{ flexGrow: 1 }}>
-        <AppText
-          type='label-large'
-          style={{
-            textAlign: 'right'
-          }}
-        >{text}</AppText>
-        {supportingText && <AppText
-          type='label-small'
-          style={{
-            textAlign: 'right',
-            color: theme.onSurfaceVariant
-          }}
-        >{supportingText}</AppText>}
+      <View style={styles.content}>
+        <AppText type="label-large" style={styles.textRight}>
+          {text}
+        </AppText>
+        {supportingText && (
+          <AppText
+            type="label-small"
+            style={[styles.textRight, { color: theme.onSurfaceVariant }]}
+          >
+            {supportingText}
+          </AppText>
+        )}
       </View>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    borderWidth: 1,
+  },
+  content: {
+    flexGrow: 1,
+  },
+  textRight: {
+    textAlign: "right",
+  },
+});

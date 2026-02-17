@@ -10,7 +10,13 @@ import { ActivityLevel } from "@/shared/types/enums/activityLevel";
 import { Climate } from "@/shared/types/enums/climate";
 import { Gender } from "@/shared/types/enums/gender";
 import { useCallback, useState } from "react";
-import { Appearance, ScrollView, useColorScheme, View } from "react-native";
+import {
+  Appearance,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
 
 export default function ProfileSettingsScreen() {
   const theme = useTheme();
@@ -42,15 +48,9 @@ export default function ProfileSettingsScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.surface }}>
+    <View style={[styles.container, { backgroundColor: theme.surface }]}>
       <Header title="Settings" />
-      <ScrollView
-        style={{
-          flex: 1,
-          padding: 16,
-          paddingTop: 0,
-        }}
-      >
+      <ScrollView style={styles.scrollView}>
         <AppText type="title-large">General</AppText>
 
         <SettingsItem
@@ -69,7 +69,7 @@ export default function ProfileSettingsScreen() {
           onValueChange={handleNotificationsChange}
         />
 
-        <AppText type="title-large" style={{ marginTop: 16 }}>
+        <AppText type="title-large" style={styles.sectionTitle}>
           Profile Information
         </AppText>
 
@@ -112,7 +112,7 @@ export default function ProfileSettingsScreen() {
           }
         />
 
-        <AppText type="title-large" style={{ marginTop: 16 }}>
+        <AppText type="title-large" style={styles.sectionTitle}>
           Body and Lifestyle
         </AppText>
 
@@ -196,7 +196,7 @@ export default function ProfileSettingsScreen() {
           ]}
         />
 
-        <AppText type="title-large" style={{ marginTop: 16 }}>
+        <AppText type="title-large" style={styles.sectionTitle}>
           Goals
         </AppText>
 
@@ -257,7 +257,7 @@ export default function ProfileSettingsScreen() {
 
         <TextButton
           label="Logout"
-          style={{ marginVertical: 16, backgroundColor: theme.error }}
+          style={[styles.logoutButton, { backgroundColor: theme.error }]}
           labelStyle={{ color: theme.onError }}
           onPress={() => {
             logout();
@@ -267,3 +267,20 @@ export default function ProfileSettingsScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    padding: 16,
+    paddingTop: 0,
+  },
+  sectionTitle: {
+    marginTop: 16,
+  },
+  logoutButton: {
+    marginVertical: 16,
+  },
+});

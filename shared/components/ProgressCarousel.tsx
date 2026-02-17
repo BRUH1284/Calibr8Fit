@@ -4,7 +4,7 @@ import { useConsumptionRecord } from "@/features/nutrition/hooks/useConsumptionR
 import { calcCaloricValue } from "@/features/nutrition/types/consumptionRecord";
 import { useRecommendations } from "@/features/profile/hooks/useRecommendations";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, View } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 import AppText from "./AppText";
 import CircularProgress from "./CircularProgress";
@@ -135,12 +135,7 @@ export default function ProgressCarousel() {
 
   const renderItem = (item: SummaryItem) => {
     return (
-      <View
-        style={{
-          width: ITEM_SIZE,
-          alignItems: "center",
-        }}
-      >
+      <View style={[styles.itemContainer, { width: ITEM_SIZE }]}>
         <CircularProgress
           size={ITEM_SIZE - 24}
           strokeWidth={6}
@@ -191,7 +186,7 @@ export default function ProgressCarousel() {
 
   const scrollX = useRef(new Animated.Value(0)).current;
   return (
-    <View onLayout={onLayout} style={{ width: "100%" }}>
+    <View onLayout={onLayout} style={styles.outerContainer}>
       {/* only render once width is known */}
       {ITEM_SIZE > 0 && (
         <Animated.FlatList
@@ -223,3 +218,12 @@ export default function ProgressCarousel() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    width: "100%",
+  },
+  itemContainer: {
+    alignItems: "center",
+  },
+});

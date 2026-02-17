@@ -3,6 +3,7 @@ import { forwardRef, useCallback, useEffect, useState } from "react";
 import {
   KeyboardTypeOptions,
   StyleProp,
+  StyleSheet,
   TextInput,
   View,
   ViewStyle,
@@ -111,16 +112,7 @@ const TextField = forwardRef<TextInput, Props>(
     }, [type, value, valueState, displayedValue]);
 
     return (
-      <View
-        style={[
-          {
-            alignSelf: "stretch",
-            gap: 4,
-            paddingTop: 4,
-          },
-          style,
-        ]}
-      >
+      <View style={[styles.outerContainer, style]}>
         <View
           style={{
             borderWidth: isFocused ? 3 : 1,
@@ -147,16 +139,9 @@ const TextField = forwardRef<TextInput, Props>(
             </AppText>
           )}
 
-          <View style={{ flexDirection: "row" }}>
+          <View style={styles.inputRow}>
             <TextInput
-              style={[
-                Typography["body-large"],
-                {
-                  padding: 0,
-                  minHeight: 24,
-                  flex: 1,
-                },
-              ]}
+              style={[Typography["body-large"], styles.textInput]}
               ref={ref}
               multiline={multiline}
               numberOfLines={numberOfLines}
@@ -185,13 +170,12 @@ const TextField = forwardRef<TextInput, Props>(
             )}
             {numberControls && type === "number" && (
               <View
-                style={{
-                  flexDirection: "row",
-                  marginVertical: isFocused ? -9 : -11,
-                  marginRight: -7,
-                  marginLeft: 8,
-                  gap: 8,
-                }}
+                style={[
+                  styles.numberControls,
+                  {
+                    marginVertical: isFocused ? -9 : -11,
+                  },
+                ]}
               >
                 <Divider
                   orientation="vertical"
@@ -254,5 +238,27 @@ const TextField = forwardRef<TextInput, Props>(
 );
 
 TextField.displayName = "TextField";
+
+const styles = StyleSheet.create({
+  outerContainer: {
+    alignSelf: "stretch",
+    gap: 4,
+    paddingTop: 4,
+  },
+  inputRow: {
+    flexDirection: "row",
+  },
+  textInput: {
+    padding: 0,
+    minHeight: 24,
+    flex: 1,
+  },
+  numberControls: {
+    flexDirection: "row",
+    marginRight: -7,
+    marginLeft: 8,
+    gap: 8,
+  },
+});
 
 export default TextField;

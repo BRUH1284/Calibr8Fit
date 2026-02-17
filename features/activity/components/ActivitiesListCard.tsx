@@ -18,17 +18,23 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
     todayRecords,
     todayCaloriesBurned,
     syncActivityRecords,
-    deleteActivityRecord
+    deleteActivityRecord,
   } = useActivityRecord();
 
-  const minimalRecords = useMemo(() =>
-    todayRecords.map(r => ({
-      id: r.id,
-      description: r.activity?.description || r.userActivity?.description || 'Unknown Activity',
-      duration: r.duration,
-      calories: r.caloriesBurned,
-      time: compactFull(new Date(r.time)),
-    })), [todayRecords]);
+  const minimalRecords = useMemo(
+    () =>
+      todayRecords.map((r) => ({
+        id: r.id,
+        description:
+          r.activity?.description ||
+          r.userActivity?.description ||
+          "Unknown Activity",
+        duration: r.duration,
+        calories: r.caloriesBurned,
+        time: compactFull(new Date(r.time)),
+      })),
+    [todayRecords],
+  );
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -42,28 +48,24 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText
-          type='title-large'
-          style={{ flex: 1 }}
-        >Activities</AppText>
-        <AppText
-          type='label-large'
-        >{`${todayCaloriesBurned} kcal`}</AppText>
+        <AppText type="title-large" style={styles.flex1}>
+          Activities
+        </AppText>
+        <AppText type="label-large">{`${todayCaloriesBurned} kcal`}</AppText>
         <IconButton
           icon={{
-            name: 'add',
+            name: "add",
             size: 36,
-            library: 'MaterialIcons',
+            library: "MaterialIcons",
             color: theme.onPrimaryVariant,
           }}
           onPress={onAddActivityPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
+          style={[styles.addButton, { backgroundColor: theme.primaryVariant }]}
+        />
       </View>
       <FlatList
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         initialNumToRender={8}
         windowSize={5}
@@ -73,10 +75,8 @@ export default function ActivitiesListCard({ onAddActivityPress }: Props) {
         renderItem={({ item }) => (
           <ActivityItem item={item} onDelete={deleteActivityRecord} />
         )}
-
-      >
-      </FlatList>
-    </View >
+      ></FlatList>
+    </View>
   );
 }
 
@@ -93,5 +93,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 8,
     gap: 16,
+  },
+  flex1: {
+    flex: 1,
+  },
+  addButton: {
+    marginLeft: 16,
   },
 });

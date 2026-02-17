@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useTheme } from "../hooks/useTheme";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 export default function Popup({
   visible: isVisible = true,
   onClose,
-  children
+  children,
 }: Props) {
   const theme = useTheme();
 
@@ -25,22 +25,27 @@ export default function Popup({
     >
       <Pressable
         onPress={onClose}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          backgroundColor: theme.dialogBackground
-        }} />
-      <View
-        style={{
-          backgroundColor: theme.surface,
-          margin: 32,
-          maxHeight: '66%',
-          marginTop: '66%',
-          borderRadius: 16,
-          padding: 16,
-          gap: 16
-        }}>{children}</View>
-    </Modal >
+        style={[styles.backdrop, { backgroundColor: theme.dialogBackground }]}
+      />
+      <View style={[styles.content, { backgroundColor: theme.surface }]}>
+        {children}
+      </View>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+  content: {
+    margin: 32,
+    maxHeight: "66%",
+    marginTop: "66%",
+    borderRadius: 16,
+    padding: 16,
+    gap: 16,
+  },
+});

@@ -10,7 +10,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 export default function MyProfile() {
   const theme = useTheme();
@@ -45,21 +45,20 @@ export default function MyProfile() {
     <PaginatedFlatList
       onRefresh={handleRefresh}
       args={refreshKey}
-      contentContainerStyle={{
-        backgroundColor: theme.surface,
-        gap: 16,
-        paddingHorizontal: 16,
-      }}
-      ListHeaderComponentStyle={{
-        backgroundColor: theme.surface,
-        paddingTop: 8,
-      }}
+      contentContainerStyle={[
+        styles.listContent,
+        { backgroundColor: theme.surface },
+      ]}
+      ListHeaderComponentStyle={[
+        styles.listHeader,
+        { backgroundColor: theme.surface },
+      ]}
       ListHeaderComponent={
         <>
-          <View style={{ flexDirection: "row", gap: 16 }}>
+          <View style={styles.headerRow}>
             <AppText
               type="title-large-bold"
-              style={{ flex: 1 }}
+              style={styles.flex1}
             >{`@${currentUser?.username}`}</AppText>
             <IconButton
               icon={{
@@ -81,17 +80,15 @@ export default function MyProfile() {
               onPress={() => router.push("/profile/settings")}
             />
           </View>
-          <View
-            style={{ flexDirection: "row", marginTop: 8, marginBottom: 16 }}
-          >
+          <View style={styles.profileRow}>
             <Image
               source={{ uri: currentUser?.profilePictureUrl }}
               placeholder={require("@/assets/images/avatar-placeholder.png")}
-              style={{ width: 96, height: 96, borderRadius: 48 }}
+              style={styles.avatar}
             />
-            <View style={{ marginLeft: 16, justifyContent: "center", gap: 8 }}>
+            <View style={styles.profileInfo}>
               <AppText type="title-large">{`${currentUser?.firstName} ${currentUser?.lastName}`}</AppText>
-              <View style={{ flexDirection: "row", gap: 16 }}>
+              <View style={styles.countsRow}>
                 <PressableCount
                   count={currentUser?.friendsCount || 0}
                   label="Friends"
@@ -126,3 +123,39 @@ export default function MyProfile() {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    gap: 16,
+    paddingHorizontal: 16,
+  },
+  listHeader: {
+    paddingTop: 8,
+  },
+  headerRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  flex1: {
+    flex: 1,
+  },
+  profileRow: {
+    flexDirection: "row",
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
+  profileInfo: {
+    marginLeft: 16,
+    justifyContent: "center",
+    gap: 8,
+  },
+  countsRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+});

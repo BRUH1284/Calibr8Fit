@@ -3,6 +3,7 @@ import IconButton from "@/shared/components/IconButton";
 import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useState } from "react";
+import { StyleSheet } from "react-native";
 import { useConsumptionRecord } from "../hooks/useConsumptionRecord";
 import { FoodMealItem } from "../types/meal";
 
@@ -33,38 +34,34 @@ export default function FoodRecordPopupContent({ onClose, item }: Props) {
   const handleAddConsumptionRecord = () => {
     addConsumptionRecord(createdRecord);
     onClose();
-  }
+  };
 
   return (
-    <PopupContentBase
-      header='Add Weight Record'
-      onBackPress={onClose}
-    >
+    <PopupContentBase header="Add Weight Record" onBackPress={onClose}>
       <>
-        <AppText
-          style={{
-            textAlign: 'center',
-          }}
-          type='title-medium'
-        >{item.name}</AppText>
+        <AppText style={styles.textCenter} type="title-medium">
+          {item.name}
+        </AppText>
         <TextField
-          type='number'
+          type="number"
           numberControls={true}
-          label={'Grams'}
+          label={"Grams"}
           value={createdRecord?.quantity.toString()}
-          onChangeText={(value) => setCreatedRecord({
-            ...createdRecord,
-            quantity: parseInt(value)
-          })}
-          suffix='g'
+          onChangeText={(value) =>
+            setCreatedRecord({
+              ...createdRecord,
+              quantity: parseInt(value),
+            })
+          }
+          suffix="g"
           minValue={0}
           numberStep={100}
         />
         <IconButton
           onPress={handleAddConsumptionRecord}
-          style={{ alignSelf: 'flex-end' }}
+          style={styles.selfEnd}
           icon={{
-            name: 'check',
+            name: "check",
             size: 32,
             library: "MaterialIcons",
           }}
@@ -73,3 +70,12 @@ export default function FoodRecordPopupContent({ onClose, item }: Props) {
     </PopupContentBase>
   );
 }
+
+const styles = StyleSheet.create({
+  textCenter: {
+    textAlign: "center",
+  },
+  selfEnd: {
+    alignSelf: "flex-end",
+  },
+});

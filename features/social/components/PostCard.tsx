@@ -4,7 +4,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { compact } from "@/shared/utils/date";
 import { Image } from "expo-image";
 import { useCallback, useMemo, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { usePosts } from "../hooks";
 import { Post } from "../types/post";
 import ImageViewModal from "./ImageViewModal";
@@ -75,23 +75,13 @@ export default function PostCard({
     const otherImages = imageUrls.slice(1, 5);
 
     return (
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          aspectRatio: 16 / 9,
-          gap: 4,
-        }}
-      >
+      <View style={styles.imageGrid}>
         <TouchableOpacity
-          style={{
-            flex: 1,
-            borderRadius: 4,
-          }}
+          style={styles.flexRounded}
           onPress={() => handleImagePress(0)}
         >
           <Image
-            style={{ flex: 1, borderRadius: 4 }}
+            style={styles.flexRounded}
             source={{ uri: mainImage }}
             contentFit="cover"
           />
@@ -105,32 +95,20 @@ export default function PostCard({
           {otherImages.map((uri, index) => (
             <TouchableOpacity
               key={index}
-              style={{
-                flex: 1,
-                borderRadius: 4,
-              }}
+              style={styles.flexRounded}
               onPress={() => handleImagePress(index + 1)}
             >
               <Image
-                style={{
-                  flex: 1,
-                  borderRadius: 4,
-                }}
+                style={styles.flexRounded}
                 source={{ uri: uri }}
                 contentFit="cover"
               />
               {index === 3 && otherImages.length > 3 && (
                 <View
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: theme.dialogBackground,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderRadius: 4,
-                    zIndex: 1,
-                  }}
+                  style={[
+                    styles.imageOverlay,
+                    { backgroundColor: theme.dialogBackground },
+                  ]}
                 >
                   <AppText type="title-large" color="onPrimary">
                     +{otherImages.length - 3}
@@ -166,27 +144,18 @@ export default function PostCard({
 
   return (
     <>
-      <View
-        style={{
-          width: "100%",
-          elevation: 4,
-          padding: 16,
-          borderRadius: 16,
-          backgroundColor: theme.surface,
-          gap: 8,
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={[styles.card, { backgroundColor: theme.surface }]}>
+        <View style={styles.authorRow}>
           <Image
             source={{ uri: author.profilePictureUrl }}
             placeholder={require("@/assets/images/avatar-placeholder.png")}
-            style={{ width: 32, height: 32, borderRadius: 16 }}
+            style={styles.authorAvatar}
           />
           <AppText
             type="title-medium"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ flex: 1 }}
+            style={styles.flex1}
           >
             {author.firstName} {author.lastName}
           </AppText>
@@ -195,7 +164,7 @@ export default function PostCard({
         </View>
         <AppText type="body-medium">{content}</AppText>
         {Images}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+        <View style={styles.actionsRow}>
           <IconButton
             variant="icon"
             icon={{
@@ -205,7 +174,7 @@ export default function PostCard({
             }}
             onPress={handleLikePress}
           />
-          <AppText style={{ marginRight: 12 }} type="body-medium">
+          <AppText style={styles.likeCount} type="body-medium">
             {likeCountState}
           </AppText>
           <IconButton
@@ -237,3 +206,53 @@ export default function PostCard({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: "100%",
+    elevation: 4,
+    padding: 16,
+    borderRadius: 16,
+    gap: 8,
+  },
+  authorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  authorAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  flex1: {
+    flex: 1,
+  },
+  imageGrid: {
+    flexDirection: "row",
+    width: "100%",
+    aspectRatio: 16 / 9,
+    gap: 4,
+  },
+  flexRounded: {
+    flex: 1,
+    borderRadius: 4,
+  },
+  imageOverlay: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    zIndex: 1,
+  },
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  likeCount: {
+    marginRight: 12,
+  },
+});

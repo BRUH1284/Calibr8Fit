@@ -1,6 +1,11 @@
 import { memo, useEffect } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 type Props = {
   progress: number;
@@ -18,8 +23,8 @@ const ProgressIndicator = memo(
   ({
     progress,
     height = 4,
-    color = '#6200EE',
-    backgroundColor = '#E0E0E0',
+    color = "#6200EE",
+    backgroundColor = "#E0E0E0",
     style,
   }: Props) => {
     const containerWidth = useSharedValue(0);
@@ -29,7 +34,7 @@ const ProgressIndicator = memo(
       const target = clamp01(progress);
       p.value = withTiming(target, {
         duration: 500,
-        easing: Easing.out(Easing.cubic)
+        easing: Easing.out(Easing.cubic),
       });
     }, [progress]);
 
@@ -40,7 +45,7 @@ const ProgressIndicator = memo(
       return {
         transform: [
           { translateX: w / 2 },
-          { scaleX: (1 - p.value) - 1 / w * (offset + height / 2) },
+          { scaleX: 1 - p.value - (1 / w) * (offset + height / 2) },
           { translateX: -w / 2 },
         ],
       };
@@ -51,9 +56,7 @@ const ProgressIndicator = memo(
       const offset = Math.min(GAP / 2, p.value * w);
 
       return {
-        transform: [
-          { translateX: w * p.value + offset },
-        ]
+        transform: [{ translateX: w * p.value + offset }],
       };
     });
 
@@ -63,7 +66,7 @@ const ProgressIndicator = memo(
       return {
         transform: [
           { translateX: -w / 2 },
-          { scaleX: p.value - 1 / w * (GAP + height) / 2 },
+          { scaleX: p.value - ((1 / w) * (GAP + height)) / 2 },
           { translateX: w / 2 },
         ],
       };
@@ -73,9 +76,7 @@ const ProgressIndicator = memo(
       const w = containerWidth.value;
 
       return {
-        transform: [
-          { translateX: w * p.value - height - GAP / 2 },
-        ]
+        transform: [{ translateX: w * p.value - height - GAP / 2 }],
       };
     });
 
@@ -89,7 +90,7 @@ const ProgressIndicator = memo(
               borderRadius: height / 2,
             },
           ]}
-          onLayout={e => {
+          onLayout={(e) => {
             const w = e.nativeEvent.layout.width;
             containerWidth.value = w;
           }}
@@ -101,7 +102,7 @@ const ProgressIndicator = memo(
                 height,
                 backgroundColor: color,
               },
-              barStyle
+              barStyle,
             ]}
           />
           <Animated.View
@@ -111,7 +112,8 @@ const ProgressIndicator = memo(
                 height,
                 backgroundColor: backgroundColor,
               },
-              trackStyle]}
+              trackStyle,
+            ]}
           />
           <Animated.View
             style={[
@@ -122,7 +124,8 @@ const ProgressIndicator = memo(
                 width: height,
                 borderRadius: height / 2,
                 backgroundColor: backgroundColor,
-              }]}
+              },
+            ]}
           />
           <Animated.View
             style={[
@@ -133,28 +136,30 @@ const ProgressIndicator = memo(
                 width: height,
                 borderRadius: height / 2,
                 backgroundColor: color,
-              }]}
+              },
+            ]}
           />
           <View
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              height,
-              width: height,
-              borderRadius: height / 2,
-              backgroundColor: color
-            }}
+            style={[
+              styles.fill,
+              {
+                right: 0,
+                height,
+                width: height,
+                borderRadius: height / 2,
+                backgroundColor: color,
+              },
+            ]}
           />
         </View>
       </View>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     flexShrink: 1,
   },
   track: {

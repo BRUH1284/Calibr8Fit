@@ -5,7 +5,7 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
@@ -36,13 +36,13 @@ export default function SignUp() {
       if (Array.isArray(payload)) {
         setUsernameError(
           payload.find((e: { description: string }) =>
-            e.description.toLowerCase().includes("username")
-          )?.description || ""
+            e.description.toLowerCase().includes("username"),
+          )?.description || "",
         );
         setPasswordError(
           payload.find((e: { description: string }) =>
-            e.description.toLowerCase().includes("password")
-          )?.description || ""
+            e.description.toLowerCase().includes("password"),
+          )?.description || "",
         );
       } else {
         setUsernameError(payload?.UserName || "");
@@ -53,22 +53,16 @@ export default function SignUp() {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        gap: 32,
-        padding: 32,
-        justifyContent: "flex-end",
-        backgroundColor: theme.surface,
-      }}
+      style={[styles.container, { backgroundColor: theme.surface }]}
     >
       <Image
-        style={{ height: 288, alignSelf: "stretch", backgroundColor: "red" }}
+        style={styles.logo}
         source={require("@/assets/images/react-logo.png")}
       />
-      <AppText type="headline-medium" style={{ textAlign: "center" }}>
+      <AppText type="headline-medium" style={styles.textCenter}>
         Sign up to Calibr8Fit
       </AppText>
-      <View style={{ gap: 6, height: 256 }}>
+      <View style={styles.form}>
         <TextField
           label="Username"
           onChangeText={handleUsernameChange}
@@ -88,11 +82,33 @@ export default function SignUp() {
         onPress={handleRegister}
         label="Continue"
         labelType="title-medium"
-        style={{
-          alignSelf: "stretch",
-          marginHorizontal: 32,
-        }}
+        style={styles.continueButton}
       />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 32,
+    padding: 32,
+    justifyContent: "flex-end",
+  },
+  logo: {
+    height: 288,
+    alignSelf: "stretch",
+    backgroundColor: "red",
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  form: {
+    gap: 6,
+    height: 256,
+  },
+  continueButton: {
+    alignSelf: "stretch",
+    marginHorizontal: 32,
+  },
+});

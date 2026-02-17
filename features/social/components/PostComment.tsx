@@ -3,7 +3,7 @@ import IconButton from "@/shared/components/IconButton";
 import { compact } from "@/shared/utils/date";
 import { Image } from "expo-image";
 import { useCallback, useMemo } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useUser } from "../context";
 import { usePosts } from "../hooks";
 import { PostComment } from "../types/post";
@@ -39,44 +39,56 @@ export default function PostCommentCard({
   }, [handleCommentDelete, author.username, currentUser?.username]);
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        gap: 8,
-      }}
-    >
+    <View style={styles.container}>
       <Image
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-        }}
+        style={styles.avatar}
         source={{ uri: author.profilePictureUrl }}
         placeholder={require("@/assets/images/avatar-placeholder.png")}
       />
-      <View style={{ flex: 1, gap: 4 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+      <View style={styles.content}>
+        <View style={styles.headerRow}>
           <AppText
             type="title-medium"
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={{ flex: 1 }}
+            style={styles.flex1}
           >
             {author.firstName} {author.lastName}
           </AppText>
           <AppText type="body-small">{compact(createdAt)}</AppText>
           {deleteButton}
         </View>
-        <AppText type="body-medium" style={{ flexShrink: 1 }}>
+        <AppText type="body-medium" style={styles.flexShrink1}>
           {content}
         </AppText>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  content: {
+    flex: 1,
+    gap: 4,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  flex1: {
+    flex: 1,
+  },
+  flexShrink1: {
+    flexShrink: 1,
+  },
+});

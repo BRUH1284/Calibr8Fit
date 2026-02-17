@@ -7,7 +7,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
@@ -44,23 +44,16 @@ export default function SignIn() {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        padding: 32,
-        gap: 32,
-        justifyContent: "flex-end",
-        alignContent: "center",
-        backgroundColor: theme.surface,
-      }}
+      style={[styles.container, { backgroundColor: theme.surface }]}
     >
       <Image
-        style={{ height: 288, alignSelf: "stretch", backgroundColor: "red" }}
+        style={styles.logo}
         source={require("@/assets/images/react-logo.png")}
       />
-      <AppText type="headline-medium" style={{ textAlign: "center" }}>
+      <AppText type="headline-medium" style={styles.textCenter}>
         Sign in to Calibr8Fit
       </AppText>
-      <View style={{ gap: 6, height: 256 }}>
+      <View style={styles.form}>
         <TextField
           label="Username"
           onChangeText={handleUsernameChange}
@@ -79,7 +72,7 @@ export default function SignIn() {
         <AppText
           type="title-small"
           color="onSurfaceVariant"
-          style={{ textAlign: "center", fontWeight: "500" }}
+          style={styles.signUpHint}
         >
           Don’t have an account?
         </AppText>
@@ -91,12 +84,7 @@ export default function SignIn() {
         />
         <AppText
           type="label-large"
-          style={{
-            flex: 1,
-            verticalAlign: "bottom",
-            color: theme.error,
-            textAlign: "center",
-          }}
+          style={[styles.errorText, { color: theme.error }]}
         >
           {errorMessage}
         </AppText>
@@ -105,11 +93,43 @@ export default function SignIn() {
         onPress={handleLogin}
         label="Continue"
         labelType="title-medium"
-        style={{
-          alignSelf: "stretch",
-          marginHorizontal: 32,
-        }}
+        style={styles.continueButton}
       />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 32,
+    gap: 32,
+    justifyContent: "flex-end",
+    alignContent: "center",
+  },
+  logo: {
+    height: 288,
+    alignSelf: "stretch",
+    backgroundColor: "red",
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  form: {
+    gap: 6,
+    height: 256,
+  },
+  signUpHint: {
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  errorText: {
+    flex: 1,
+    verticalAlign: "bottom",
+    textAlign: "center",
+  },
+  continueButton: {
+    alignSelf: "stretch",
+    marginHorizontal: 32,
+  },
+});

@@ -25,16 +25,20 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
 
   const [isCreationMode, setIsCreationMode] = useState(false);
   const [header, setHeader] = useState<string>();
-  const [headerRightIcon, setHeaderRightIcon] =
-    useState<{ iconName: IconItem['name'], iconLibrary: IconItem['library'] }>();
-  const [onHeaderRightIconPress, setOnHeaderRightIconPress] = useState<() => void>(() => { });
+  const [headerRightIcon, setHeaderRightIcon] = useState<{
+    iconName: IconItem["name"];
+    iconLibrary: IconItem["library"];
+  }>();
+  const [onHeaderRightIconPress, setOnHeaderRightIconPress] = useState<
+    () => void
+  >(() => {});
   const [onBackPress, setOnBackPress] = useState<() => void>(() => onClose);
 
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
 
   // State for food search query
-  const [foodQuery, setFoodQuery] = useState('');
+  const [foodQuery, setFoodQuery] = useState("");
 
   const combinedFoods = useMemo(() => {
     return [
@@ -47,14 +51,14 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
         ...m,
         userMealId: m.id,
         caloricValue: calcCaloricValue(m),
-      }))
+      })),
     ] as FoodMealItem[];
   }, [foods, userFoods, meals]);
   // Memoized arranged foods based on the search query
   const arrangedFoodsAndMeals = useMemo(() => {
     return combinedFoods
       .filter(({ name, id }) =>
-        name.toLowerCase().includes(foodQuery.toLowerCase())
+        name.toLowerCase().includes(foodQuery.toLowerCase()),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [combinedFoods, foodQuery]);
@@ -70,10 +74,10 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
   };
 
   const disableCreationMode = useCallback(() => {
-    setHeader('Foods');
+    setHeader("Foods");
     setHeaderRightIcon({
-      iconName: 'pencil-plus',
-      iconLibrary: 'MaterialCommunityIcons'
+      iconName: "pencil-plus",
+      iconLibrary: "MaterialCommunityIcons",
     });
     setOnHeaderRightIconPress(() => enableCreationMode);
     setOnBackPress(() => onClose);
@@ -81,9 +85,9 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
   }, []);
 
   const enableCreationMode = useCallback(() => {
-    setHeader('Create Food or Meal');
+    setHeader("Create Food or Meal");
     setHeaderRightIcon(undefined);
-    setOnHeaderRightIconPress(() => { });
+    setOnHeaderRightIconPress(() => {});
     setOnBackPress(() => disableCreationMode);
     setIsCreationMode(true);
   }, []);
@@ -101,29 +105,29 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
       children={
         isCreationMode ? (
           <>
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16 }}>
+            <View style={styles.toggleRow}>
               <TextButton
-                label='Food'
-                variant={currentPage === 0 ? 'filled' : 'toggle'}
+                label="Food"
+                variant={currentPage === 0 ? "filled" : "toggle"}
                 onPress={() => pagerRef.current?.setPage(0)}
                 style={styles.toggleButton}
               />
               <TextButton
-                label='Meal'
-                variant={currentPage === 1 ? 'filled' : 'toggle'}
+                label="Meal"
+                variant={currentPage === 1 ? "filled" : "toggle"}
                 onPress={() => pagerRef.current?.setPage(1)}
                 style={styles.toggleButton}
               />
             </View>
             <PagerView
               ref={pagerRef}
-              style={{ height: '91%', marginHorizontal: -16 }}
-              onPageSelected={e => setCurrentPage(e.nativeEvent.position)}
+              style={styles.pagerView}
+              onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
             >
-              <View key="1" style={{ gap: 16, paddingHorizontal: 16 }}>
+              <View key="1" style={styles.pageContent}>
                 <FoodPopupCreateFoodContent onDone={onClose} />
               </View>
-              <View key="2" style={{ gap: 16, paddingHorizontal: 16 }}>
+              <View key="2" style={styles.pageContent}>
                 <FoodPopupCreateMealContent onDone={onClose} />
               </View>
             </PagerView>
@@ -137,10 +141,13 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
             />
             <FlatList
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                />
               }
               initialNumToRender={10}
-              contentContainerStyle={{ gap: 16 }}
+              contentContainerStyle={styles.listContent}
               data={arrangedFoodsAndMeals}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
@@ -152,7 +159,8 @@ export default function FoodListPopupContent({ onClose, onFoodSelect }: Props) {
               )}
             />
           </>
-        )}
+        )
+      }
     />
   );
 }
@@ -162,4 +170,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 4,
   },
-})
+  toggleRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 16,
+  },
+  pagerView: {
+    height: "91%",
+    marginHorizontal: -16,
+  },
+  pageContent: {
+    gap: 16,
+    paddingHorizontal: 16,
+  },
+  listContent: {
+    gap: 16,
+  },
+});

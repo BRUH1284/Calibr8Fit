@@ -4,6 +4,7 @@ import IconButton from "@/shared/components/IconButton";
 import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useState } from "react";
+import { StyleSheet } from "react-native";
 import { useActivityRecord } from "../hooks/useActivityRecord";
 import { ActivityItem } from "../types/activityRecord";
 
@@ -12,14 +13,17 @@ type Props = {
   onClose: () => void;
 };
 
-export default function ActivityRecordPopupContent({ activity, onClose }: Props) {
+export default function ActivityRecordPopupContent({
+  activity,
+  onClose,
+}: Props) {
   const { addActivityRecord } = useActivityRecord();
   const { caloriesBurnedCalculator } = useRecommendations();
 
   // State for adding activity record
   const [createdActivityRecord, setCreatedActivityRecord] = useState({
     duration: 0,
-    caloriesBurned: 0
+    caloriesBurned: 0,
   });
 
   const handleAddActivityRecord = useCallback(() => {
@@ -41,46 +45,47 @@ export default function ActivityRecordPopupContent({ activity, onClose }: Props)
   }, [createdActivityRecord]);
 
   return (
-    <PopupContentBase
-      onBackPress={onClose}
-      header={'Add Activity Record'}
-    >
+    <PopupContentBase onBackPress={onClose} header={"Add Activity Record"}>
       <>
-        <AppText
-          style={{
-            textAlign: 'center',
-          }}
-          type='title-medium'
-        >{activity.description}</AppText>
+        <AppText style={styles.textCenter} type="title-medium">
+          {activity.description}
+        </AppText>
         <TextField
-          type='number'
+          type="number"
           numberControls={true}
-          label={'Minutes'}
+          label={"Minutes"}
           value={(createdActivityRecord?.duration / 60).toString()}
-          onChangeText={(value) => setCreatedActivityRecord({
-            duration: parseFloat(value) * 60, // Convert minutes to seconds
-            caloriesBurned: caloriesBurnedCalculator(activity.metValue, parseFloat(value))
-          })}
-          suffix='min'
+          onChangeText={(value) =>
+            setCreatedActivityRecord({
+              duration: parseFloat(value) * 60, // Convert minutes to seconds
+              caloriesBurned: caloriesBurnedCalculator(
+                activity.metValue,
+                parseFloat(value),
+              ),
+            })
+          }
+          suffix="min"
           minValue={0}
         />
         <TextField
-          type='number'
+          type="number"
           numberControls={true}
-          label={'Calories Burned'}
+          label={"Calories Burned"}
           value={createdActivityRecord?.caloriesBurned.toString()}
-          onChangeText={(value) => setCreatedActivityRecord({
-            ...createdActivityRecord!,
-            caloriesBurned: parseFloat(value)
-          })}
-          suffix='kcal'
+          onChangeText={(value) =>
+            setCreatedActivityRecord({
+              ...createdActivityRecord!,
+              caloriesBurned: parseFloat(value),
+            })
+          }
+          suffix="kcal"
           minValue={0}
         />
         <IconButton
           onPress={handleAddActivityRecord}
-          style={{ alignSelf: 'flex-end' }}
+          style={styles.selfEnd}
           icon={{
-            name: 'check',
+            name: "check",
             size: 32,
             library: "MaterialIcons",
           }}
@@ -89,3 +94,12 @@ export default function ActivityRecordPopupContent({ activity, onClose }: Props)
     </PopupContentBase>
   );
 }
+
+const styles = StyleSheet.create({
+  textCenter: {
+    textAlign: "center",
+  },
+  selfEnd: {
+    alignSelf: "flex-end",
+  },
+});

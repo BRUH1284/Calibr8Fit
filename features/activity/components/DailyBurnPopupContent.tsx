@@ -4,6 +4,7 @@ import IconButton from "@/shared/components/IconButton";
 import PopupContentBase from "@/shared/components/PopupContentBase";
 import TextField from "@/shared/components/TextField";
 import { useCallback, useMemo, useState } from "react";
+import { StyleSheet } from "react-native";
 import { useDailyBurn } from "../hooks/useDailyBurn";
 import { ActivityItem } from "../types/activityRecord";
 
@@ -31,41 +32,34 @@ export default function DailyBurnPopupContent({ activity, onClose }: Props) {
     onClose();
   }, [duration, activity]);
 
-  const calories = useMemo(() =>
-    caloriesBurnedCalculator(activity.metValue, duration / 60)
-    , [duration, activity]);
+  const calories = useMemo(
+    () => caloriesBurnedCalculator(activity.metValue, duration / 60),
+    [duration, activity],
+  );
 
   return (
-    <PopupContentBase
-      onBackPress={onClose}
-      header={'Add Target'}
-    >
+    <PopupContentBase onBackPress={onClose} header={"Add Target"}>
       <>
-        <AppText
-          style={{
-            textAlign: 'center',
-          }}
-          type='title-medium'
-        >{activity.description}</AppText>
+        <AppText style={styles.textCenter} type="title-medium">
+          {activity.description}
+        </AppText>
         <TextField
-          type='number'
+          type="number"
           numberControls={true}
-          label={'Minutes'}
+          label={"Minutes"}
           value={(duration / 60).toString()}
           onChangeText={(value) => setDuration(parseInt(value) * 60)}
-          suffix='min'
+          suffix="min"
           minValue={1}
         />
-        <AppText
-          type='title-medium'
-        >
+        <AppText type="title-medium">
           {`Estimated Calories Burned: ${calories} kcal`}
         </AppText>
         <IconButton
           onPress={handleAddDailyBurnTarget}
-          style={{ alignSelf: 'flex-end' }}
+          style={styles.selfEnd}
           icon={{
-            name: 'check',
+            name: "check",
             size: 32,
             library: "MaterialIcons",
           }}
@@ -74,3 +68,12 @@ export default function DailyBurnPopupContent({ activity, onClose }: Props) {
     </PopupContentBase>
   );
 }
+
+const styles = StyleSheet.create({
+  textCenter: {
+    textAlign: "center",
+  },
+  selfEnd: {
+    alignSelf: "flex-end",
+  },
+});

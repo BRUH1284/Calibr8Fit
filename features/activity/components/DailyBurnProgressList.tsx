@@ -26,18 +26,18 @@ export default function DailyBurnProgressList() {
           "Unknown Activity",
         duration: t.duration,
         calories: todayActivityCaloriesBurned(
-          t.activityId ?? t.userActivityId!
+          t.activityId ?? t.userActivityId!,
         ),
         progress: Math.min(
           todayActivityCaloriesBurned(t.activityId ?? t.userActivityId!) /
             caloriesBurnedCalculator(
               (t.activity ?? t.userActivity!).metValue,
-              t.duration / 60
+              t.duration / 60,
             ),
-          1
+          1,
         ),
       })),
-    [caloriesBurnedCalculator, targets, todayActivityCaloriesBurned]
+    [caloriesBurnedCalculator, targets, todayActivityCaloriesBurned],
   );
 
   const progress = useMemo(() => {
@@ -47,11 +47,11 @@ export default function DailyBurnProgressList() {
 
   return (
     <View style={styles.container}>
-      <AppText type="title-large" style={{ paddingBottom: 8 }}>
+      <AppText type="title-large" style={styles.titlePadding}>
         Daily Burn
       </AppText>
       <View style={styles.headerContainer}>
-        <AppText type="title-medium" style={{ flex: 1 }}>
+        <AppText type="title-medium" style={styles.flex1}>
           Progress
         </AppText>
         <AppText type="title-small">{`${todayCaloriesBurned}/${todayCaloriesTarget} Kcal`}</AppText>
@@ -64,7 +64,7 @@ export default function DailyBurnProgressList() {
       <View style={styles.list}>
         {minimalTargets.map((item) => (
           <View key={item.id} style={styles.listItem}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.flex1}>
               <AppText
                 type="title-medium"
                 numberOfLines={1}
@@ -148,6 +148,11 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 8,
-    paddingTop: 8,
+  },
+  titlePadding: {
+    paddingBottom: 8,
+  },
+  flex1: {
+    flex: 1,
   },
 });

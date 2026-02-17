@@ -19,17 +19,24 @@ export default function RationListCard({ onAddPress }: Props) {
     todayRecords,
     todayCaloriesConsumed,
     syncConsumptionRecords,
-    deleteConsumptionRecord
+    deleteConsumptionRecord,
   } = useConsumptionRecord();
 
-  const minimalRecords = useMemo(() => todayRecords
-    .map(r => ({
-      id: r.id,
-      name: r.food?.name || r.userFood?.name || r.userMeal?.name || 'Unknown Food',
-      calories: calcCaloricValue(r),
-      quantity: r.quantity,
-      time: compactFull(new Date(r.time)),
-    })), [todayRecords]);
+  const minimalRecords = useMemo(
+    () =>
+      todayRecords.map((r) => ({
+        id: r.id,
+        name:
+          r.food?.name ||
+          r.userFood?.name ||
+          r.userMeal?.name ||
+          "Unknown Food",
+        calories: calcCaloricValue(r),
+        quantity: r.quantity,
+        time: compactFull(new Date(r.time)),
+      })),
+    [todayRecords],
+  );
 
   // Handle refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -43,35 +50,31 @@ export default function RationListCard({ onAddPress }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText
-          type='title-large'
-          style={{ flex: 1 }}
-        >Ration</AppText>
-        <AppText
-          type='label-large'
-        >{`${todayCaloriesConsumed} kcal`}</AppText>
+        <AppText type="title-large" style={styles.flex1}>
+          Ration
+        </AppText>
+        <AppText type="label-large">{`${todayCaloriesConsumed} kcal`}</AppText>
         <IconButton
           icon={{
-            name: 'add',
+            name: "add",
             size: 36,
-            library: 'MaterialIcons',
+            library: "MaterialIcons",
             color: theme.onSurface,
           }}
           onPress={onAddPress}
-          style={{ marginLeft: 16, backgroundColor: theme.primaryVariant }} />
-
+          style={[styles.addButton, { backgroundColor: theme.primaryVariant }]}
+        />
       </View>
       <FlatList
-        refreshControl={<RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
         data={minimalRecords}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <RationItem item={item} onDelete={deleteConsumptionRecord} />
         )}
-      >
-      </FlatList>
+      ></FlatList>
     </View>
   );
 }
@@ -89,5 +92,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 8,
     gap: 16,
-  }
+  },
+  flex1: {
+    flex: 1,
+  },
+  addButton: {
+    marginLeft: 16,
+  },
 });

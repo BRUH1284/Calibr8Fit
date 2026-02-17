@@ -15,6 +15,7 @@ import DynamicIcon, { IconItem } from "@/shared/components/DynamicIcon";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { PlatformPressable } from "@react-navigation/elements";
 import { Tabs } from "expo-router";
+import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const screenConfigs: Record<string, IconItem> = {
@@ -57,13 +58,9 @@ export default function TabLayout() {
                                     tabBarStyle: {
                                       backgroundColor: theme.surfaceContainer,
                                       borderTopWidth: 0,
-                                      height: 64 + 24, // 64 for tab bar height + 24 for safe area
+                                      height: 64 + 24,
                                     },
-                                    tabBarIconStyle: {
-                                      height: "100%",
-                                      alignContent: "center",
-                                      justifyContent: "center",
-                                    },
+                                    tabBarIconStyle: styles.tabBarIcon,
                                     tabBarButton: (props) => (
                                       <PlatformPressable
                                         {...props}
@@ -104,3 +101,11 @@ export default function TabLayout() {
     </ProfileProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarIcon: {
+    height: "100%",
+    alignContent: "center",
+    justifyContent: "center",
+  },
+});

@@ -3,7 +3,7 @@ import IconButton from "@/shared/components/IconButton";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useState } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
 
 type Props = {
   visible: boolean;
@@ -43,33 +43,14 @@ export default function ImageViewModal({
     >
       <Pressable
         onPress={() => onClose()}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          backgroundColor: theme.dialogBackground,
-        }}
+        style={[styles.backdrop, { backgroundColor: theme.dialogBackground }]}
       >
         <Image
           source={{ uri: imageUrls[currentIndex] }}
-          style={{
-            width: "100%",
-            height: "100%",
-            alignSelf: "center",
-          }}
+          style={styles.fullImage}
           contentFit="contain"
         />
-        <View
-          style={{
-            position: "absolute",
-            bottom: 40,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            paddingHorizontal: 20,
-          }}
-        >
+        <View style={styles.controlsRow}>
           <IconButton
             variant="icon"
             icon={{
@@ -80,14 +61,7 @@ export default function ImageViewModal({
             }}
             onPress={() => handleBackPress()}
           />
-          <View
-            style={{
-              backgroundColor: "rgba(0,0,0,0.5)",
-              borderRadius: 32,
-              paddingHorizontal: 15,
-              paddingVertical: 4,
-            }}
-          >
+          <View style={styles.counterBadge}>
             <AppText color="surface">
               {currentIndex + 1} / {imageUrls.length}
             </AppText>
@@ -108,3 +82,31 @@ export default function ImageViewModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+  fullImage: {
+    width: "100%",
+    height: "100%",
+    alignSelf: "center",
+  },
+  controlsRow: {
+    position: "absolute",
+    bottom: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingHorizontal: 20,
+  },
+  counterBadge: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 32,
+    paddingHorizontal: 15,
+    paddingVertical: 4,
+  },
+});

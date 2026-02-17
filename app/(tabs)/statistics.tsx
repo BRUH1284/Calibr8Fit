@@ -8,7 +8,7 @@ import MonthLineChartCard from "@/shared/components/MonthLineChartCard";
 import MonthSelector from "@/shared/components/MonthSelector";
 import { useTheme } from "@/shared/hooks/useTheme";
 import React, { useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 export default function Statistics() {
   const theme = useTheme();
@@ -74,22 +74,10 @@ export default function Statistics() {
   }, []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: theme.surface,
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: theme.surface }]}>
       <ScrollView
-        style={{
-          flex: 1,
-          backgroundColor: theme.surface,
-        }}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          gap: 16,
-        }}
+        style={[styles.scrollView, { backgroundColor: theme.surface }]}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={fetchData} />
         }
@@ -122,18 +110,13 @@ export default function Statistics() {
           referenceLine1Position={profileSettings?.targetWeight ?? 0}
           data={weightData}
         />
-        <View style={{ height: 48 }} />
+        <View style={styles.spacer} />
       </ScrollView>
       <MonthSelector
-        style={{
-          backgroundColor: theme.primaryVariant,
-          position: "absolute",
-          alignSelf: "center",
-          bottom: 16,
-          padding: 8,
-          borderRadius: 32,
-          minWidth: 224,
-        }}
+        style={[
+          styles.monthSelector,
+          { backgroundColor: theme.primaryVariant },
+        ]}
         textColor="onPrimaryVariant"
         onMonthChange={(start, end) => {
           setDateRange({ start, end });
@@ -143,3 +126,28 @@ export default function Statistics() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 16,
+  },
+  spacer: {
+    height: 48,
+  },
+  monthSelector: {
+    position: "absolute",
+    alignSelf: "center",
+    bottom: 16,
+    padding: 8,
+    borderRadius: 32,
+    minWidth: 224,
+  },
+});

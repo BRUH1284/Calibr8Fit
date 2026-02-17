@@ -4,7 +4,7 @@ import PaginatedFlatList from "@/shared/components/PaginatedFlatList";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Typography } from "@/styles/typography";
 import { useCallback, useState } from "react";
-import { Modal, Pressable, TextInput, View } from "react-native";
+import { Modal, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePosts } from "../hooks";
@@ -38,7 +38,7 @@ export default function PostCommentsModal({
       onCommentAdded?.();
       refresh();
     },
-    [addComment, postId, onCommentAdded, refresh]
+    [addComment, postId, onCommentAdded, refresh],
   );
 
   const handleCommentDelete = useCallback(() => {
@@ -50,7 +50,7 @@ export default function PostCommentsModal({
     (page: number, pageSize: number) => {
       return getPostComments(postId!, page, pageSize);
     },
-    [getPostComments, postId]
+    [getPostComments, postId],
   );
 
   return (
@@ -61,30 +61,12 @@ export default function PostCommentsModal({
       onRequestClose={onClose}
       statusBarTranslucent={true}
     >
-      <Pressable style={{ height: "20%" }} onPress={onClose} />
+      <Pressable style={styles.backdrop} onPress={onClose} />
       <KeyboardAvoidingView
-        style={{
-          flex: 1,
-          overflow: "visible",
-          borderTopLeftRadius: 32,
-          borderTopRightRadius: 32,
-          elevation: 8,
-          backgroundColor: theme.surface,
-          justifyContent: "flex-end",
-        }}
+        style={[styles.sheetContainer, { backgroundColor: theme.surface }]}
         behavior="padding"
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            gap: 16,
-            borderBottomWidth: 1,
-            borderColor: theme.outline,
-          }}
-        >
+        <View style={[styles.headerBar, { borderColor: theme.outline }]}>
           <IconButton
             variant="icon"
             icon={{
@@ -102,40 +84,23 @@ export default function PostCommentsModal({
           args={refreshKey}
           pageSize={10}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ gap: 8, padding: 16 }}
+          contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <PostCommentCard comment={item} onDelete={handleCommentDelete} />
           )}
           ListEmptyComponent={
-            <AppText
-              style={{
-                textAlign: "center",
-                padding: 16,
-              }}
-              type="body-large"
-            >
+            <AppText style={styles.emptyText} type="body-large">
               No comments yet.
             </AppText>
           }
         />
         <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            padding: 8,
-            gap: 8,
-            backgroundColor: theme.surfaceContainer,
-          }}
+          style={[styles.inputBar, { backgroundColor: theme.surfaceContainer }]}
         >
           <TextInput
             style={[
-              {
-                flex: 1,
-                minHeight: 48,
-                backgroundColor: theme.surface,
-                borderRadius: 24,
-                paddingHorizontal: 8,
-              },
+              styles.commentInput,
+              { backgroundColor: theme.surface },
               Typography["body-medium"],
             ]}
             multiline
@@ -145,7 +110,7 @@ export default function PostCommentsModal({
           />
           <IconButton
             variant="icon"
-            style={{ marginVertical: 8 }}
+            style={styles.sendButton}
             icon={{
               name: "send",
               library: "MaterialIcons",
@@ -160,11 +125,57 @@ export default function PostCommentsModal({
         </View>
       </KeyboardAvoidingView>
       <View
-        style={{
-          height: insets.bottom,
-          backgroundColor: theme.surfaceContainer,
-        }}
+        style={[
+          styles.bottomInset,
+          { height: insets.bottom, backgroundColor: theme.surfaceContainer },
+        ]}
       />
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    height: "20%",
+  },
+  sheetContainer: {
+    flex: 1,
+    overflow: "visible",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    elevation: 8,
+    justifyContent: "flex-end",
+  },
+  headerBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 16,
+    borderBottomWidth: 1,
+  },
+  listContent: {
+    gap: 8,
+    padding: 16,
+  },
+  emptyText: {
+    textAlign: "center",
+    padding: 16,
+  },
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    padding: 8,
+    gap: 8,
+  },
+  commentInput: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: 24,
+    paddingHorizontal: 8,
+  },
+  sendButton: {
+    marginVertical: 8,
+  },
+  bottomInset: {},
+});

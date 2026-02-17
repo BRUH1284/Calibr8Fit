@@ -20,19 +20,12 @@ const RationItem = memo(({ item, onDelete }: RationItemProps) => {
   const theme = useTheme();
   return (
     <View style={styles.listItem}>
-      <View style={{ flex: 1 }}>
-        <AppText
-          type="title-medium"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+      <View style={styles.flex1}>
+        <AppText type="title-medium" numberOfLines={1} ellipsizeMode="tail">
           {item.name}
         </AppText>
 
-        <AppText
-          style={{ color: theme.onSurfaceVariant }}
-          type='label-small'
-        >
+        <AppText style={{ color: theme.onSurfaceVariant }} type="label-small">
           {item.time}
         </AppText>
       </View>
@@ -90,6 +83,9 @@ const styles = StyleSheet.create({
   },
   centerText: {
     textAlign: "center",
+  },
+  flex1: {
+    flex: 1,
   },
 });
 

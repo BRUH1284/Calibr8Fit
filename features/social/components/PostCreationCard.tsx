@@ -5,7 +5,7 @@ import { Typography } from "@/styles/typography";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { FlatList, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, TextInput, View } from "react-native";
 import { usePosts } from "../hooks";
 import { PostImage } from "../types/post";
 
@@ -57,43 +57,28 @@ export default function PostCreationCard({ onPostCreated }: Props) {
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: theme.surface,
-        borderRadius: 16,
-        padding: 16,
-        elevation: 4,
-        gap: 8,
-      }}
-    >
+    <View style={[styles.card, { backgroundColor: theme.surface }]}>
       <AppText type="title-large">Create a new post</AppText>
-      <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={styles.inputRow}>
         <TextInput
           value={input}
           onChangeText={setInput}
           placeholder="What's on your mind?"
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: theme.outline,
-            borderRadius: 8,
-            padding: 8,
-            textAlignVertical: "top",
-            color: theme.onSurface,
-            ...Typography["body-medium"],
-          }}
+          style={[
+            styles.textInput,
+            { borderColor: theme.outline, color: theme.onSurface },
+            Typography["body-medium"],
+          ]}
           multiline
         />
-        <View
-          style={{ justifyContent: "flex-end", alignItems: "center", gap: 8 }}
-        >
+        <View style={styles.buttonColumn}>
           <IconButton
             icon={{
               name: "image-plus",
               library: "MaterialCommunityIcons",
               size: 32,
             }}
-            style={{ aspectRatio: 1 }}
+            style={styles.squareButton}
             onPress={handleAddImage}
           />
           <IconButton
@@ -102,7 +87,7 @@ export default function PostCreationCard({ onPostCreated }: Props) {
               library: "MaterialIcons",
               size: 32,
             }}
-            style={{ aspectRatio: 1 }}
+            style={styles.squareButton}
             onPress={handleCreatePost}
           />
         </View>
@@ -113,10 +98,7 @@ export default function PostCreationCard({ onPostCreated }: Props) {
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => (
           <>
-            <Image
-              source={{ uri: item.uri }}
-              style={{ width: 96, height: 96, borderRadius: 8 }}
-            />
+            <Image source={{ uri: item.uri }} style={styles.thumbnail} />
             <IconButton
               icon={{
                 name: "close",
@@ -124,19 +106,55 @@ export default function PostCreationCard({ onPostCreated }: Props) {
                 size: 24,
                 color: theme.onError,
               }}
-              style={{
-                position: "absolute",
-                top: 4,
-                right: 4,
-                backgroundColor: theme.error,
-                padding: 4,
-              }}
+              style={[styles.removeButton, { backgroundColor: theme.error }]}
               onPress={() => handleRemoveImage(item.uri)}
             />
           </>
         )}
-        contentContainerStyle={{ gap: 8 }}
+        contentContainerStyle={styles.imageListContent}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    padding: 16,
+    elevation: 4,
+    gap: 8,
+  },
+  inputRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  textInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    textAlignVertical: "top",
+  },
+  buttonColumn: {
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 8,
+  },
+  squareButton: {
+    aspectRatio: 1,
+  },
+  thumbnail: {
+    width: 96,
+    height: 96,
+    borderRadius: 8,
+  },
+  removeButton: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    padding: 4,
+  },
+  imageListContent: {
+    gap: 8,
+  },
+});
