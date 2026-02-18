@@ -13,3 +13,7 @@ Calibr8Fit is a cross-platform mobile app built with React Native and Expo. It c
   <img src="https://github.com/user-attachments/assets/707a0f73-5e21-45c5-944d-c1c667b55a37" width="256"/>
   <img src="https://github.com/user-attachments/assets/5d76ce47-1010-4012-b10e-0295954be43e" width="256"/>
 </p>
+
+## Related Repositories
+
+- [ASP.NET Backend](https://github.com/BRUH1284/Calibr8Fit.Api)
