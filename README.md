@@ -1,50 +1,15 @@
-# Welcome to your Expo app 👋
+# Calibr8Fit - React Native Frontend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Calibr8Fit is a cross-platform mobile app built with React Native and Expo. It connects to the Calibr8Fit ASP.NET Core backend API to provide users with powerful tracking tools for nutrition, workouts, hydration, weight progress, and social interaction.
 
-## Get started
+## Work In Progress Screenshots
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c6c19b82-0dca-497a-8b46-1d13fb4f55fc" width="256"/>
+  <img src="https://github.com/user-attachments/assets/244e1fff-41f2-41a0-be1b-ada35488ab77" width="256"/>
+  <img src="https://github.com/user-attachments/assets/cdaff4b4-e0ab-4d20-b1f1-12bc600c615a" width="256"/>
+</p>
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/707a0f73-5e21-45c5-944d-c1c667b55a37" width="256"/>
+  <img src="https://github.com/user-attachments/assets/5d76ce47-1010-4012-b10e-0295954be43e" width="256"/>
+</p>
